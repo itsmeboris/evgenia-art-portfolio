@@ -9,6 +9,7 @@ const { body, validationResult } = require('express-validator');
 const session = require('express-session');
 const FileStore = require('session-file-store')(session);
 const { v4: uuidv4 } = require('uuid');
+const compression = require('compression');
 const app = express();
 const port = process.env.PORT || 3000;
 
@@ -27,6 +28,20 @@ if (!ADMIN_USERNAME || !ADMIN_PASSWORD_HASH) {
 if (!process.env.SESSION_SECRET) {
     console.warn('⚠️  WARNING: SESSION_SECRET not set in .env file. Using generated secret (not recommended for production).');
 }
+
+// Compression middleware (must be early in the chain)
+app.use(compression({
+    level: 6, // Compression level (1-9, 6 is default)
+    threshold: 1024, // Only compress responses larger than 1KB
+    filter: (req, res) => {
+        // Skip compression for certain file types or conditions
+        if (req.headers['x-no-compression']) {
+            return false;
+        }
+        // Fall back to standard filter function
+        return compression.filter(req, res);
+    }
+}));
 
 // Security middleware
 app.use(helmet({
@@ -357,6 +372,7 @@ app.listen(port, '0.0.0.0', () => {
   console.log(`- Main site: http://localhost:${port}/`);
   console.log(`- Gallery: http://localhost:${port}/gallery`);
   console.log(`- Admin panel: http://localhost:${port}/admin/`);
+  console.log(`✅ Compression middleware enabled (gzip/deflate)`);
 
   // Show local network access information
   const interfaces = require('os').networkInterfaces();

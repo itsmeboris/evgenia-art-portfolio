@@ -89,24 +89,7 @@ app.get('/admin/*', requireAuth, (req, res) => {
   res.sendFile(path.join(__dirname, 'admin', req.path.replace('/admin/', '')));
 });
 
-// Serve static files from the current directory (excluding admin folder)
-app.use(express.static(path.join(__dirname), {
-  // Set cache control headers to improve performance
-  maxAge: '1d',
-  // Set proper MIME types
-  setHeaders: (res, filePath) => {
-    // For JavaScript files
-    if (filePath.endsWith('.js')) {
-      res.setHeader('Content-Type', 'application/javascript');
-    }
-    // For CSS files
-    if (filePath.endsWith('.css')) {
-      res.setHeader('Content-Type', 'text/css');
-    }
-  }
-}));
-
-// Clean URLs for the main site (no .html extension needed)
+// Clean URLs for the main site (no .html extension needed) - MUST come before static middleware
 app.get('/', (req, res) => {
   res.sendFile(path.join(__dirname, 'index.html'));
 });
@@ -123,6 +106,29 @@ app.get('/contact', (req, res) => {
   res.sendFile(path.join(__dirname, 'contact.html'));
 });
 
+// Serve favicon
+app.get('/favicon.ico', (req, res) => {
+  res.sendFile(path.join(__dirname, 'public/assets/favicon/favicon.ico'));
+});
+
+// Serve static files from specific directories only
+app.use('/public', express.static(path.join(__dirname, 'public'), {
+  maxAge: '1d',
+  setHeaders: (res, filePath) => {
+    if (filePath.endsWith('.js')) {
+      res.setHeader('Content-Type', 'application/javascript; charset=utf-8');
+    }
+    if (filePath.endsWith('.css')) {
+      res.setHeader('Content-Type', 'text/css; charset=utf-8');
+    }
+    if (filePath.endsWith('.json')) {
+      res.setHeader('Content-Type', 'application/json; charset=utf-8');
+    }
+  }
+}));
+
+
+
 // Route for individual artwork pages
 app.get('/artwork/:id', (req, res) => {
   res.sendFile(path.join(__dirname, 'artwork.html'));
@@ -131,19 +137,19 @@ app.get('/artwork/:id', (req, res) => {
 // Newsletter subscription endpoint
 app.post('/newsletter/subscribe', (req, res) => {
   const { email } = req.body;
-  
+
   if (!email || !email.includes('@')) {
     return res.status(400).json({ success: false, message: 'Please enter a valid email address.' });
   }
-  
+
   // In a real application, you would:
   // 1. Validate email format more thoroughly
   // 2. Save to database
   // 3. Send confirmation email
   // 4. Integrate with email service (Mailchimp, SendGrid, etc.)
-  
+
   console.log(`Newsletter subscription: ${email}`);
-  
+
   // For now, just return success
   res.json({ success: true, message: 'Thank you for subscribing to our newsletter!' });
 });
@@ -151,41 +157,46 @@ app.post('/newsletter/subscribe', (req, res) => {
 // Contact form endpoint
 app.post('/contact/submit', (req, res) => {
   const { name, email, subject, message } = req.body;
-  
+
   // Basic validation
   if (!name || !email || !subject || !message) {
-    return res.status(400).json({ 
-      success: false, 
-      message: 'Please fill in all required fields.' 
+    return res.status(400).json({
+      success: false,
+      message: 'Please fill in all required fields.'
     });
   }
-  
+
   if (!email.includes('@')) {
-    return res.status(400).json({ 
-      success: false, 
-      message: 'Please enter a valid email address.' 
+    return res.status(400).json({
+      success: false,
+      message: 'Please enter a valid email address.'
     });
   }
-  
+
   // In a real application, you would:
   // 1. Validate inputs more thoroughly
   // 2. Save to database
   // 3. Send email notification to admin
   // 4. Send confirmation email to user
   // 5. integrate with email service
-  
+
   console.log(`Contact form submission:
     Name: ${name}
     Email: ${email}
     Subject: ${subject}
     Message: ${message}
   `);
-  
+
   // For now, just return success
-  res.json({ 
-    success: true, 
-    message: `Thank you for your message, ${name}! I will get back to you as soon as possible.` 
+  res.json({
+    success: true,
+    message: `Thank you for your message, ${name}! I will get back to you as soon as possible.`
   });
+});
+
+// Catch-all for any unmatched requests - send 404 without logging ENOENT errors
+app.use((req, res) => {
+  res.status(404).send('Page not found');
 });
 
 // Start the server

@@ -169,6 +169,19 @@ function initGalleryGrid(data) {
 
     // Initialize "Add to Cart" buttons
     initAddToCartButtons(data);
+
+    // Notify modules about new elements (if available)
+    if (window.app) {
+        const cartModule = window.app.getModule('cart');
+        if (cartModule && cartModule.refreshButtons) {
+            cartModule.refreshButtons();
+        }
+
+        const lightboxModule = window.app.getModule('lightbox');
+        if (lightboxModule && lightboxModule.refreshGallery) {
+            lightboxModule.refreshGallery();
+        }
+    }
 }
 
 // Initialize "Add to Cart" buttons
@@ -275,6 +288,19 @@ function initLatestArtwork(data) {
 
     // We need to call initAddToCartButtons here as well for the latest artwork section
     initAddToCartButtons(data);
+
+    // Notify modules about new elements (if available)
+    if (window.app) {
+        const cartModule = window.app.getModule('cart');
+        if (cartModule && cartModule.refreshButtons) {
+            cartModule.refreshButtons();
+        }
+
+        const lightboxModule = window.app.getModule('lightbox');
+        if (lightboxModule && lightboxModule.refreshGallery) {
+            lightboxModule.refreshGallery();
+        }
+    }
 }
 
 // Generate and populate the Featured Collections section

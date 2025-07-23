@@ -18,98 +18,98 @@
         .artwork-detail-container {
             padding: 60px 0;
         }
-        
+
         .artwork-detail {
             display: grid;
             grid-template-columns: 1fr 1fr;
             gap: 40px;
             align-items: start;
         }
-        
+
         .artwork-image-container {
             position: relative;
             overflow: hidden;
             border-radius: 4px;
             box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
         }
-        
+
         .artwork-image-container img {
             width: 100%;
             display: block;
             transition: transform 0.5s ease;
             cursor: zoom-in;
         }
-        
+
         .artwork-image-container:hover img {
             transform: scale(1.02);
         }
-        
+
         .artwork-info {
             padding: 20px 0;
             text-align: center;
         }
-        
+
         .artwork-info h1 {
             font-family: 'Cormorant Garamond', serif;
             font-size: 2.5rem;
             margin-bottom: 10px;
             color: #333;
         }
-        
+
         .artwork-metadata {
             margin-bottom: 20px;
             font-family: 'Montserrat', sans-serif;
             text-align: left;
         }
-        
+
         .artwork-metadata p {
             margin: 8px 0;
             color: #555;
         }
-        
+
         .artwork-description {
             margin: 25px 0;
             line-height: 1.8;
             color: #444;
         }
-        
+
         .artwork-actions {
             display: flex;
             justify-content: center;
             gap: 15px;
             margin-top: 25px;
         }
-        
+
         .related-artworks {
             margin-top: 60px;
             padding-top: 40px;
             border-top: 1px solid #eee;
         }
-        
+
         .related-artworks h2 {
             font-family: 'Cormorant Garamond', serif;
             font-size: 2rem;
             margin-bottom: 30px;
             text-align: center;
         }
-        
+
         .related-grid {
             display: grid;
             grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
             gap: 30px;
         }
-        
+
         .artwork-not-found {
             text-align: center;
             padding: 80px 0;
         }
-        
+
         .artwork-not-found h2 {
             font-size: 2rem;
             margin-bottom: 20px;
             color: #9e7e5c;
         }
-        
+
         .artwork-not-found p {
             margin-bottom: 30px;
             color: #666;
@@ -134,45 +134,45 @@
         .related-grid .artwork-image:hover img {
             transform: scale(1.05);
         }
-        
+
         .related-grid .artwork-details {
             text-align: left;
         }
-        
+
         .related-grid .artwork-details h3 {
             margin-bottom: 8px;
         }
-        
+
         .related-grid .artwork-details h3 a {
             color: inherit;
             text-decoration: none;
             transition: color 0.2s ease;
         }
-        
+
         .related-grid .artwork-details h3 a:hover {
             color: #9e7e5c;
         }
-        
+
         .related-grid .artwork-details p {
             margin: 5px 0;
             font-size: 0.9rem;
             color: #555;
         }
-        
+
         .related-grid .artwork-details .btn {
             margin-top: 10px;
             display: inline-block;
         }
-        
+
         @media (max-width: 768px) {
             .artwork-detail {
                 grid-template-columns: 1fr;
             }
-            
+
             .artwork-info h1 {
                 font-size: 2rem;
             }
-            
+
             .related-grid {
                 grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
             }
@@ -219,7 +219,7 @@
                     <p>Please wait while we retrieve the artwork details.</p>
                 </div>
             </div>
-            
+
             <!-- Related Artworks -->
             <div class="related-artworks">
                 <h2>You Might Also Like</h2>
@@ -282,31 +282,27 @@
         </div>
     </footer>
 
-    <script src="/public/js/main.js"></script>
-    <!-- Artwork Loader Script -->
-    <script src="/public/js/artwork-loader.js"></script>
-    
     <!-- Artwork Detail Script -->
     <script>
         document.addEventListener('DOMContentLoaded', function() {
             // Load artwork data first, then initialize the artwork detail
             window.addEventListener('artwork-data-loaded', initArtworkDetail);
-            
+
             // If artwork data is already loaded, initialize right away
             if (window.artworkData) {
                 initArtworkDetail();
             }
         });
-        
+
         function initArtworkDetail() {
             // Get the artwork ID from the URL
             const pathParts = window.location.pathname.split('/');
             const artworkId = pathParts[pathParts.length - 1];
-            
+
             // Find the artwork in the data
             let artwork = null;
             let artworksData = window.artworkData;
-            
+
             if (!artworksData || !artworksData.artworks) {
                 // Try to get from localStorage as fallback
                 try {
@@ -318,11 +314,11 @@
                     console.error('Error retrieving artwork data:', e);
                 }
             }
-            
+
             if (artworksData && artworksData.artworks) {
                 // Find by ID first
                 artwork = artworksData.artworks.find(a => a.id === artworkId);
-                
+
                 // If not found by ID, try with generated ID (lowercase title with hyphens)
                 if (!artwork) {
                     artwork = artworksData.artworks.find(a => {
@@ -330,7 +326,7 @@
                         return generatedId === artworkId;
                     });
                 }
-                
+
                 // If artwork is found, render it
                 if (artwork) {
                     renderArtworkDetail(artwork, artworksData.settings);
@@ -344,17 +340,17 @@
                 showArtworkNotFound();
             }
         }
-        
+
         function renderArtworkDetail(artwork, settings) {
             const detailContainer = document.getElementById('artwork-detail-content');
             const currency = settings && settings.currency ? settings.currency : '₪';
-            
+
             // Format the price
             const formattedPrice = artwork.price ? `${currency}${artwork.price}` : 'Price on request';
-            
+
             // Ensure image paths are absolute
             const imagePath = artwork.image.startsWith('/') ? artwork.image : `/${artwork.image}`;
-            
+
             // Create the detail HTML
             const detailHTML = `
                 <div class="artwork-detail">
@@ -385,55 +381,55 @@
                     </div>
                 </div>
             `;
-            
+
             detailContainer.innerHTML = detailHTML;
         }
-        
+
         function renderRelatedArtworks(currentArtwork, allArtworks, settings) {
             const relatedContainer = document.getElementById('related-artworks');
             const currency = settings && settings.currency ? settings.currency : '₪';
-            
+
             // Find related artworks (same category or collection)
-            let relatedArtworks = allArtworks.filter(artwork => 
-                artwork.category === currentArtwork.category && 
+            let relatedArtworks = allArtworks.filter(artwork =>
+                artwork.category === currentArtwork.category &&
                 artwork.id !== currentArtwork.id
             );
-            
+
             // If not enough related artworks by category, add some random ones
             if (relatedArtworks.length < 3) {
                 const randomArtworks = allArtworks
-                    .filter(artwork => 
-                        artwork.id !== currentArtwork.id && 
+                    .filter(artwork =>
+                        artwork.id !== currentArtwork.id &&
                         !relatedArtworks.some(related => related.id === artwork.id)
                     )
                     .sort(() => 0.5 - Math.random()) // Shuffle
                     .slice(0, 3 - relatedArtworks.length);
-                
+
                 relatedArtworks = [...relatedArtworks, ...randomArtworks];
             }
-            
+
             // Limit to 3 related artworks
             relatedArtworks = relatedArtworks.slice(0, 3);
-            
+
             // If no related artworks, hide the section
             if (relatedArtworks.length === 0) {
                 document.querySelector('.related-artworks').style.display = 'none';
                 return;
             }
-            
+
             // Clear the container
             relatedContainer.innerHTML = '';
-            
+
             // Add each related artwork
             relatedArtworks.forEach(artwork => {
                 const formattedPrice = artwork.price ? `${currency}${artwork.price}` : 'Price on request';
-                
+
                 // Ensure image paths are absolute
                 const imagePath = artwork.image.startsWith('/') ? artwork.image : `/${artwork.image}`;
-                
+
                 const artworkElement = document.createElement('div');
                 artworkElement.className = 'artwork-item';
-                
+
                 artworkElement.innerHTML = `
                     <a href="/artwork/${artwork.id}" class="artwork-image">
                         <img src="${imagePath}" alt="${artwork.title}">
@@ -446,11 +442,11 @@
                         <a href="/artwork/${artwork.id}" class="btn outline-btn">View Details</a>
                     </div>
                 `;
-                
+
                 relatedContainer.appendChild(artworkElement);
             });
         }
-        
+
         function showArtworkNotFound() {
             const detailContainer = document.getElementById('artwork-detail-content');
             detailContainer.innerHTML = `
@@ -460,16 +456,16 @@
                     <a href="/gallery" class="btn primary-btn">Browse Gallery</a>
                 </div>
             `;
-            
+
             // Hide related artworks
             document.querySelector('.related-artworks').style.display = 'none';
         }
-        
+
         // Helper function to add artwork to cart from the detail page
         function addToCartFromDetail(artworkId) {
             // Find the artwork in the data
             let artworksData = window.artworkData;
-            
+
             if (!artworksData || !artworksData.artworks) {
                 // Try to get from localStorage as fallback
                 try {
@@ -482,31 +478,31 @@
                     return;
                 }
             }
-            
+
             if (!artworksData || !artworksData.artworks) {
                 console.error('No artwork data available');
                 return;
             }
-            
+
             // Find the artwork
             const artwork = artworksData.artworks.find(a => a.id === artworkId);
-            
+
             if (!artwork) {
                 console.error('Artwork not found:', artworkId);
                 return;
             }
-            
+
             // Get the currency from settings
-            const currency = artworksData.settings && artworksData.settings.currency 
-                ? artworksData.settings.currency 
+            const currency = artworksData.settings && artworksData.settings.currency
+                ? artworksData.settings.currency
                 : '₪';
-            
+
             // Format the price
             const formattedPrice = artwork.price ? `${currency}${artwork.price}` : `${currency}0`;
-            
+
             // Ensure image path is absolute
             const imagePath = artwork.image.startsWith('/') ? artwork.image : `/${artwork.image}`;
-            
+
             // Create item to add to cart
             const item = {
                 id: artwork.id,
@@ -515,18 +511,18 @@
                 image: imagePath,
                 dimensions: artwork.dimensions || 'Dimensions not specified'
             };
-            
+
             // Add to cart
             if (window.addToCart) {
                 window.addToCart(item);
-                
+
                 // Show feedback
                 const addToCartBtn = document.querySelector('.add-to-cart-btn');
                 if (addToCartBtn) {
                     const originalText = addToCartBtn.textContent;
                     addToCartBtn.textContent = 'Added to Cart!';
                     addToCartBtn.disabled = true;
-                    
+
                     setTimeout(() => {
                         addToCartBtn.textContent = originalText;
                         addToCartBtn.disabled = false;
@@ -535,7 +531,7 @@
             }
         }
     </script>
-    
+
     <!-- Cart Modal Overlay -->
     <div class="cart-modal-overlay">
         <div class="cart-modal">
@@ -558,5 +554,9 @@
             </div>
         </div>
     </div>
+
+    <!-- Scripts -->
+    <script src="/public/js/main.js"></script>
+    <script src="/public/js/artwork-loader.js"></script>
 </body>
-</html> 
+</html>

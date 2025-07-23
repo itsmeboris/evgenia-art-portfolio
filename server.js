@@ -18,7 +18,7 @@ const sessions = new Map();
 // Authentication middleware
 function requireAuth(req, res, next) {
   const sessionId = req.headers.cookie?.split('sessionId=')[1]?.split(';')[0];
-  
+
   if (sessionId && sessions.has(sessionId)) {
     next();
   } else {
@@ -29,11 +29,11 @@ function requireAuth(req, res, next) {
 // Admin login endpoint
 app.post('/admin/login', (req, res) => {
   const { username, password } = req.body;
-  
+
   if (username === ADMIN_USERNAME && password === ADMIN_PASSWORD) {
     const sessionId = Date.now().toString() + Math.random().toString(36);
     sessions.set(sessionId, { username, timestamp: Date.now() });
-    
+
     res.setHeader('Set-Cookie', `sessionId=${sessionId}; Path=/; Max-Age=3600`);
     res.redirect('/admin/');
   } else {
@@ -55,7 +55,7 @@ app.post('/admin/logout', (req, res) => {
 app.get('/admin/login', (req, res) => {
   // Check if user is already logged in
   const sessionId = req.headers.cookie?.split('sessionId=')[1]?.split(';')[0];
-  
+
   if (sessionId && sessions.has(sessionId)) {
     // User is already logged in, redirect to admin panel
     res.redirect('/admin/');
@@ -126,6 +126,66 @@ app.get('/contact', (req, res) => {
 // Route for individual artwork pages
 app.get('/artwork/:id', (req, res) => {
   res.sendFile(path.join(__dirname, 'artwork.html'));
+});
+
+// Newsletter subscription endpoint
+app.post('/newsletter/subscribe', (req, res) => {
+  const { email } = req.body;
+  
+  if (!email || !email.includes('@')) {
+    return res.status(400).json({ success: false, message: 'Please enter a valid email address.' });
+  }
+  
+  // In a real application, you would:
+  // 1. Validate email format more thoroughly
+  // 2. Save to database
+  // 3. Send confirmation email
+  // 4. Integrate with email service (Mailchimp, SendGrid, etc.)
+  
+  console.log(`Newsletter subscription: ${email}`);
+  
+  // For now, just return success
+  res.json({ success: true, message: 'Thank you for subscribing to our newsletter!' });
+});
+
+// Contact form endpoint
+app.post('/contact/submit', (req, res) => {
+  const { name, email, subject, message } = req.body;
+  
+  // Basic validation
+  if (!name || !email || !subject || !message) {
+    return res.status(400).json({ 
+      success: false, 
+      message: 'Please fill in all required fields.' 
+    });
+  }
+  
+  if (!email.includes('@')) {
+    return res.status(400).json({ 
+      success: false, 
+      message: 'Please enter a valid email address.' 
+    });
+  }
+  
+  // In a real application, you would:
+  // 1. Validate inputs more thoroughly
+  // 2. Save to database
+  // 3. Send email notification to admin
+  // 4. Send confirmation email to user
+  // 5. integrate with email service
+  
+  console.log(`Contact form submission:
+    Name: ${name}
+    Email: ${email}
+    Subject: ${subject}
+    Message: ${message}
+  `);
+  
+  // For now, just return success
+  res.json({ 
+    success: true, 
+    message: `Thank you for your message, ${name}! I will get back to you as soon as possible.` 
+  });
 });
 
 // Start the server

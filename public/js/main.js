@@ -1185,21 +1185,57 @@ document.addEventListener('DOMContentLoaded', function() {
             e.preventDefault();
 
             const emailInput = this.querySelector('input[type="email"]');
+            const submitButton = this.querySelector('button[type="submit"]');
             const email = emailInput.value;
 
             if (email) {
-                // In a real implementation, we would make an API call to a mailing list service
-                console.log(`Subscribing email: ${email}`);
+                // Disable button and show loading state
+                submitButton.disabled = true;
+                const originalButtonText = submitButton.textContent;
+                submitButton.textContent = 'Subscribing...';
 
-                // Show success message
-                const formContainer = this.parentElement;
-                const successMessage = document.createElement('p');
-                successMessage.classList.add('success-message');
-                successMessage.textContent = 'Thank you for subscribing to our newsletter!';
+                // Make API call to server
+                fetch('/newsletter/subscribe', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ email })
+                })
+                .then(response => response.json())
+                .then(data => {
+                    const formContainer = this.parentElement;
+                    const message = document.createElement('p');
+                    message.classList.add(data.success ? 'success-message' : 'error-message');
+                    message.textContent = data.message;
 
-                // Replace form with success message
-                this.style.display = 'none';
-                formContainer.appendChild(successMessage);
+                    if (data.success) {
+                        // Replace form with success message
+                        this.style.display = 'none';
+                        formContainer.appendChild(message);
+                    } else {
+                        // Show error message above form
+                        formContainer.insertBefore(message, this);
+                        
+                        // Re-enable button
+                        submitButton.disabled = false;
+                        submitButton.textContent = originalButtonText;
+                    }
+                })
+                .catch(error => {
+                    console.error('Newsletter subscription error:', error);
+                    
+                    // Show error message
+                    const formContainer = this.parentElement;
+                    const errorMessage = document.createElement('p');
+                    errorMessage.classList.add('error-message');
+                    errorMessage.textContent = 'Sorry, there was an error. Please try again later.';
+                    formContainer.insertBefore(errorMessage, this);
+
+                    // Re-enable button
+                    submitButton.disabled = false;
+                    submitButton.textContent = originalButtonText;
+                });
             }
         });
     }
@@ -1217,27 +1253,65 @@ document.addEventListener('DOMContentLoaded', function() {
             const email = this.querySelector('#email').value;
             const subject = this.querySelector('#subject').value;
             const message = this.querySelector('#message').value;
+            const submitButton = this.querySelector('button[type="submit"]');
 
-            // In a real implementation, we would make an API call to a form handling service
-            console.log(`Contact Form Submission:
-                Name: ${name}
-                Email: ${email}
-                Subject: ${subject}
-                Message: ${message}
-            `);
+            // Disable button and show loading state
+            submitButton.disabled = true;
+            const originalButtonText = submitButton.textContent;
+            submitButton.textContent = 'Sending...';
 
-            // Show success message
-            const formContainer = this.parentElement;
-            const successMessage = document.createElement('div');
-            successMessage.classList.add('success-message');
-            successMessage.innerHTML = `
-                <h3>Message Sent Successfully!</h3>
-                <p>Thank you for reaching out, ${name}. I will get back to you as soon as possible.</p>
-            `;
+            // Make API call to server
+            fetch('/contact/submit', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ name, email, subject, message })
+            })
+            .then(response => response.json())
+            .then(data => {
+                const formContainer = this.parentElement;
+                const messageDiv = document.createElement('div');
+                messageDiv.classList.add(data.success ? 'success-message' : 'error-message');
+                
+                if (data.success) {
+                    messageDiv.innerHTML = `
+                        <h3>Message Sent Successfully!</h3>
+                        <p>${data.message}</p>
+                    `;
+                    // Replace form with success message
+                    this.style.display = 'none';
+                    formContainer.appendChild(messageDiv);
+                } else {
+                    messageDiv.innerHTML = `
+                        <h3>Error</h3>
+                        <p>${data.message}</p>
+                    `;
+                    // Show error message above form
+                    formContainer.insertBefore(messageDiv, this);
+                    
+                    // Re-enable button
+                    submitButton.disabled = false;
+                    submitButton.textContent = originalButtonText;
+                }
+            })
+            .catch(error => {
+                console.error('Contact form error:', error);
+                
+                // Show error message
+                const formContainer = this.parentElement;
+                const errorMessage = document.createElement('div');
+                errorMessage.classList.add('error-message');
+                errorMessage.innerHTML = `
+                    <h3>Error</h3>
+                    <p>Sorry, there was an error sending your message. Please try again later.</p>
+                `;
+                formContainer.insertBefore(errorMessage, this);
 
-            // Replace form with success message
-            this.style.display = 'none';
-            formContainer.appendChild(successMessage);
+                // Re-enable button
+                submitButton.disabled = false;
+                submitButton.textContent = originalButtonText;
+            });
         });
     }
 });

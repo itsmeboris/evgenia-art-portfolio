@@ -123,7 +123,7 @@ function initGalleryGrid(data) {
             artworkItem.setAttribute('data-id', artwork.id);
 
             // Format the price with the correct currency
-            let formattedPrice = artwork.price ? `${currency}${artwork.price}` : 'Price on request';
+            let formattedPrice = (artwork.price !== null && artwork.price !== undefined) ? `${currency}${artwork.price}` : 'Price on request';
 
             artworkItem.innerHTML = `
                 <div class="artwork-image">
@@ -185,7 +185,7 @@ function initAddToCartButtons(data) {
                 const currency = data.settings.currency || '₪';
 
                 // Format the price with the correct currency - now artwork.price should be numeric only
-                const formattedPrice = artwork.price ? `${currency}${artwork.price}` : 'Price on request';
+                const formattedPrice = (artwork.price !== null && artwork.price !== undefined) ? `${currency}${artwork.price}` : 'Price on request';
 
                 // Create an item object to add to the cart
                 const item = {
@@ -254,7 +254,7 @@ function initLatestArtwork(data) {
         artworkItem.setAttribute('data-id', artwork.id);
 
         // Format the price with the correct currency
-        let formattedPrice = artwork.price ? `${currency}${artwork.price}` : 'Price on request';
+        let formattedPrice = (artwork.price !== null && artwork.price !== undefined) ? `${currency}${artwork.price}` : 'Price on request';
 
         artworkItem.innerHTML = `
             <div class="artwork-image">

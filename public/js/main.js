@@ -1853,7 +1853,7 @@ function displaySearchResults(results, query, settings) {
         );
 
         // Format the price
-        const formattedPrice = artwork.price ? `${currency}${artwork.price}` : 'Price on request';
+        const formattedPrice = (artwork.price !== null && artwork.price !== undefined) ? `${currency}${artwork.price}` : 'Price on request';
 
         resultItem.innerHTML = `
             <a href="/artwork/${artwork.id}" class="search-result-link">

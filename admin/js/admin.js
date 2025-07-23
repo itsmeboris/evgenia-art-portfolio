@@ -183,7 +183,7 @@ function createArtworkCard(artwork) {
         <div class="artwork-info">
             <h3>${artwork.title}</h3>
             <p>${artwork.dimensions} | ${artwork.medium}</p>
-            <p>${artwork.price}</p>
+            <p>${artwork.price !== null && artwork.price !== undefined ? `${artworkData.settings.currency || '₪'}${artwork.price}` : 'Price on request'}</p>
             <div class="category-tag">${categoryName}</div>
             <div class="artwork-actions">
                 <button class="btn btn-secondary edit-artwork" data-id="${artwork.id}">Edit</button>
@@ -358,7 +358,10 @@ function initArtworkForm() {
             subcategory: document.getElementById('artwork-subcategory').value,
             dimensions: document.getElementById('artwork-dimensions').value,
             medium: document.getElementById('artwork-medium').value,
-            price: document.getElementById('artwork-price').value,
+            price: (() => {
+                const priceValue = document.getElementById('artwork-price').value.trim();
+                return priceValue === '' ? null : parseFloat(priceValue) || null;
+            })(),
             description: document.getElementById('artwork-description').value,
             image: document.getElementById('artwork-image').value,
             featured: document.getElementById('artwork-featured').checked
@@ -450,7 +453,7 @@ function openEditArtworkModal(artworkId) {
     document.getElementById('artwork-subcategory').value = artwork.subcategory || '';
     document.getElementById('artwork-dimensions').value = artwork.dimensions;
     document.getElementById('artwork-medium').value = artwork.medium;
-    document.getElementById('artwork-price').value = artwork.price;
+    document.getElementById('artwork-price').value = artwork.price !== null && artwork.price !== undefined ? artwork.price : '';
     document.getElementById('artwork-description').value = artwork.description;
     document.getElementById('artwork-image').value = artwork.image;
     document.getElementById('artwork-featured').checked = artwork.featured;
@@ -987,7 +990,10 @@ function initBatchUpload() {
                     subcategory: subcategory || '',
                     dimensions: dimensions || '',
                     medium: medium || 'Acrylic on Canvas',
-                    price: price || '',
+                    price: (() => {
+                        const priceValue = price.trim();
+                        return priceValue === '' ? null : parseFloat(priceValue) || null;
+                    })(),
                     description: '',
                     image: image,
                     featured: false

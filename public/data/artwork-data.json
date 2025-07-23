@@ -7,7 +7,7 @@
       "subcategory": "",
       "dimensions": "20cm X 20cm",
       "medium": "Acrylic on Canvas",
-      "price": "500",
+      "price": 500,
       "description": "",
       "image": "public/assets/images/artwork/birds/Image1.jpg",
       "featured": false
@@ -19,7 +19,7 @@
       "subcategory": "songbirds",
       "dimensions": "20cm X 20cm",
       "medium": "Acrylic on Canvas",
-      "price": "400",
+      "price": 400,
       "description": "",
       "image": "public/assets/images/artwork/birds/Image2.jpg",
       "featured": false
@@ -31,7 +31,7 @@
       "subcategory": "songbirds",
       "dimensions": "40cm X 20cm",
       "medium": "Acrylic on Canvas",
-      "price": "400",
+      "price": 400,
       "description": "",
       "image": "public/assets/images/artwork/birds/Image7.jpg",
       "featured": false
@@ -43,7 +43,7 @@
       "subcategory": "raptors",
       "dimensions": "40cm X 40cm",
       "medium": "Acrylic on Canvas",
-      "price": "400",
+      "price": 400,
       "description": "",
       "image": "public/assets/images/artwork/birds/Image22.jpg",
       "featured": false
@@ -55,7 +55,7 @@
       "subcategory": "songbirds",
       "dimensions": "40cm X 40cm",
       "medium": "Acrylic on Canvas",
-      "price": "400",
+      "price": 400,
       "description": "",
       "image": "public/assets/images/artwork/birds/Image24.jpg",
       "featured": false
@@ -67,7 +67,7 @@
       "subcategory": "",
       "dimensions": "40cm X 30cm",
       "medium": "Acrylic on Canvas",
-      "price": "400",
+      "price": 400,
       "description": "",
       "image": "public/assets/images/artwork/birds/Image9.jpg",
       "featured": true
@@ -79,7 +79,7 @@
       "subcategory": "",
       "dimensions": "40cm X 60cm",
       "medium": "Acrylic on Canvas",
-      "price": "400",
+      "price": 400,
       "description": "",
       "image": "public/assets/images/artwork/floral/Image26.jpg",
       "featured": false
@@ -91,7 +91,7 @@
       "subcategory": "",
       "dimensions": "60cm X 50cm",
       "medium": "Acrylic on Canvas",
-      "price": "400",
+      "price": 400,
       "description": "",
       "image": "public/assets/images/artwork/floral/Image27.jpg",
       "featured": false
@@ -103,7 +103,7 @@
       "subcategory": "",
       "dimensions": "40cm X 20cm",
       "medium": "Acrylic on Canvas",
-      "price": "400",
+      "price": 400,
       "description": "",
       "image": "public/assets/images/artwork/floral/Image13.jpg",
       "featured": false
@@ -115,7 +115,7 @@
       "subcategory": "",
       "dimensions": "40cm X 60cm",
       "medium": "Acrylic on Canvas",
-      "price": "400",
+      "price": 400,
       "description": "",
       "image": "public/assets/images/artwork/floral/Image34.jpg",
       "featured": false
@@ -127,7 +127,7 @@
       "subcategory": "",
       "dimensions": "40cm X 50cm",
       "medium": "Acrylic on Canvas",
-      "price": "400",
+      "price": 400,
       "description": "",
       "image": "public/assets/images/artwork/floral/Image29.jpg",
       "featured": false
@@ -139,7 +139,7 @@
       "subcategory": "",
       "dimensions": "40cm X 50cm",
       "medium": "Acrylic on Canvas",
-      "price": "400",
+      "price": 400,
       "description": "",
       "image": "public/assets/images/artwork/floral/Image28.jpg",
       "featured": false
@@ -151,7 +151,7 @@
       "subcategory": "",
       "dimensions": "50cm X 60cm",
       "medium": "Acrylic on Canvas",
-      "price": "",
+      "price": null,
       "description": "",
       "image": "public/assets/images/artwork/floral/Image39.jpg",
       "featured": true
@@ -163,7 +163,7 @@
       "subcategory": "",
       "dimensions": "40cm X 60cm",
       "medium": "Acrylic on Canvas",
-      "price": "",
+      "price": null,
       "description": "",
       "image": "public/assets/images/artwork/floral/Image38.jpg",
       "featured": false
@@ -175,7 +175,7 @@
       "subcategory": "",
       "dimensions": "",
       "medium": "Acrylic on Canvas",
-      "price": "400",
+      "price": 400,
       "description": "",
       "image": "public/assets/images/artwork/floral/Image40.jpg",
       "featured": false
@@ -187,7 +187,7 @@
       "subcategory": "",
       "dimensions": "40cm X 60cm",
       "medium": "Acrylic on Canvas",
-      "price": "",
+      "price": null,
       "description": "",
       "image": "public/assets/images/artwork/floral/Image36.jpg",
       "featured": false
@@ -199,7 +199,7 @@
       "subcategory": "",
       "dimensions": "25cm X 25cm",
       "medium": "Acrylic on Canvas",
-      "price": "400",
+      "price": 400,
       "description": "",
       "image": "public/assets/images/artwork/towns/Image25.jpg",
       "featured": false
@@ -211,7 +211,7 @@
       "subcategory": "",
       "dimensions": "15cm X 15cm",
       "medium": "Acrylic on Canvas",
-      "price": "400",
+      "price": 400,
       "description": "",
       "image": "public/assets/images/artwork/towns/Image4.jpg",
       "featured": false
@@ -223,7 +223,7 @@
       "subcategory": "",
       "dimensions": "40cm X 60cm",
       "medium": "Acrylic on Canvas",
-      "price": "400",
+      "price": 400,
       "description": "",
       "image": "public/assets/images/artwork/towns/Image48.jpg",
       "featured": false
@@ -235,7 +235,7 @@
       "subcategory": "",
       "dimensions": "40cm X 40cm",
       "medium": "Acrylic on Canvas",
-      "price": "400",
+      "price": 400,
       "description": "",
       "image": "public/assets/images/artwork/towns/Image19.jpg",
       "featured": false
@@ -247,7 +247,7 @@
       "subcategory": "",
       "dimensions": "50cm X 40cm",
       "medium": "Acrylic on Canvas",
-      "price": "400",
+      "price": 400,
       "description": "",
       "image": "public/assets/images/artwork/towns/Image32.jpg",
       "featured": false
@@ -259,7 +259,7 @@
       "subcategory": "",
       "dimensions": "60cm X 50cm",
       "medium": "Acrylic on Canvas",
-      "price": "400",
+      "price": 400,
       "description": "",
       "image": "public/assets/images/artwork/towns/Image49.jpg",
       "featured": false
@@ -271,7 +271,7 @@
       "subcategory": "",
       "dimensions": "50cm X 70cm",
       "medium": "Acrylic on Canvas",
-      "price": "400",
+      "price": 400,
       "description": "",
       "image": "public/assets/images/artwork/towns/Image55.jpg",
       "featured": false
@@ -283,7 +283,7 @@
       "subcategory": "",
       "dimensions": "50cm X 60cm",
       "medium": "Acrylic on Canvas",
-      "price": "400",
+      "price": 400,
       "description": "",
       "image": "public/assets/images/artwork/towns/Image56.jpg",
       "featured": false
@@ -295,7 +295,7 @@
       "subcategory": "",
       "dimensions": "40cm X 60cm",
       "medium": "Acrylic on Canvas",
-      "price": "",
+      "price": null,
       "description": "",
       "image": "public/assets/images/artwork/towns/Image45.jpg",
       "featured": false
@@ -307,7 +307,7 @@
       "subcategory": "",
       "dimensions": "50cm X 40cm",
       "medium": "Acrylic on Canvas",
-      "price": "400",
+      "price": 400,
       "description": "",
       "image": "public/assets/images/artwork/towns/Image31.jpg",
       "featured": false
@@ -319,7 +319,7 @@
       "subcategory": "",
       "dimensions": "60cm X 60cm",
       "medium": "Acrylic on Canvas",
-      "price": "400",
+      "price": 400,
       "description": "",
       "image": "public/assets/images/artwork/towns/Image43.jpg",
       "featured": false
@@ -331,7 +331,7 @@
       "subcategory": "",
       "dimensions": "50cm X 60cm",
       "medium": "Acrylic on Canvas",
-      "price": "400",
+      "price": 400,
       "description": "",
       "image": "public/assets/images/artwork/towns/Image35.jpg",
       "featured": false
@@ -343,7 +343,7 @@
       "subcategory": "",
       "dimensions": "20cm X 20cm",
       "medium": "Acrylic on Canvas",
-      "price": "400",
+      "price": 400,
       "description": "",
       "image": "public/assets/images/artwork/towns/Image3.jpg",
       "featured": false
@@ -355,7 +355,7 @@
       "subcategory": "",
       "dimensions": "50cm X 50cm",
       "medium": "Acrylic on Canvas",
-      "price": "400",
+      "price": 400,
       "description": "",
       "image": "public/assets/images/artwork/towns/Image33.jpg",
       "featured": false
@@ -367,7 +367,7 @@
       "subcategory": "",
       "dimensions": "60cm X 60cm",
       "medium": "Acrylic on Canvas",
-      "price": "400",
+      "price": 400,
       "description": "",
       "image": "public/assets/images/artwork/towns/Image51.jpg",
       "featured": false
@@ -379,7 +379,7 @@
       "subcategory": "",
       "dimensions": "20cm X 40cm",
       "medium": "Acrylic on Canvas",
-      "price": "400",
+      "price": 400,
       "description": "",
       "image": "public/assets/images/artwork/towns/Image11.jpg",
       "featured": false
@@ -391,7 +391,7 @@
       "subcategory": "",
       "dimensions": "50cm X 60cm",
       "medium": "Acrylic on Canvas",
-      "price": "400",
+      "price": 400,
       "description": "",
       "image": "public/assets/images/artwork/towns/Image53.jpg",
       "featured": false
@@ -403,7 +403,7 @@
       "subcategory": "",
       "dimensions": "50cm X 70cm",
       "medium": "Acrylic on Canvas",
-      "price": "400",
+      "price": 400,
       "description": "",
       "image": "public/assets/images/artwork/towns/Image44.jpg",
       "featured": true
@@ -415,7 +415,7 @@
       "subcategory": "",
       "dimensions": "60cm X 60cm",
       "medium": "Acrylic on Canvas",
-      "price": "400",
+      "price": 400,
       "description": "",
       "image": "public/assets/images/artwork/towns/Image47.jpg",
       "featured": false
@@ -427,7 +427,7 @@
       "subcategory": "",
       "dimensions": "40cm X 40cm",
       "medium": "Acrylic on Canvas",
-      "price": "400",
+      "price": 400,
       "description": "",
       "image": "public/assets/images/artwork/towns/Image20.jpg",
       "featured": false
@@ -439,7 +439,7 @@
       "subcategory": "",
       "dimensions": "25cm X 25cm",
       "medium": "Acrylic on Canvas",
-      "price": "400",
+      "price": 400,
       "description": "",
       "image": "public/assets/images/artwork/towns/Image21.jpg",
       "featured": false
@@ -451,7 +451,7 @@
       "subcategory": "",
       "dimensions": "60cm X 60cm",
       "medium": "Acrylic on Canvas",
-      "price": "400",
+      "price": 400,
       "description": "",
       "image": "public/assets/images/artwork/towns/Image46.jpg",
       "featured": false
@@ -463,7 +463,7 @@
       "subcategory": "",
       "dimensions": "40cm X 20cm",
       "medium": "Acrylic on Canvas",
-      "price": "400",
+      "price": 400,
       "description": "",
       "image": "public/assets/images/artwork/towns/Image8.jpg",
       "featured": false
@@ -475,7 +475,7 @@
       "subcategory": "",
       "dimensions": "60cm X 50cm",
       "medium": "Acrylic on Canvas",
-      "price": "400",
+      "price": 400,
       "description": "",
       "image": "public/assets/images/artwork/towns/Image37.jpg",
       "featured": false

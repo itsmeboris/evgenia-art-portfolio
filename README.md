@@ -1,6 +1,6 @@
 # Evgenia Portnov | Artist Portfolio & E-commerce Website
 
-This is a modern, responsive portfolio and e-commerce website for artist Evgenia Portnov. The site showcases her artwork while providing a seamless shopping experience through Shopify integration.
+This is a modern, responsive portfolio and e-commerce website for artist Evgenia Portnov. The site showcases her artwork while providing a seamless shopping experience through an integrated shopping cart system.
 
 ## Project Overview
 
@@ -11,7 +11,112 @@ The website features:
 - Gallery with filtering by artwork categories (Floral, Towns, Birds)
 - About page that tells Evgenia's artistic journey
 - Contact page with a form and FAQs
-- Shopify integration for e-commerce functionality
+- **Modern modular JavaScript architecture** with performance optimization
+- **Shopping cart system** with localStorage persistence
+- **Advanced image loading** with lazy loading and lightbox functionality
+- **Real-time search** with debouncing and search history
+- **Comprehensive error handling** with automatic recovery
+
+## 🏗️ JavaScript Architecture
+
+**Recently Refactored (2025):** The website has been completely refactored from a monolithic 1,710-line JavaScript file into a modern, maintainable modular architecture:
+
+### Core Modules
+
+#### 🛒 **Cart Module** (`public/js/modules/cart.js`)
+- Complete shopping cart system with CartManager class
+- localStorage persistence for cart state
+- Currency management (USD/CAD/EUR) with conversion
+- Performance optimization with render queuing
+- Concurrency control and state management
+- Error handling and recovery mechanisms
+
+#### 🎨 **UI Module** (`public/js/modules/ui.js`)
+- Mobile menu with accessibility features
+- FAQ toggles and accordion functionality
+- Smooth scroll effects and responsive handling
+- Focus management and keyboard navigation
+- Utility functions for DOM manipulation
+
+#### 🔍 **Lightbox Module** (`public/js/modules/lightbox.js`)
+- Image viewing with gallery navigation
+- Keyboard support (arrow keys, escape)
+- Image preloading and caching for performance
+- Mobile optimization with touch gestures
+- Accessibility features and screen reader support
+
+#### 🔎 **Search Module** (`public/js/modules/search.js`)
+- Real-time artwork search with modal interface
+- Debounced input for performance (300ms delay)
+- Search history with localStorage persistence
+- Result highlighting and relevance scoring
+- Advanced filtering by category, price, and keywords
+
+#### 📝 **Forms Module** (`public/js/modules/forms.js`)
+- Newsletter and contact form handling
+- Real-time validation with user feedback
+- Rate limiting to prevent spam
+- Accessibility enhancements (ARIA labels, focus management)
+- Comprehensive error handling and user notifications
+
+#### ⚠️ **Error Handler Module** (`public/js/modules/error-handler.js`)
+- Global error management with event listeners
+- Component-level error boundaries
+- Automatic recovery strategies with graceful degradation
+- User-friendly error messages with retry options
+- Error categorization and logging system
+
+#### 🛠️ **Utils Module** (`public/js/modules/utils.js`)
+- Performance helpers (debounce, throttle)
+- Data manipulation and string formatting utilities
+- Storage helpers for localStorage management
+- Device detection and responsive utilities
+- Animation and easing functions
+
+#### 🖼️ **Lazy Loader Module** (`public/js/modules/lazy-loader.js`)
+- Intersection Observer-based image loading
+- Concurrency control (max 3 simultaneous loads)
+- Retry logic with exponential backoff
+- Performance tracking and queue management
+- SVG placeholder generation for loading states
+
+### 🎯 **App Manager** (`public/js/main.js`)
+The central coordinator that:
+- **Priority-based module loading**: Critical → Essential → Features
+- **Performance monitoring**: Track load times, memory usage, error rates
+- **Retry mechanisms**: Exponential backoff for failed module loads
+- **Memory management**: Automatic cleanup every 5 minutes
+- **Development tools**: Performance dashboard and debugging utilities
+
+## 🚀 Performance Features
+
+### Loading Strategy
+- **Async module loading** for non-blocking initialization
+- **Priority-based loading**: Critical modules load first, features load with delay
+- **Retry mechanisms**: Up to 3 attempts with exponential backoff
+- **Performance caching**: Intelligent cache expiration and memory management
+
+### Error Recovery
+- **Component isolation**: Failed components don't crash the entire application
+- **Auto-recovery**: Components self-heal after 5 seconds
+- **Graceful degradation**: Fallback UI when components fail
+- **User feedback**: Friendly error messages with retry buttons
+
+### Development Tools
+Access development tools in browser console:
+```javascript
+// Performance dashboard
+window.app.dev.showDashboard()
+
+// Detailed performance report
+window.app.dev.getFullReport()
+
+// Run performance tests
+window.app.dev.testPerformance()
+
+// Export performance data
+window.app.dev.exportData()
+```
 
 ## Project Structure
 
@@ -21,57 +126,71 @@ The website features:
 ├── about.html               # About page
 ├── gallery.html             # Gallery/Shop page
 ├── contact.html             # Contact page
+├── artwork.html             # Individual artwork details
+├── shop.html                # Shopping page
+├── server.js                # Node.js server with proper routing
 ├── public/                  # Public assets
 │   ├── css/                 # CSS files
-│   │   └── style.css        # Main stylesheet
+│   │   ├── style.css        # Main stylesheet
+│   │   ├── additional-styles.css # Additional styles
+│   │   └── search-modal.css # Search modal styles
 │   ├── js/                  # JavaScript files
-│   │   └── main.js          # Main JavaScript file
-│   └── assets/              # Other assets
+│   │   ├── main.js          # App Manager (modular coordinator)
+│   │   ├── main-old.js      # Original monolithic file (backup)
+│   │   ├── artwork-loader.js # Artwork loading functionality
+│   │   └── modules/         # Modular JavaScript architecture
+│   │       ├── cart.js      # Shopping cart system
+│   │       ├── ui.js        # User interface components
+│   │       ├── lightbox.js  # Image lightbox functionality
+│   │       ├── search.js    # Search functionality
+│   │       ├── forms.js     # Form handling and validation
+│   │       ├── error-handler.js # Error management
+│   │       ├── utils.js     # Utility functions
+│   │       └── lazy-loader.js # Image lazy loading
+│   ├── data/                # Data files
+│   │   └── artwork-data.json # Central artwork database
+│   └── assets/              # Static assets
 │       └── images/          # Image files
+├── admin/                   # Admin interface
+│   ├── index.html           # Admin panel
+│   ├── login.html           # Admin login
+│   ├── css/admin.css        # Admin styles
+│   ├── js/admin.js          # Admin functionality
+│   └── README.md            # Admin documentation
 └── README.md                # This file
 ```
 
-## Shopify Integration
+## Shopping Cart Integration
 
-To fully integrate with Shopify, you'll need to:
+The website includes a comprehensive shopping cart system:
 
-1. Create a Shopify store if you don't have one already
-2. Replace placeholder product data with actual Shopify products
-3. Implement the Shopify Buy Button or Shopping Cart API
+### Features
+- **Add to Cart**: Direct integration from gallery and individual artwork pages
+- **Cart Management**: View, update quantities, remove items
+- **Currency Support**: USD, CAD, EUR with automatic conversion
+- **Persistence**: Cart state saved in localStorage
+- **Performance**: Optimized rendering with queue system
+- **Error Handling**: Robust error recovery and user feedback
 
-### Option 1: Shopify Buy Button
-
-1. Log in to your Shopify admin dashboard
-2. Go to Sales Channels > Buy Button
-3. Create a new Buy Button for each product or collection
-4. Copy the generated code and replace the placeholder buttons in the HTML
-
-### Option 2: Shopify JavaScript Buy SDK
-
-For a more customized integration, use the Shopify JavaScript Buy SDK:
-
-1. Install the SDK: `npm install shopify-buy`
-2. Initialize the client with your shop's domain and Storefront API access token
-3. Use the SDK to fetch products and handle cart functionality
-
-Example implementation:
-
+### Cart API
 ```javascript
-// Initialize the client
-const client = ShopifyBuy.buildClient({
-  domain: 'your-shop-name.myshopify.com',
-  storefrontAccessToken: 'your-storefront-access-token'
-});
+// Add item to cart
+await window.cart.addToCart(artworkId, quantity);
 
-// Fetch all products
-client.product.fetchAll().then((products) => {
-  // Do something with the products
-});
+// Get cart contents
+const items = window.cart.getItems();
 
-// Create a cart
-client.checkout.create().then((checkout) => {
-  // Do something with the checkout
-});
+// Update item quantity
+await window.cart.updateItemQuantity(artworkId, newQuantity);
+
+// Remove item
+await window.cart.removeItem(artworkId);
+
+// Clear cart
+window.cart.clearCart();
+
+// Get cart total
+const total = window.cart.getTotal();
 ```
 
 ## Customization
@@ -79,8 +198,29 @@ client.checkout.create().then((checkout) => {
 ### Adding New Artwork
 
 1. Add the artwork image to `/public/assets/images/`
-2. Add a new artwork item to the gallery grid in `gallery.html`
-3. Set the appropriate data category (floral, towns, birds)
+2. Update the central data file at `/public/data/artwork-data.json`:
+   ```json
+   {
+     "id": "unique-artwork-id",
+     "title": "Artwork Title",
+     "category": "floral", // or "towns", "birds"
+     "price": 150,
+     "currency": "USD",
+     "image": "path/to/image.jpg",
+     "description": "Artwork description",
+     "dimensions": "16x20 inches",
+     "medium": "Watercolor on paper"
+   }
+   ```
+3. The artwork will automatically appear in the gallery and be searchable
+
+### Managing Content with Admin Panel
+
+Access the admin panel at `/admin/` to:
+- Add, edit, and delete artwork entries
+- Upload new images
+- Manage categories and pricing
+- View analytics and performance data
 
 ### Changing Colors
 
@@ -96,57 +236,157 @@ To change the color scheme, edit the CSS variables in `public/css/style.css`:
 }
 ```
 
-### Adding Pages
+### Extending JavaScript Modules
 
-To add a new page:
+The modular architecture makes it easy to extend functionality:
 
-1. Create a new HTML file with the same structure as existing pages
-2. Update the navigation links in all pages to include the new page
-3. Add the page's specific content and styles
+#### Adding a New Module
+1. Create a new file in `/public/js/modules/your-module.js`
+2. Follow the module pattern:
+   ```javascript
+   class YourModule {
+     constructor() {
+       this.initialized = false;
+     }
+     
+     async init() {
+       if (this.initialized) return;
+       // Your initialization code
+       this.initialized = true;
+     }
+     
+     // Your module methods
+   }
+   
+   window.YourModule = YourModule;
+   ```
+3. Register the module in `main.js` module loading configuration
+
+#### Customizing Existing Modules
+Each module is self-contained and can be modified independently:
+- **Cart**: Modify pricing logic, add discount codes, integrate payment gateways
+- **Search**: Add new search filters, modify ranking algorithms
+- **Lightbox**: Add new gallery features, modify navigation
+- **Forms**: Add new form types, modify validation rules
 
 ## Development
 
-To run this project locally:
+### Running Locally
 
-1. Clone the repository
-2. Open the project in your code editor
-3. Use a local server to view the website (like VS Code's Live Server extension)
+To run this project locally and avoid CORS issues:
+
+1. **Install Node.js** from [nodejs.org](https://nodejs.org/)
+2. **Clone the repository** and navigate to the project directory
+3. **Install dependencies**:
+   ```bash
+   npm install
+   ```
+4. **Start the development server**:
+   ```bash
+   npm start
+   ```
+5. **Open your browser** to [http://localhost:3000](http://localhost:3000)
+
+### Development Features
+
+The modular architecture includes several development tools:
+
+#### Performance Monitoring
+Monitor your website's performance in real-time:
+```javascript
+// View live performance dashboard
+window.app.dev.showDashboard()
+
+// Get detailed metrics
+const report = window.app.dev.getFullReport()
+console.log(report.performance.moduleLoadTimes)
+console.log(report.cart.performanceMetrics)
+console.log(report.errors.componentHealth)
+```
+
+#### Memory Management
+Track and optimize memory usage:
+```javascript
+// Monitor memory usage
+window.app.dev.getMemoryReport()
+
+// Force cleanup (normally automatic)
+window.app.cleanup()
+```
+
+#### Error Testing
+Test error boundaries and recovery:
+```javascript
+// Test component error handling
+window.app.dev.testErrorBoundaries()
+
+// Simulate component failures
+window.app.dev.simulateError('cart') // or 'search', 'lightbox', etc.
+```
+
+### Code Quality
+
+The codebase follows modern JavaScript best practices:
+- **ES6+ Features**: Classes, async/await, destructuring, template literals
+- **Error Handling**: Comprehensive try-catch blocks with user-friendly recovery
+- **Performance**: Debouncing, throttling, lazy loading, memory management
+- **Accessibility**: ARIA labels, keyboard navigation, screen reader support
+- **Responsive Design**: Mobile-first approach with progressive enhancement
+
+### File Organization
+
+The modular structure promotes:
+- **Separation of Concerns**: Each module handles a specific functionality
+- **Maintainability**: Easy to locate and modify specific features
+- **Testability**: Modules can be tested independently
+- **Scalability**: New features can be added as separate modules
+- **Performance**: Modules load only when needed
 
 ## Deployment
 
+### Standard Deployment
+
 To deploy this website:
 
-1. Upload all files to your web hosting server
-2. Ensure your domain name points to the correct hosting location
-3. Configure any necessary server settings (like HTTPS)
-
-## Credits
-
-- Design inspiration: [Mariella Paints](https://mariellapaints.com/)
-- Fonts: [Google Fonts](https://fonts.google.com/) (Cormorant Garamond & Montserrat)
-- Icons: [Font Awesome](https://fontawesome.com/)
-
-## License
-
-All rights reserved. This website and its content belong to Evgenia Portnov.
-
-## Running Locally
-
-To avoid CORS issues with local files, use the included Node.js server:
-
-1. Install Node.js from [nodejs.org](https://nodejs.org/)
-2. Open a terminal in this directory
-3. Install dependencies:
+1. **Build for production** (optional optimization):
+   ```bash
+   npm run build  # If you have a build script
    ```
-   npm install
+
+2. **Upload files** to your web hosting server:
+   - All HTML files (index.html, gallery.html, etc.)
+   - Complete `/public/` directory with all assets
+   - `server.js` and `package.json` if using Node.js hosting
+   - `/admin/` directory for content management
+
+3. **Configure server settings**:
+   - Enable HTTPS for security
+   - Set up proper MIME types for static files
+   - Configure URL rewriting for artwork detail pages
+
+### Node.js Hosting
+
+For hosting providers that support Node.js:
+
+1. **Upload all files** including `server.js` and `package.json`
+2. **Install dependencies** on the server:
+   ```bash
+   npm install --production
    ```
-4. Start the server:
-   ```
+3. **Start the application**:
+   ```bash
    npm start
    ```
-5. Open [http://localhost:3000](http://localhost:3000) in your browser
+4. **Configure environment**:
+   - Set `PORT` environment variable if required
+   - Configure any necessary firewall rules
 
-The website will be available at http://localhost:3000, and the admin panel at http://localhost:3000/admin/
+### Static Hosting
+
+For static hosting (GitHub Pages, Netlify, etc.):
+- Upload all files except `server.js`
+- The website will work with basic functionality
+- Some features may require a backend (contact forms, admin panel)
 
 ## Accessing Your Site
 
@@ -196,16 +436,109 @@ To make your locally running website accessible from anywhere on the internet:
 - Free ngrok URLs change each time you restart ngrok
 - Anyone with the ngrok URL can access your site
 
+## Performance Optimization
+
+The website includes several performance optimizations:
+
+### Image Loading
+- **Lazy Loading**: Images load only when entering the viewport
+- **Progressive Enhancement**: Placeholder images while loading
+- **Optimized Formats**: Support for WebP and other modern formats
+- **Responsive Images**: Different sizes for different screen sizes
+
+### JavaScript Performance
+- **Module Splitting**: Code is split into focused, cacheable modules
+- **Async Loading**: Non-critical modules load asynchronously
+- **Memory Management**: Automatic cleanup prevents memory leaks
+- **Caching**: Intelligent caching reduces redundant operations
+
+### User Experience
+- **Error Boundaries**: Failed components don't crash the entire site
+- **Graceful Degradation**: Site works even when JavaScript fails
+- **Accessibility**: Full keyboard navigation and screen reader support
+- **Progressive Enhancement**: Core functionality works without JavaScript
+
+## Browser Support
+
+The website is compatible with:
+- **Modern Browsers**: Chrome, Firefox, Safari, Edge (last 2 versions)
+- **Mobile Browsers**: iOS Safari, Chrome Mobile, Samsung Internet
+- **Legacy Support**: Graceful degradation for older browsers
+- **Accessibility**: Screen readers and assistive technologies
+
+## Troubleshooting
+
+### Common Issues
+
+#### Module Loading Errors
+If you see module loading errors in the console:
+1. Check that all module files exist in `/public/js/modules/`
+2. Verify the server is running (for absolute path resolution)
+3. Check browser console for specific error messages
+4. Use development tools: `window.app.dev.testPerformance()`
+
+#### Cart Not Working
+If the shopping cart isn't functioning:
+1. Check localStorage availability: `window.app.dev.getFullReport().cart`
+2. Verify artwork data format in `/public/data/artwork-data.json`
+3. Check for JavaScript errors in browser console
+
+#### Performance Issues
+If the site feels slow:
+1. Monitor performance: `window.app.dev.showDashboard()`
+2. Check memory usage: `window.app.dev.getMemoryReport()`
+3. Test error boundaries: `window.app.dev.testErrorBoundaries()`
+
+#### Images Not Loading
+If images aren't displaying properly:
+1. Verify image paths in artwork data
+2. Check lazy loading status: Look for "lazy-loader" in console
+3. Test on different network conditions
+
+### Getting Help
+
+For technical issues:
+1. Check browser console for error messages
+2. Use built-in development tools (`window.app.dev`)
+3. Review module-specific documentation in code comments
+4. Test with different browsers and devices
+
 ## File Structure
 
 - `index.html` - Main website home page
-- `gallery.html` - Artwork gallery page
+- `gallery.html` - Artwork gallery page  
+- `artwork.html` - Individual artwork detail pages
 - `public/` - Contains all assets (images, CSS, JS)
   - `public/data/artwork-data.json` - Central data file for all artwork
+  - `public/js/modules/` - Modular JavaScript architecture
 - `admin/` - Admin interface for managing artwork
   - `admin/index.html` - Admin panel
   - `admin/README.md` - Admin documentation
+- `server.js` - Node.js server with proper routing and static file serving
 
 ## Content Management
 
-All artwork data is stored in a single JSON file at `public/data/artwork-data.json`. Both the main website and admin panel read from and write to this file. 
+All artwork data is stored in a single JSON file at `public/data/artwork-data.json`. Both the main website and admin panel read from and write to this file. The modular architecture ensures data consistency and provides real-time updates across all components.
+
+## Credits
+
+- **Design inspiration**: [Mariella Paints](https://mariellapaints.com/)
+- **Fonts**: [Google Fonts](https://fonts.google.com/) (Cormorant Garamond & Montserrat)
+- **Icons**: [Font Awesome](https://fontawesome.com/)
+- **Architecture**: Modern JavaScript ES6+ with modular design principles
+- **Performance**: Optimized with lazy loading, caching, and error boundaries
+
+## Recent Updates (2025)
+
+- ✅ **Complete JavaScript refactoring** from monolithic to modular architecture
+- ✅ **Performance optimization** with lazy loading and intelligent caching  
+- ✅ **Shopping cart system** with localStorage persistence
+- ✅ **Advanced error handling** with automatic recovery
+- ✅ **Real-time search** with debouncing and history
+- ✅ **Comprehensive testing** and development tools
+- ✅ **Mobile optimization** and accessibility improvements
+- ✅ **Server routing fixes** and static file handling
+
+## License
+
+All rights reserved. This website and its content belong to Evgenia Portnov. 

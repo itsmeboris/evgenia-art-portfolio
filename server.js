@@ -43,7 +43,9 @@ app.use(compression({
     }
 }));
 
-// Security middleware
+// Security middleware - configured for development/production
+const isDevelopment = process.env.NODE_ENV !== 'production';
+
 app.use(helmet({
     contentSecurityPolicy: {
         directives: {
@@ -52,7 +54,7 @@ app.use(helmet({
             scriptSrcAttr: ["'unsafe-inline'", "'unsafe-hashes'"],
             styleSrc: ["'self'", "'unsafe-inline'", "https://fonts.googleapis.com", "https://cdnjs.cloudflare.com"],
             styleSrcElem: ["'self'", "'unsafe-inline'", "https://fonts.googleapis.com", "https://cdnjs.cloudflare.com"],
-            imgSrc: ["'self'", "data:", "https:"],
+            imgSrc: ["'self'", "data:", "https:", ...(isDevelopment ? ["http:"] : [])],
             fontSrc: ["'self'", "https://fonts.gstatic.com", "https://cdnjs.cloudflare.com"],
             connectSrc: ["'self'"],
             frameSrc: ["'none'"],
@@ -61,7 +63,13 @@ app.use(helmet({
             formAction: ["'self'"],
         },
     },
-    crossOriginEmbedderPolicy: false
+    crossOriginEmbedderPolicy: false,
+    // Disable HSTS in development to avoid SSL issues
+    hsts: isDevelopment ? false : {
+        maxAge: 31536000,
+        includeSubDomains: true,
+        preload: true
+    }
 }));
 
 // Rate limiting for form submissions
@@ -111,7 +119,7 @@ app.use(session({
         secure: process.env.NODE_ENV === 'production', // HTTPS only in production
         httpOnly: true, // Prevent XSS
         maxAge: 1000 * 60 * 60 * 2, // 2 hours
-        sameSite: 'strict' // CSRF protection
+        sameSite: isDevelopment ? 'lax' : 'strict' // More permissive in development
     },
     name: 'evgenia.sid' // Custom session name
 }));
@@ -373,6 +381,8 @@ app.listen(port, '0.0.0.0', () => {
   console.log(`- Gallery: http://localhost:${port}/gallery`);
   console.log(`- Admin panel: http://localhost:${port}/admin/`);
   console.log(`✅ Compression middleware enabled (gzip/deflate)`);
+  console.log(`✅ Security headers configured for ${isDevelopment ? 'development' : 'production'} environment`);
+  console.log(`✅ HSTS ${isDevelopment ? 'disabled' : 'enabled'} (development mode: ${isDevelopment})`);
 
   // Show local network access information
   const interfaces = require('os').networkInterfaces();
@@ -389,9 +399,10 @@ app.listen(port, '0.0.0.0', () => {
   });
 
   if (localIPs.length > 0) {
-    console.log('\nYou can also access this site from other devices on your network:');
+    console.log('\n📱 Mobile device access (HTTP only in development):');
     localIPs.forEach((ip) => {
-      console.log(`http://${ip}:${port}`);
+      console.log(`   http://${ip}:${port}`);
     });
+    console.log('\n⚠️  Note: Use HTTP (not HTTPS) for mobile access in development');
   }
 });

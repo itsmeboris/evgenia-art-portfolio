@@ -25,8 +25,8 @@
       "featured": false
     },
     {
-      "id": "pheonix",
-      "title": "Pheonix",
+      "id": "phoenix",
+      "title": "Phoenix",
       "category": "birds",
       "subcategory": "songbirds",
       "dimensions": "40cm X 20cm",
@@ -37,8 +37,8 @@
       "featured": false
     },
     {
-      "id": "easgle",
-      "title": "Easgle",
+      "id": "eagle",
+      "title": "Eagle",
       "category": "birds",
       "subcategory": "raptors",
       "dimensions": "40cm X 40cm",
@@ -253,8 +253,8 @@
       "featured": false
     },
     {
-      "id": "city-in-a-reflaction",
-      "title": "City in a Reflaction",
+      "id": "city-in-a-reflection",
+      "title": "City in a Reflection",
       "category": "towns",
       "subcategory": "",
       "dimensions": "60cm X 50cm",

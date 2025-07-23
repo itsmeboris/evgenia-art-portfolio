@@ -977,59 +977,7 @@ function initCartModal(cart, updateQuantity, removeFromCart, calculateTotal, cur
                 });
             }
 
-            // Add CSS for the empty cart styling
-            const style = document.createElement('style');
-            style.textContent = `
-                .empty-cart-container {
-                    display: flex;
-                    flex-direction: column;
-                    align-items: center;
-                    justify-content: center;
-                    padding: 2rem;
-                    text-align: center;
-                    animation: fadeIn 0.5s ease-out;
-                }
-
-                .empty-cart-icon {
-                    color: #aaa;
-                    margin-bottom: 1rem;
-                    transform-origin: center;
-                    animation: pulse 2s infinite;
-                }
-
-                .empty-cart-title {
-                    font-size: 1.5rem;
-                    margin-bottom: 0.5rem;
-                    color: #333;
-                }
-
-                .empty-cart-subtitle {
-                    font-size: 1rem;
-                    margin-bottom: 1.5rem;
-                    color: #666;
-                }
-
-                .continue-shopping-btn {
-                    transition: all 0.3s ease;
-                    transform: scale(1);
-                }
-
-                .continue-shopping-btn:hover {
-                    transform: scale(1.05);
-                }
-
-                @keyframes fadeIn {
-                    from { opacity: 0; transform: translateY(20px); }
-                    to { opacity: 1; transform: translateY(0); }
-                }
-
-                @keyframes pulse {
-                    0% { transform: scale(1); }
-                    50% { transform: scale(1.05); }
-                    100% { transform: scale(1); }
-                }
-            `;
-            document.head.appendChild(style);
+            // Empty cart styles are now in additional-styles.css
 
             return;
         }
@@ -1403,6 +1351,19 @@ document.addEventListener('DOMContentLoaded', function() {
     });
 });
 
+// Utility function for debouncing
+function debounce(func, wait) {
+    let timeout;
+    return function executedFunction(...args) {
+        const later = () => {
+            clearTimeout(timeout);
+            func(...args);
+        };
+        clearTimeout(timeout);
+        timeout = setTimeout(later, wait);
+    };
+}
+
 // Search Functionality
 function initSearchFunctionality() {
     // Create search modal if it doesn't exist
@@ -1462,218 +1423,7 @@ function createSearchModal() {
         </div>
     `;
 
-    // Add styles for the search modal
-    const style = document.createElement('style');
-    style.textContent = `
-        .search-modal-overlay {
-            position: fixed;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background-color: rgba(0, 0, 0, 0.8);
-            display: flex;
-            align-items: flex-start;
-            justify-content: center;
-            z-index: 10000;
-            opacity: 0;
-            visibility: hidden;
-            transition: opacity 0.3s ease, visibility 0.3s ease;
-            padding: 2rem;
-            overflow-y: auto;
-        }
-
-        .search-modal-overlay.active {
-            opacity: 1;
-            visibility: visible;
-        }
-
-        .search-modal {
-            background-color: white;
-            border-radius: 8px;
-            width: 90%;
-            max-width: 800px;
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
-            margin-top: 80px;
-            transform: translateY(-20px);
-            transition: transform 0.3s ease;
-            max-height: 80vh;
-            display: flex;
-            flex-direction: column;
-        }
-
-        .search-modal-overlay.active .search-modal {
-            transform: translateY(0);
-        }
-
-        .search-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 1.5rem;
-            border-bottom: 1px solid #eee;
-        }
-
-        .search-header h2 {
-            margin: 0;
-            font-family: 'Cormorant Garamond', serif;
-            font-weight: 500;
-            color: #333;
-        }
-
-        .search-close {
-            background: none;
-            border: none;
-            font-size: 1.2rem;
-            cursor: pointer;
-            color: #666;
-            transition: color 0.2s ease;
-        }
-
-        .search-close:hover {
-            color: #000;
-        }
-
-        .search-form-container {
-            padding: 1.5rem;
-            border-bottom: 1px solid #eee;
-        }
-
-        .search-input-group {
-            display: flex;
-            position: relative;
-        }
-
-        .search-input {
-            flex: 1;
-            padding: 0.8rem 1rem;
-            border: 1px solid #ddd;
-            border-radius: 4px;
-            font-size: 1rem;
-            outline: none;
-            transition: border-color 0.2s ease;
-            padding-right: 80px; /* Space for buttons */
-        }
-
-        .search-input:focus {
-            border-color: #9e7e5c;
-        }
-
-        .search-btn {
-            position: absolute;
-            right: 0;
-            top: 0;
-            bottom: 0;
-            background: #9e7e5c;
-            color: white;
-            border: none;
-            border-radius: 0 4px 4px 0;
-            padding: 0 1rem;
-            cursor: pointer;
-            transition: background 0.2s ease;
-        }
-
-        .search-btn:hover {
-            background: #8c6c4a;
-        }
-
-        .search-clear {
-            position: absolute;
-            right: 45px;
-            top: 0;
-            bottom: 0;
-            background: none;
-            border: none;
-            color: #999;
-            cursor: pointer;
-            padding: 0 0.5rem;
-            transition: color 0.2s ease;
-        }
-
-        .search-clear:hover {
-            color: #333;
-        }
-
-        .search-results-container {
-            padding: 1.5rem;
-            overflow-y: auto;
-            max-height: 50vh;
-        }
-
-        .search-results-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
-            gap: 1.5rem;
-        }
-
-        .search-result-item {
-            border: 1px solid #eee;
-            border-radius: 4px;
-            overflow: hidden;
-            transition: transform 0.2s ease, box-shadow 0.2s ease;
-        }
-
-        .search-result-item:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
-        }
-
-        .search-result-image {
-            width: 100%;
-            height: 200px;
-            object-fit: cover;
-            cursor: pointer;
-        }
-
-        .search-result-info {
-            padding: 1rem;
-        }
-
-        .search-result-info h3 {
-            margin: 0 0 0.5rem;
-            font-size: 1.1rem;
-            color: #333;
-        }
-
-        .search-result-info p {
-            margin: 0 0 0.5rem;
-            font-size: 0.9rem;
-            color: #666;
-        }
-
-        .search-highlight {
-            background-color: rgba(158, 126, 92, 0.2);
-            padding: 0 2px;
-            border-radius: 2px;
-        }
-
-        .search-no-results {
-            text-align: center;
-            padding: 2rem;
-            color: #666;
-        }
-
-        .no-results-icon {
-            color: #999;
-            margin-bottom: 1rem;
-        }
-
-        @media (max-width: 768px) {
-            .search-results-grid {
-                grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
-            }
-
-            .search-result-image {
-                height: 150px;
-            }
-
-            .search-modal {
-                width: 95%;
-                margin-top: 60px;
-            }
-        }
-    `;
-    document.head.appendChild(style);
+    // Search modal styles are now in search-modal.css
 
     // Add to DOM
     document.body.appendChild(searchModal);
@@ -1703,14 +1453,17 @@ function createSearchModal() {
         performSearch();
     });
 
-    // Input handler for real-time search
+    // Input handler for real-time search with debouncing
     const searchInput = searchModal.querySelector('.search-input');
     const clearBtn = searchModal.querySelector('.search-clear');
+    
+    // Create debounced search function
+    const debouncedSearch = debounce(performSearch, 300);
 
     searchInput.addEventListener('input', function() {
         if (this.value.length > 0) {
             clearBtn.style.display = 'block';
-            performSearch();
+            debouncedSearch();
         } else {
             clearBtn.style.display = 'none';
             clearSearchResults();

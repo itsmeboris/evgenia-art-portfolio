@@ -1217,3 +1217,131 @@ footer {
 .collection-image {
     height: 250px;
 }
+
+/* Confirmation Modal Styles */
+.confirmation-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.8);
+    backdrop-filter: blur(3px);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 10000;
+    opacity: 0;
+    visibility: hidden;
+    transition: all 0.3s ease;
+}
+
+.confirmation-overlay.active {
+    opacity: 1;
+    visibility: visible;
+}
+
+.confirmation-modal {
+    background: #ffffff;
+    border-radius: 12px;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.4);
+    max-width: 450px;
+    width: 90%;
+    transform: scale(0.7) translateY(50px);
+    transition: all 0.3s ease;
+    overflow: hidden;
+    border: 1px solid #e0e0e0;
+}
+
+.confirmation-overlay.active .confirmation-modal {
+    transform: scale(1) translateY(0);
+}
+
+.confirmation-header {
+    padding: 24px 24px 16px;
+    border-bottom: 1px solid #ddd;
+    background: #f8f9fa;
+}
+
+.confirmation-header h3 {
+    margin: 0;
+    font-family: var(--font-heading);
+    font-size: 1.25rem;
+    color: #2c3e50;
+    font-weight: 600;
+}
+
+.confirmation-body {
+    padding: 20px 24px;
+    background: #ffffff;
+}
+
+.confirmation-body p {
+    margin: 0;
+    color: #34495e;
+    line-height: 1.6;
+    font-size: 1rem;
+}
+
+.confirmation-actions {
+    padding: 16px 24px 24px;
+    display: flex;
+    gap: 12px;
+    justify-content: flex-end;
+    background: #ffffff;
+    border-top: 1px solid #f0f0f0;
+}
+
+.confirmation-actions .btn {
+    min-width: 90px;
+    padding: 12px 24px;
+    font-size: 0.95rem;
+    font-weight: 500;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.confirmation-actions .btn.outline-btn {
+    background: #f8f9fa;
+    color: #6c757d;
+    border: 1px solid #dee2e6;
+}
+
+.confirmation-actions .btn.outline-btn:hover {
+    background: #e9ecef;
+    color: #495057;
+}
+
+.confirmation-actions .btn.primary-btn {
+    background: #dc3545;
+    color: #ffffff;
+}
+
+.confirmation-actions .btn.primary-btn:hover {
+    background: #c82333;
+}
+
+/* Cart Button States */
+.add-to-cart.in-cart,
+.add-to-cart-btn.in-cart {
+    background-color: var(--color-light-gray);
+    color: var(--color-text);
+    cursor: not-allowed;
+    opacity: 0.7;
+}
+
+.add-to-cart.in-cart:hover,
+.add-to-cart-btn.in-cart:hover {
+    background-color: var(--color-light-gray);
+    transform: none;
+}
+
+/* Cart Item Unique Label */
+.cart-item-unique {
+    font-size: 0.85rem;
+    color: var(--color-primary);
+    font-style: italic;
+    margin: 4px 0 0 0;
+}

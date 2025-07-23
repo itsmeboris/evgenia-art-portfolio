@@ -330,12 +330,12 @@ class CartManager {
             const existingItemIndex = this.cart.findIndex(cartItem => cartItem.id === item.id);
 
             if (existingItemIndex !== -1) {
-                // Update existing item
-                this.cart[existingItemIndex].quantity += 1;
-                this.cart[existingItemIndex].price = item.price;
-                this.cart[existingItemIndex].image = item.image;
+                // Artwork is unique - don't allow duplicates
+                this.showNotification(`${item.title} is already in your cart`, 'info');
+                this.setState({ isLoading: false });
+                return false;
             } else {
-                // Add new item
+                // Add new item (quantity is always 1 for unique artworks)
                 this.cart.push({ ...item, quantity: 1 });
             }
 
@@ -420,10 +420,52 @@ class CartManager {
         try {
             const totalItems = this.cart.reduce((total, item) => total + item.quantity, 0);
             this.cartCountElement.textContent = totalItems;
+
+            // Update add to cart button states
+            this.updateAddToCartButtonStates();
             this.cartCountElement.style.display = totalItems > 0 ? 'flex' : 'none';
         } catch (error) {
             this.handleError('Error updating cart count', error);
         }
+    }
+
+    // Update add to cart button states based on cart contents
+    updateAddToCartButtonStates() {
+        try {
+            document.querySelectorAll('.add-to-cart, .add-to-cart-btn').forEach(button => {
+                const artworkId = button.getAttribute('data-id') || button.getAttribute('onclick')?.match(/'([^']+)'/)?.[1];
+                if (artworkId) {
+                    const isInCart = this.cart.some(item => item.id === artworkId);
+                    if (isInCart) {
+                        button.textContent = 'Already in Cart';
+                        button.classList.add('in-cart');
+                        button.disabled = true;
+                    } else {
+                        button.textContent = 'Add to Cart';
+                        button.classList.remove('in-cart');
+                        button.disabled = false;
+                    }
+                }
+            });
+        } catch (error) {
+            this.handleError('Error updating button states', error);
+        }
+    }
+
+    // Schedule button state update with delay to ensure DOM is ready
+    scheduleButtonStateUpdate() {
+        // Update immediately
+        this.updateAddToCartButtonStates();
+        
+        // Also update after a short delay in case buttons aren't ready yet
+        setTimeout(() => {
+            this.updateAddToCartButtonStates();
+        }, 100);
+        
+        // Also update after page is fully loaded
+        setTimeout(() => {
+            this.updateAddToCartButtonStates();
+        }, 500);
     }
 
     // Update cart count from storage (for page loads)
@@ -431,6 +473,8 @@ class CartManager {
         try {
             this.loadCartFromStorage();
             this.updateCartCount();
+            // Schedule button state update to handle timing issues
+            this.scheduleButtonStateUpdate();
         } catch (error) {
             this.handleError('Error updating cart count from storage', error);
         }
@@ -553,11 +597,79 @@ class CartManager {
 
     // Show empty cart confirmation
     showEmptyCartConfirmation() {
-        const confirmed = confirm('Are you sure you want to empty your cart? This action cannot be undone.');
-        if (confirmed) {
-            this.resetCart();
-            this.showNotification('Cart emptied successfully', 'info');
-        }
+        this.showCustomConfirmation(
+            'Empty Cart',
+            'Are you sure you want to empty your cart? This action cannot be undone.',
+            () => {
+                this.resetCart();
+                this.showNotification('Cart emptied successfully', 'info');
+            }
+        );
+    }
+
+    // Show custom confirmation dialog with animations
+    showCustomConfirmation(title, message, onConfirm) {
+        // Create overlay
+        const overlay = document.createElement('div');
+        overlay.className = 'confirmation-overlay';
+        
+        // Create modal
+        const modal = document.createElement('div');
+        modal.className = 'confirmation-modal';
+        
+        modal.innerHTML = `
+            <div class="confirmation-header">
+                <h3>${title}</h3>
+            </div>
+            <div class="confirmation-body">
+                <p>${message}</p>
+            </div>
+            <div class="confirmation-actions">
+                <button class="btn outline-btn confirmation-cancel">Cancel</button>
+                <button class="btn primary-btn confirmation-confirm">Confirm</button>
+            </div>
+        `;
+        
+        overlay.appendChild(modal);
+        document.body.appendChild(overlay);
+        
+        // Add animation
+        setTimeout(() => {
+            overlay.classList.add('active');
+        }, 10);
+        
+        // Handle actions
+        const cancelBtn = modal.querySelector('.confirmation-cancel');
+        const confirmBtn = modal.querySelector('.confirmation-confirm');
+        
+        const closeModal = () => {
+            overlay.classList.remove('active');
+            setTimeout(() => {
+                document.body.removeChild(overlay);
+            }, 300);
+        };
+        
+        cancelBtn.addEventListener('click', closeModal);
+        confirmBtn.addEventListener('click', () => {
+            closeModal();
+            onConfirm();
+        });
+        
+        // Close on overlay click
+        overlay.addEventListener('click', (e) => {
+            if (e.target === overlay) {
+                closeModal();
+            }
+        });
+        
+        // Close on ESC key
+        const handleKeyPress = (e) => {
+            if (e.key === 'Escape') {
+                closeModal();
+                document.removeEventListener('keydown', handleKeyPress);
+            }
+        };
+        document.addEventListener('keydown', handleKeyPress);
     }
 
     // Process checkout (placeholder for now)
@@ -629,11 +741,7 @@ class CartManager {
                 <h3 class="cart-item-title">${item.title}</h3>
                 <p class="cart-item-dimensions">${item.dimensions || 'Dimensions not specified'}</p>
                 <p class="cart-item-price">${item.price || `${this.currentCurrency}0.00`}</p>
-            </div>
-            <div class="cart-item-quantity">
-                <button class="quantity-minus" aria-label="Decrease quantity">-</button>
-                <input type="number" value="${item.quantity}" min="0" max="99" aria-label="Quantity">
-                <button class="quantity-plus" aria-label="Increase quantity">+</button>
+                <p class="cart-item-unique">Unique artwork</p>
             </div>
             <button class="cart-item-remove" aria-label="Remove item">
                 <i class="fas fa-trash"></i>
@@ -648,28 +756,7 @@ class CartManager {
 
     // Add event listeners to cart item
     addCartItemEventListeners(cartItem, item) {
-        const quantityMinus = cartItem.querySelector('.quantity-minus');
-        const quantityPlus = cartItem.querySelector('.quantity-plus');
-        const quantityInput = cartItem.querySelector('input');
         const removeButton = cartItem.querySelector('.cart-item-remove');
-
-        quantityMinus.addEventListener('click', () => {
-            const newQuantity = Math.max(0, parseInt(quantityInput.value) - 1);
-            quantityInput.value = newQuantity;
-            this.updateQuantity(item.id, newQuantity);
-        });
-
-        quantityPlus.addEventListener('click', () => {
-            const newQuantity = Math.min(99, parseInt(quantityInput.value) + 1);
-            quantityInput.value = newQuantity;
-            this.updateQuantity(item.id, newQuantity);
-        });
-
-        quantityInput.addEventListener('change', () => {
-            const newQuantity = Math.max(0, Math.min(99, parseInt(this.value) || 0));
-            this.value = newQuantity;
-            this.updateQuantity(item.id, newQuantity);
-        });
 
         removeButton.addEventListener('click', (e) => {
             e.preventDefault();

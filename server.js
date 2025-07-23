@@ -3,6 +3,9 @@ require('dotenv').config();
 const express = require('express');
 const path = require('path');
 const bcrypt = require('bcrypt');
+const helmet = require('helmet');
+const rateLimit = require('express-rate-limit');
+const { body, validationResult } = require('express-validator');
 const app = express();
 const port = process.env.PORT || 3000;
 
@@ -16,9 +19,56 @@ if (!ADMIN_USERNAME || !ADMIN_PASSWORD_HASH) {
     process.exit(1);
 }
 
+// Security middleware
+app.use(helmet({
+    contentSecurityPolicy: {
+        directives: {
+            defaultSrc: ["'self'"],
+            scriptSrc: ["'self'", "'unsafe-inline'"],
+            styleSrc: ["'self'", "'unsafe-inline'"],
+            imgSrc: ["'self'", "data:", "https:"],
+            fontSrc: ["'self'"],
+            connectSrc: ["'self'"],
+            frameSrc: ["'none'"],
+            objectSrc: ["'none'"],
+            baseUri: ["'self'"],
+            formAction: ["'self'"],
+        },
+    },
+    crossOriginEmbedderPolicy: false
+}));
+
+// Rate limiting for form submissions
+const formLimiter = rateLimit({
+    windowMs: 15 * 60 * 1000, // 15 minutes
+    max: 10, // Limit each IP to 10 requests per windowMs
+    message: { success: false, message: 'Too many requests. Please try again later.' },
+    standardHeaders: true,
+    legacyHeaders: false,
+});
+
+// Rate limiting for admin login
+const loginLimiter = rateLimit({
+    windowMs: 15 * 60 * 1000, // 15 minutes
+    max: 5, // Limit each IP to 5 login attempts per windowMs
+    message: { success: false, message: 'Too many login attempts. Please try again later.' },
+    standardHeaders: true,
+    legacyHeaders: false,
+});
+
+// Input sanitization helper
+function sanitizeInput(input) {
+    if (typeof input !== 'string') return input;
+    return input
+        .replace(/[<>]/g, '') // Remove < and > to prevent basic XSS
+        .replace(/javascript:/gi, '') // Remove javascript: protocol
+        .replace(/on\w+=/gi, '') // Remove event handlers like onclick=
+        .trim();
+}
+
 // Middleware to parse JSON and URL-encoded data
-app.use(express.json());
-app.use(express.urlencoded({ extended: true }));
+app.use(express.json({ limit: '10mb' }));
+app.use(express.urlencoded({ extended: true, limit: '10mb' }));
 
 // Simple session storage (in production, use proper session management)
 const sessions = new Map();
@@ -35,7 +85,7 @@ function requireAuth(req, res, next) {
 }
 
 // Admin login endpoint
-app.post('/admin/login', async (req, res) => {
+app.post('/admin/login', loginLimiter, async (req, res) => {
   const { username, password } = req.body;
 
   try {
@@ -150,64 +200,104 @@ app.get('/artwork/:id', (req, res) => {
 });
 
 // Newsletter subscription endpoint
-app.post('/newsletter/subscribe', (req, res) => {
-  const { email } = req.body;
+app.post('/newsletter/subscribe', 
+  formLimiter,
+  [
+    body('email')
+      .isEmail()
+      .withMessage('Please enter a valid email address.')
+      .normalizeEmail()
+      .isLength({ max: 254 })
+      .withMessage('Email address is too long.')
+  ],
+  (req, res) => {
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+      return res.status(400).json({ 
+        success: false, 
+        message: errors.array()[0].msg 
+      });
+    }
 
-  if (!email || !email.includes('@')) {
-    return res.status(400).json({ success: false, message: 'Please enter a valid email address.' });
+    const { email } = req.body;
+    const sanitizedEmail = sanitizeInput(email);
+
+    // In a real application, you would:
+    // 1. Save to database
+    // 2. Send confirmation email
+    // 3. Integrate with email service (Mailchimp, SendGrid, etc.)
+
+    console.log(`Newsletter subscription: ${sanitizedEmail}`);
+
+    // For now, just return success
+    res.json({ success: true, message: 'Thank you for subscribing to our newsletter!' });
   }
-
-  // In a real application, you would:
-  // 1. Validate email format more thoroughly
-  // 2. Save to database
-  // 3. Send confirmation email
-  // 4. Integrate with email service (Mailchimp, SendGrid, etc.)
-
-  console.log(`Newsletter subscription: ${email}`);
-
-  // For now, just return success
-  res.json({ success: true, message: 'Thank you for subscribing to our newsletter!' });
-});
+);
 
 // Contact form endpoint
-app.post('/contact/submit', (req, res) => {
-  const { name, email, subject, message } = req.body;
+app.post('/contact/submit', 
+  formLimiter,
+  [
+    body('name')
+      .trim()
+      .isLength({ min: 2, max: 100 })
+      .withMessage('Name must be between 2 and 100 characters.')
+      .matches(/^[a-zA-Z\s\-\.]+$/)
+      .withMessage('Name can only contain letters, spaces, hyphens, and periods.'),
+    body('email')
+      .isEmail()
+      .withMessage('Please enter a valid email address.')
+      .normalizeEmail()
+      .isLength({ max: 254 })
+      .withMessage('Email address is too long.'),
+    body('subject')
+      .trim()
+      .isLength({ min: 5, max: 200 })
+      .withMessage('Subject must be between 5 and 200 characters.')
+      .matches(/^[a-zA-Z0-9\s\-\.\,\!\?]+$/)
+      .withMessage('Subject contains invalid characters.'),
+    body('message')
+      .trim()
+      .isLength({ min: 10, max: 2000 })
+      .withMessage('Message must be between 10 and 2000 characters.')
+  ],
+  (req, res) => {
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+      return res.status(400).json({
+        success: false,
+        message: errors.array()[0].msg
+      });
+    }
 
-  // Basic validation
-  if (!name || !email || !subject || !message) {
-    return res.status(400).json({
-      success: false,
-      message: 'Please fill in all required fields.'
+    const { name, email, subject, message } = req.body;
+    
+    // Sanitize all inputs
+    const sanitizedName = sanitizeInput(name);
+    const sanitizedEmail = sanitizeInput(email);
+    const sanitizedSubject = sanitizeInput(subject);
+    const sanitizedMessage = sanitizeInput(message);
+
+    // In a real application, you would:
+    // 1. Save to database
+    // 2. Send email notification to admin
+    // 3. Send confirmation email to user
+    // 4. Integrate with email service
+
+    console.log(`Contact form submission:
+      Name: ${sanitizedName}
+      Email: ${sanitizedEmail}
+      Subject: ${sanitizedSubject}
+      Message: ${sanitizedMessage}
+    `);
+
+    // For now, just return success
+    res.json({
+      success: true,
+      message: `Thank you for your message, ${sanitizedName}! I will get back to you as soon as possible.`
     });
   }
-
-  if (!email.includes('@')) {
-    return res.status(400).json({
-      success: false,
-      message: 'Please enter a valid email address.'
-    });
-  }
-
-  // In a real application, you would:
-  // 1. Validate inputs more thoroughly
-  // 2. Save to database
-  // 3. Send email notification to admin
-  // 4. Send confirmation email to user
-  // 5. integrate with email service
-
-  console.log(`Contact form submission:
-    Name: ${name}
-    Email: ${email}
-    Subject: ${subject}
-    Message: ${message}
-  `);
-
-  // For now, just return success
-  res.json({
-    success: true,
-    message: `Thank you for your message, ${name}! I will get back to you as soon as possible.`
-  });
-});
+);
 
 // Catch-all for any unmatched requests - send 404 without logging ENOENT errors
 app.use((req, res) => {

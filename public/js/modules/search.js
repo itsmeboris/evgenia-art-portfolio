@@ -676,9 +676,21 @@ class SearchManager {
         }
     }
 
+    // Sanitize search input to prevent XSS
+    sanitizeSearchInput(input) {
+        if (typeof input !== 'string') return '';
+        return input
+            .replace(/[<>]/g, '') // Remove < and > to prevent basic XSS
+            .replace(/javascript:/gi, '') // Remove javascript: protocol
+            .replace(/on\w+=/gi, '') // Remove event handlers like onclick=
+            .replace(/['"]/g, '') // Remove quotes
+            .trim();
+    }
+
     // Perform the actual search
     performSearch() {
-        const query = this.searchInput?.value.trim().toLowerCase();
+        const rawQuery = this.searchInput?.value || '';
+        const query = this.sanitizeSearchInput(rawQuery).toLowerCase();
 
         if (!query || query.length < this.minSearchLength) {
             this.clearResults();

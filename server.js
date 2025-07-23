@@ -6,12 +6,16 @@ const bcrypt = require('bcrypt');
 const helmet = require('helmet');
 const rateLimit = require('express-rate-limit');
 const { body, validationResult } = require('express-validator');
+const session = require('express-session');
+const FileStore = require('session-file-store')(session);
+const { v4: uuidv4 } = require('uuid');
 const app = express();
 const port = process.env.PORT || 3000;
 
 // Admin authentication configuration from environment variables
 const ADMIN_USERNAME = process.env.ADMIN_USERNAME;
 const ADMIN_PASSWORD_HASH = process.env.ADMIN_PASSWORD_HASH;
+const SESSION_SECRET = process.env.SESSION_SECRET || uuidv4();
 
 // Validate that required environment variables are set
 if (!ADMIN_USERNAME || !ADMIN_PASSWORD_HASH) {
@@ -19,15 +23,22 @@ if (!ADMIN_USERNAME || !ADMIN_PASSWORD_HASH) {
     process.exit(1);
 }
 
+// Warn if using generated session secret (not recommended for production)
+if (!process.env.SESSION_SECRET) {
+    console.warn('⚠️  WARNING: SESSION_SECRET not set in .env file. Using generated secret (not recommended for production).');
+}
+
 // Security middleware
 app.use(helmet({
     contentSecurityPolicy: {
         directives: {
             defaultSrc: ["'self'"],
-            scriptSrc: ["'self'", "'unsafe-inline'"],
-            styleSrc: ["'self'", "'unsafe-inline'"],
+            scriptSrc: ["'self'", "'unsafe-inline'", "'unsafe-eval'"],
+            scriptSrcAttr: ["'unsafe-inline'", "'unsafe-hashes'"],
+            styleSrc: ["'self'", "'unsafe-inline'", "https://fonts.googleapis.com", "https://cdnjs.cloudflare.com"],
+            styleSrcElem: ["'self'", "'unsafe-inline'", "https://fonts.googleapis.com", "https://cdnjs.cloudflare.com"],
             imgSrc: ["'self'", "data:", "https:"],
-            fontSrc: ["'self'"],
+            fontSrc: ["'self'", "https://fonts.gstatic.com", "https://cdnjs.cloudflare.com"],
             connectSrc: ["'self'"],
             frameSrc: ["'none'"],
             objectSrc: ["'none'"],
@@ -66,18 +77,37 @@ function sanitizeInput(input) {
         .trim();
 }
 
+// Session configuration
+app.use(session({
+    secret: SESSION_SECRET,
+    genid: () => uuidv4(), // Use UUID for session IDs
+    resave: false,
+    saveUninitialized: false,
+    store: new FileStore({
+        path: './sessions', // Directory to store session files
+        ttl: 7200, // 2 hours in seconds
+        retries: 5,
+        factor: 1,
+        minTimeout: 50,
+        maxTimeout: 100,
+        secret: SESSION_SECRET
+    }),
+    cookie: {
+        secure: process.env.NODE_ENV === 'production', // HTTPS only in production
+        httpOnly: true, // Prevent XSS
+        maxAge: 1000 * 60 * 60 * 2, // 2 hours
+        sameSite: 'strict' // CSRF protection
+    },
+    name: 'evgenia.sid' // Custom session name
+}));
+
 // Middleware to parse JSON and URL-encoded data
 app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ extended: true, limit: '10mb' }));
 
-// Simple session storage (in production, use proper session management)
-const sessions = new Map();
-
 // Authentication middleware
 function requireAuth(req, res, next) {
-  const sessionId = req.headers.cookie?.split('sessionId=')[1]?.split(';')[0];
-
-  if (sessionId && sessions.has(sessionId)) {
+  if (req.session && req.session.user && req.session.user.authenticated) {
     next();
   } else {
     res.redirect('/admin/login');
@@ -91,11 +121,29 @@ app.post('/admin/login', loginLimiter, async (req, res) => {
   try {
     // Check username and verify password with bcrypt
     if (username === ADMIN_USERNAME && await bcrypt.compare(password, ADMIN_PASSWORD_HASH)) {
-      const sessionId = Date.now().toString() + Math.random().toString(36);
-      sessions.set(sessionId, { username, timestamp: Date.now() });
+      // Regenerate session ID to prevent session fixation
+      req.session.regenerate((err) => {
+        if (err) {
+          console.error('Session regeneration error:', err);
+          return res.redirect('/admin/login?error=server');
+        }
 
-      res.setHeader('Set-Cookie', `sessionId=${sessionId}; Path=/; Max-Age=3600`);
-      res.redirect('/admin/');
+        // Set session data
+        req.session.user = {
+          username: username,
+          authenticated: true,
+          loginTime: new Date().toISOString()
+        };
+
+        // Save session
+        req.session.save((err) => {
+          if (err) {
+            console.error('Session save error:', err);
+            return res.redirect('/admin/login?error=server');
+          }
+          res.redirect('/admin/');
+        });
+      });
     } else {
       console.log(`Failed login attempt for username: ${username}`);
       res.redirect('/admin/login?error=invalid');
@@ -108,20 +156,19 @@ app.post('/admin/login', loginLimiter, async (req, res) => {
 
 // Admin logout endpoint
 app.post('/admin/logout', (req, res) => {
-  const sessionId = req.headers.cookie?.split('sessionId=')[1]?.split(';')[0];
-  if (sessionId) {
-    sessions.delete(sessionId);
-  }
-  res.setHeader('Set-Cookie', 'sessionId=; Path=/; Max-Age=0');
-  res.redirect('/admin/login');
+  req.session.destroy((err) => {
+    if (err) {
+      console.error('Session destruction error:', err);
+    }
+    res.clearCookie('evgenia.sid');
+    res.redirect('/admin/login');
+  });
 });
 
 // Login page (no authentication required) - clean URL
 app.get('/admin/login', (req, res) => {
   // Check if user is already logged in
-  const sessionId = req.headers.cookie?.split('sessionId=')[1]?.split(';')[0];
-
-  if (sessionId && sessions.has(sessionId)) {
+  if (req.session && req.session.user && req.session.user.authenticated) {
     // User is already logged in, redirect to admin panel
     res.redirect('/admin/');
   } else {

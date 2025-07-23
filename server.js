@@ -1,12 +1,20 @@
 // Simple Express server to serve the website locally
+require('dotenv').config();
 const express = require('express');
 const path = require('path');
+const bcrypt = require('bcrypt');
 const app = express();
-const port = 3000;
+const port = process.env.PORT || 3000;
 
-// Admin authentication configuration
-const ADMIN_USERNAME = 'admin';
-const ADMIN_PASSWORD = 'artadmin2024'; // Change this to a secure password
+// Admin authentication configuration from environment variables
+const ADMIN_USERNAME = process.env.ADMIN_USERNAME;
+const ADMIN_PASSWORD_HASH = process.env.ADMIN_PASSWORD_HASH;
+
+// Validate that required environment variables are set
+if (!ADMIN_USERNAME || !ADMIN_PASSWORD_HASH) {
+    console.error('❌ ERROR: ADMIN_USERNAME and ADMIN_PASSWORD_HASH must be set in .env file');
+    process.exit(1);
+}
 
 // Middleware to parse JSON and URL-encoded data
 app.use(express.json());
@@ -27,17 +35,24 @@ function requireAuth(req, res, next) {
 }
 
 // Admin login endpoint
-app.post('/admin/login', (req, res) => {
+app.post('/admin/login', async (req, res) => {
   const { username, password } = req.body;
 
-  if (username === ADMIN_USERNAME && password === ADMIN_PASSWORD) {
-    const sessionId = Date.now().toString() + Math.random().toString(36);
-    sessions.set(sessionId, { username, timestamp: Date.now() });
+  try {
+    // Check username and verify password with bcrypt
+    if (username === ADMIN_USERNAME && await bcrypt.compare(password, ADMIN_PASSWORD_HASH)) {
+      const sessionId = Date.now().toString() + Math.random().toString(36);
+      sessions.set(sessionId, { username, timestamp: Date.now() });
 
-    res.setHeader('Set-Cookie', `sessionId=${sessionId}; Path=/; Max-Age=3600`);
-    res.redirect('/admin/');
-  } else {
-    res.redirect('/admin/login?error=invalid');
+      res.setHeader('Set-Cookie', `sessionId=${sessionId}; Path=/; Max-Age=3600`);
+      res.redirect('/admin/');
+    } else {
+      console.log(`Failed login attempt for username: ${username}`);
+      res.redirect('/admin/login?error=invalid');
+    }
+  } catch (error) {
+    console.error('Login error:', error);
+    res.redirect('/admin/login?error=server');
   }
 });
 

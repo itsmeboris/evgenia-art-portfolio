@@ -1,123 +1,130 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Page Not Found - Evgenia Portnov</title>
-    <link rel="stylesheet" href="public/css/style.css">
-    <link rel="stylesheet" href="public/css/additional-styles.css">
-    <link rel="icon" href="public/assets/favicon/favicon.ico" type="image/x-icon">
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@300;400;500;600;700&family=Montserrat:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="public/css/style.css" />
+    <link rel="stylesheet" href="public/css/additional-styles.css" />
+    <link rel="icon" href="public/assets/favicon/favicon.ico" type="image/x-icon" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@300;400;500;600;700&family=Montserrat:wght@300;400;500;600&display=swap"
+      rel="stylesheet"
+    />
     <style>
-        .error-container {
-            min-height: 80vh;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            padding: 2rem;
-            text-align: center;
-        }
-        
-        .error-title {
-            font-size: 3rem;
-            margin-bottom: 1rem;
-        }
-        
-        .error-message {
-            font-size: 1.2rem;
-            margin-bottom: 2rem;
-            max-width: 600px;
-        }
-        
-        .error-btn {
-            margin-top: 1rem;
-        }
+      .error-container {
+        min-height: 80vh;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        padding: 2rem;
+        text-align: center;
+      }
+
+      .error-title {
+        font-size: 3rem;
+        margin-bottom: 1rem;
+      }
+
+      .error-message {
+        font-size: 1.2rem;
+        margin-bottom: 2rem;
+        max-width: 600px;
+      }
+
+      .error-btn {
+        margin-top: 1rem;
+      }
     </style>
-</head>
-<body>
+  </head>
+  <body>
     <!-- Header -->
     <header>
-        <div class="container">
-            <nav>
-                <div class="logo">
-                    <a href="/">
-                        <img src="public/assets/logo.jpg" alt="Evgenia Portnov Logo" class="header-logo">
-                    </a>
-                    <a href="/" class="logo-name">Evgenia Portnov</a>
-                </div>
-                <div class="nav-links">
-                    <ul>
-                        <li><a href="/">Home</a></li>
-                        <li><a href="/gallery">Gallery</a></li>
-                        <li><a href="/about">About</a></li>
-                        <li><a href="/contact">Contact</a></li>
-                    </ul>
-                </div>
-                <div class="shop-icons">
-                    <a href="#" class="cart-icon"><i class="fas fa-shopping-cart"></i><span class="cart-count">0</span></a>
-                    <div class="mobile-menu-toggle">
-                        <i class="fas fa-bars"></i>
-                    </div>
-                </div>
-            </nav>
-        </div>
+      <div class="container">
+        <nav>
+          <div class="logo">
+            <a href="/">
+              <img src="public/assets/logo.jpg" alt="Evgenia Portnov Logo" class="header-logo" />
+            </a>
+            <a href="/" class="logo-name">Evgenia Portnov</a>
+          </div>
+          <div class="nav-links">
+            <ul>
+              <li><a href="/">Home</a></li>
+              <li><a href="/gallery">Gallery</a></li>
+              <li><a href="/about">About</a></li>
+              <li><a href="/contact">Contact</a></li>
+            </ul>
+          </div>
+          <div class="shop-icons">
+            <a href="#" class="cart-icon"
+              ><i class="fas fa-shopping-cart"></i><span class="cart-count">0</span></a
+            >
+            <div class="mobile-menu-toggle">
+              <i class="fas fa-bars"></i>
+            </div>
+          </div>
+        </nav>
+      </div>
     </header>
 
     <!-- 404 Error Content -->
     <section class="error-container">
-        <h1 class="error-title">Page Not Found</h1>
-        <p class="error-message">Sorry, the page you're looking for doesn't exist or has been moved.</p>
-        <div class="error-buttons">
-            <a href="/" class="btn primary-btn error-btn">Go to Homepage</a>
-            <a href="/gallery" class="btn secondary-btn error-btn">View Gallery</a>
-        </div>
+      <h1 class="error-title">Page Not Found</h1>
+      <p class="error-message">
+        Sorry, the page you're looking for doesn't exist or has been moved.
+      </p>
+      <div class="error-buttons">
+        <a href="/" class="btn primary-btn error-btn">Go to Homepage</a>
+        <a href="/gallery" class="btn secondary-btn error-btn">View Gallery</a>
+      </div>
     </section>
 
     <!-- Footer -->
     <footer>
-        <div class="container">
-            <div class="footer-content">
-                <div class="footer-logo">
-                    <img src="public/assets/logo.jpg" alt="Evgenia Portnov Logo" class="footer-logo-img">
-                    <p>Artist & Creator</p>
-                </div>
-                <div class="footer-links">
-                    <div class="footer-nav">
-                        <h4>Navigation</h4>
-                        <ul>
-                            <li><a href="/">Home</a></li>
-                            <li><a href="/gallery">Gallery</a></li>
-                            <li><a href="/about">About</a></li>
-                            <li><a href="/contact">Contact</a></li>
-                        </ul>
-                    </div>
-                    <div class="footer-collections">
-                        <h4>Collections</h4>
-                        <ul class="footer-collection-links">
-                            <!-- Collection links will be dynamically populated -->
-                        </ul>
-                    </div>
-                    <div class="footer-social">
-                        <h4>Connect</h4>
-                        <div class="social-icons">
-                            <a href="#" target="_blank"><i class="fab fa-instagram"></i></a>
-                            <a href="#" target="_blank"><i class="fab fa-facebook"></i></a>
-                            <a href="#" target="_blank"><i class="fab fa-pinterest"></i></a>
-                        </div>
-                    </div>
-                </div>
+      <div class="container">
+        <div class="footer-content">
+          <div class="footer-logo">
+            <img src="public/assets/logo.jpg" alt="Evgenia Portnov Logo" class="footer-logo-img" />
+            <p>Artist & Creator</p>
+          </div>
+          <div class="footer-links">
+            <div class="footer-nav">
+              <h4>Navigation</h4>
+              <ul>
+                <li><a href="/">Home</a></li>
+                <li><a href="/gallery">Gallery</a></li>
+                <li><a href="/about">About</a></li>
+                <li><a href="/contact">Contact</a></li>
+              </ul>
             </div>
-            <div class="footer-bottom">
-                <p>&copy; 2025 Evgenia Portnov. All rights reserved.</p>
+            <div class="footer-collections">
+              <h4>Collections</h4>
+              <ul class="footer-collection-links">
+                <!-- Collection links will be dynamically populated -->
+              </ul>
             </div>
+            <div class="footer-social">
+              <h4>Connect</h4>
+              <div class="social-icons">
+                <a href="#" target="_blank"><i class="fab fa-instagram"></i></a>
+                <a href="#" target="_blank"><i class="fab fa-facebook"></i></a>
+                <a href="#" target="_blank"><i class="fab fa-pinterest"></i></a>
+              </div>
+            </div>
+          </div>
         </div>
+        <div class="footer-bottom">
+          <p>&copy; 2025 Evgenia Portnov. All rights reserved.</p>
+        </div>
+      </div>
     </footer>
 
     <script src="public/js/main.js"></script>
     <!-- Artwork Loader Script -->
     <script src="public/js/artwork-loader.js"></script>
-</body>
-</html> 
+  </body>
+</html>

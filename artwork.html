@@ -1,242 +1,255 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Artwork | Evgenia Portnov</title>
-    <link rel="stylesheet" href="/public/css/style.css">
-    <link rel="stylesheet" href="/public/css/additional-styles.css">
-    <link rel="stylesheet" href="/public/css/search-modal.css">
-    <link rel="icon" href="/public/assets/favicon/favicon.ico" type="image/x-icon">
-    <link rel="apple-touch-icon" href="/public/assets/favicon/apple-touch-icon.png">
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@300;400;500;600;700&family=Montserrat:wght@300;400;500;600&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
-</head>
-<body>
+    <link rel="stylesheet" href="/public/css/style.css" />
+    <link rel="stylesheet" href="/public/css/additional-styles.css" />
+    <link rel="stylesheet" href="/public/css/search-modal.css" />
+    <link rel="icon" href="/public/assets/favicon/favicon.ico" type="image/x-icon" />
+    <link rel="apple-touch-icon" href="/public/assets/favicon/apple-touch-icon.png" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@300;400;500;600;700&family=Montserrat:wght@300;400;500;600&display=swap"
+      rel="stylesheet"
+    />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css"
+    />
+  </head>
+  <body>
     <!-- Header -->
     <header>
-        <div class="container">
-            <nav>
-                <div class="logo">
-                    <a href="/">
-                        <img src="/public/assets/logo.jpg" alt="Evgenia Portnov Logo" class="header-logo">
-                    </a>
-                    <a href="/" class="logo-name">Evgenia Portnov</a>
-                </div>
-                <div class="nav-links">
-                    <ul>
-                        <li><a href="/">Home</a></li>
-                        <li><a href="/gallery" class="active">Gallery</a></li>
-                        <li><a href="/about">About</a></li>
-                        <li><a href="/contact">Contact</a></li>
-                    </ul>
-                </div>
-                <div class="shop-icons">
-                    <a href="#" class="search-icon"><i class="fas fa-search"></i></a>
-                    <a href="#" class="cart-icon"><i class="fas fa-shopping-cart"></i><span class="cart-count">0</span></a>
-                    <div class="mobile-menu-toggle">
-                        <i class="fas fa-bars"></i>
-                    </div>
-                </div>
-            </nav>
-        </div>
+      <div class="container">
+        <nav>
+          <div class="logo">
+            <a href="/">
+              <img src="/public/assets/logo.jpg" alt="Evgenia Portnov Logo" class="header-logo" />
+            </a>
+            <a href="/" class="logo-name">Evgenia Portnov</a>
+          </div>
+          <div class="nav-links">
+            <ul>
+              <li><a href="/">Home</a></li>
+              <li><a href="/gallery" class="active">Gallery</a></li>
+              <li><a href="/about">About</a></li>
+              <li><a href="/contact">Contact</a></li>
+            </ul>
+          </div>
+          <div class="shop-icons">
+            <a href="#" class="search-icon"><i class="fas fa-search"></i></a>
+            <a href="#" class="cart-icon"
+              ><i class="fas fa-shopping-cart"></i><span class="cart-count">0</span></a
+            >
+            <div class="mobile-menu-toggle">
+              <i class="fas fa-bars"></i>
+            </div>
+          </div>
+        </nav>
+      </div>
     </header>
 
     <!-- Artwork Detail Section -->
     <section class="artwork-detail-container">
-        <div class="container">
-            <div id="artwork-detail-content">
-                <!-- This will be populated with the artwork details -->
-                <div class="artwork-not-found">
-                    <h2>Loading Artwork...</h2>
-                    <p>Please wait while we retrieve the artwork details.</p>
-                </div>
-            </div>
-
-            <!-- Related Artworks -->
-            <div class="related-artworks">
-                <h2>You Might Also Like</h2>
-                <div class="related-grid" id="related-artworks">
-                    <!-- Related artwork will be loaded here -->
-                </div>
-            </div>
+      <div class="container">
+        <div id="artwork-detail-content">
+          <!-- This will be populated with the artwork details -->
+          <div class="artwork-not-found">
+            <h2>Loading Artwork...</h2>
+            <p>Please wait while we retrieve the artwork details.</p>
+          </div>
         </div>
+
+        <!-- Related Artworks -->
+        <div class="related-artworks">
+          <h2>You Might Also Like</h2>
+          <div class="related-grid" id="related-artworks">
+            <!-- Related artwork will be loaded here -->
+          </div>
+        </div>
+      </div>
     </section>
 
     <!-- Newsletter Section -->
     <section class="newsletter">
-        <div class="container">
-            <h2>Stay Updated</h2>
-            <p>Join my newsletter to receive updates on new artwork, exhibitions, and special offers.</p>
-            <form class="newsletter-form">
-                <input type="email" placeholder="Your email address" required>
-                <button type="submit" class="btn primary-btn">Subscribe</button>
-            </form>
-        </div>
+      <div class="container">
+        <h2>Stay Updated</h2>
+        <p>
+          Join my newsletter to receive updates on new artwork, exhibitions, and special offers.
+        </p>
+        <form class="newsletter-form">
+          <input type="email" placeholder="Your email address" required />
+          <button type="submit" class="btn primary-btn">Subscribe</button>
+        </form>
+      </div>
     </section>
 
     <!-- Footer -->
     <footer>
-        <div class="container">
-            <div class="footer-content">
-                <div class="footer-logo">
-                    <img src="/public/assets/logo.jpg" alt="Evgenia Portnov Logo" class="footer-logo-img">
-                    <p>Artist & Creator</p>
-                </div>
-                <div class="footer-links">
-                    <div class="footer-nav">
-                        <h4>Navigation</h4>
-                        <ul>
-                            <li><a href="/">Home</a></li>
-                            <li><a href="/gallery">Gallery</a></li>
-                            <li><a href="/about">About</a></li>
-                            <li><a href="/contact">Contact</a></li>
-                        </ul>
-                    </div>
-                    <div class="footer-collections">
-                        <h4>Collections</h4>
-                        <ul class="footer-collection-links">
-                            <!-- Collection links will be dynamically populated -->
-                        </ul>
-                    </div>
-                    <div class="footer-social">
-                        <h4>Connect</h4>
-                        <div class="social-icons">
-                            <a href="#" target="_blank"><i class="fab fa-instagram"></i></a>
-                            <a href="#" target="_blank"><i class="fab fa-facebook"></i></a>
-                            <a href="#" target="_blank"><i class="fab fa-pinterest"></i></a>
-                        </div>
-                    </div>
-                </div>
+      <div class="container">
+        <div class="footer-content">
+          <div class="footer-logo">
+            <img src="/public/assets/logo.jpg" alt="Evgenia Portnov Logo" class="footer-logo-img" />
+            <p>Artist & Creator</p>
+          </div>
+          <div class="footer-links">
+            <div class="footer-nav">
+              <h4>Navigation</h4>
+              <ul>
+                <li><a href="/">Home</a></li>
+                <li><a href="/gallery">Gallery</a></li>
+                <li><a href="/about">About</a></li>
+                <li><a href="/contact">Contact</a></li>
+              </ul>
             </div>
-            <div class="footer-bottom">
-                <p>&copy; 2025 Evgenia Portnov. All rights reserved.</p>
+            <div class="footer-collections">
+              <h4>Collections</h4>
+              <ul class="footer-collection-links">
+                <!-- Collection links will be dynamically populated -->
+              </ul>
             </div>
+            <div class="footer-social">
+              <h4>Connect</h4>
+              <div class="social-icons">
+                <a href="#" target="_blank"><i class="fab fa-instagram"></i></a>
+                <a href="#" target="_blank"><i class="fab fa-facebook"></i></a>
+                <a href="#" target="_blank"><i class="fab fa-pinterest"></i></a>
+              </div>
+            </div>
+          </div>
         </div>
+        <div class="footer-bottom">
+          <p>&copy; 2025 Evgenia Portnov. All rights reserved.</p>
+        </div>
+      </div>
     </footer>
 
     <!-- Cart Modal Overlay -->
     <div class="cart-modal-overlay">
-        <div class="cart-modal">
-            <div class="cart-header">
-                <h2>Your Cart</h2>
-                <button class="cart-close"><i class="fas fa-times"></i></button>
-            </div>
-            <div class="cart-items-container">
-                <!-- Cart items will be populated here -->
-            </div>
-            <div class="cart-footer">
-                <div class="cart-total">
-                    <span>Total:</span>
-                    <span class="cart-total-amount">₪0.00</span>
-                </div>
-                <div class="cart-actions">
-                    <button class="btn outline-btn cart-empty">Empty Cart</button>
-                    <button class="btn primary-btn cart-checkout">Checkout</button>
-                </div>
-            </div>
+      <div class="cart-modal">
+        <div class="cart-header">
+          <h2>Your Cart</h2>
+          <button class="cart-close"><i class="fas fa-times"></i></button>
         </div>
+        <div class="cart-items-container">
+          <!-- Cart items will be populated here -->
+        </div>
+        <div class="cart-footer">
+          <div class="cart-total">
+            <span>Total:</span>
+            <span class="cart-total-amount">₪0.00</span>
+          </div>
+          <div class="cart-actions">
+            <button class="btn outline-btn cart-empty">Empty Cart</button>
+            <button class="btn primary-btn cart-checkout">Checkout</button>
+          </div>
+        </div>
+      </div>
     </div>
 
     <!-- Webpack Bundles - Artwork specific bundle -->
-    <script src="/public/dist/js/common.c6403be95ee3501dee54.min.js"></script>
+    <script src="/public/dist/js/common.ed6ef3bc376fde6f442a.min.js"></script>
     <script src="/public/dist/js/lightbox.bf4274a9974dfb151230.min.js"></script>
     <script src="/public/dist/js/search.c7a336f5491da5aae2e0.min.js"></script>
     <script src="/public/dist/js/artwork.17208fc604edf2f06045.min.js"></script>
 
     <!-- Artwork Detail Script -->
     <script>
-        document.addEventListener('DOMContentLoaded', function() {
-            // Initialize search and UI modules
-            initializeModules();
+      document.addEventListener('DOMContentLoaded', function () {
+        // Initialize search and UI modules
+        initializeModules();
 
-            // Simple initialization - no complex module waiting
-            window.addEventListener('artwork-data-loaded', initArtworkDetail);
+        // Simple initialization - no complex module waiting
+        window.addEventListener('artwork-data-loaded', initArtworkDetail);
 
-            // If artwork data is already loaded, initialize right away
-            if (window.artworkData) {
-                initArtworkDetail();
+        // If artwork data is already loaded, initialize right away
+        if (window.artworkData) {
+          initArtworkDetail();
+        }
+      });
+
+      function initializeModules() {
+        try {
+          // Initialize search manager
+          if (window.SearchManager) {
+            window.searchManager = new SearchManager();
+            window.searchManager.init();
+          }
+
+          // Initialize UI manager
+          if (window.UIManager) {
+            window.uiManager = new UIManager();
+            window.uiManager.init();
+          }
+        } catch (error) {
+          console.error('Error initializing modules:', error);
+        }
+      }
+
+      function initArtworkDetail() {
+        // Get the artwork ID from the URL
+        const pathParts = window.location.pathname.split('/');
+        const artworkId = pathParts[pathParts.length - 1];
+
+        // Find the artwork in the data
+        let artwork = null;
+        let artworksData = window.artworkData;
+
+        if (!artworksData || !artworksData.artworks) {
+          // Try to get from localStorage as fallback
+          try {
+            const savedData = localStorage.getItem('evgenia-artwork-data');
+            if (savedData) {
+              artworksData = JSON.parse(savedData);
             }
-        });
-
-        function initializeModules() {
-            try {
-                // Initialize search manager
-                if (window.SearchManager) {
-                    window.searchManager = new SearchManager();
-                    window.searchManager.init();
-                }
-
-                // Initialize UI manager
-                if (window.UIManager) {
-                    window.uiManager = new UIManager();
-                    window.uiManager.init();
-                }
-            } catch (error) {
-                console.error('Error initializing modules:', error);
-            }
+          } catch (e) {
+            console.error('Error retrieving artwork data:', e);
+          }
         }
 
-        function initArtworkDetail() {
-            // Get the artwork ID from the URL
-            const pathParts = window.location.pathname.split('/');
-            const artworkId = pathParts[pathParts.length - 1];
+        if (artworksData && artworksData.artworks) {
+          // Find by ID first
+          artwork = artworksData.artworks.find(a => a.id === artworkId);
 
-            // Find the artwork in the data
-            let artwork = null;
-            let artworksData = window.artworkData;
+          // If not found by ID, try with generated ID
+          if (!artwork) {
+            artwork = artworksData.artworks.find(a => {
+              const generatedId = a.title
+                .toLowerCase()
+                .replace(/\s+/g, '-')
+                .replace(/[^a-z0-9-]/g, '');
+              return generatedId === artworkId;
+            });
+          }
 
-            if (!artworksData || !artworksData.artworks) {
-                // Try to get from localStorage as fallback
-                try {
-                    const savedData = localStorage.getItem('evgenia-artwork-data');
-                    if (savedData) {
-                        artworksData = JSON.parse(savedData);
-                    }
-                } catch (e) {
-                    console.error('Error retrieving artwork data:', e);
-                }
-            }
-
-            if (artworksData && artworksData.artworks) {
-                // Find by ID first
-                artwork = artworksData.artworks.find(a => a.id === artworkId);
-
-                // If not found by ID, try with generated ID
-                if (!artwork) {
-                    artwork = artworksData.artworks.find(a => {
-                        const generatedId = a.title.toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, '');
-                        return generatedId === artworkId;
-                    });
-                }
-
-                // If artwork is found, render it
-                if (artwork) {
-                    renderArtworkDetail(artwork, artworksData.settings);
-                    renderRelatedArtworks(artwork, artworksData.artworks, artworksData.settings);
-                    document.title = `${artwork.title} | Evgenia Portnov`;
-                } else {
-                    showArtworkNotFound();
-                }
-            } else {
-                showArtworkNotFound();
-            }
+          // If artwork is found, render it
+          if (artwork) {
+            renderArtworkDetail(artwork, artworksData.settings);
+            renderRelatedArtworks(artwork, artworksData.artworks, artworksData.settings);
+            document.title = `${artwork.title} | Evgenia Portnov`;
+          } else {
+            showArtworkNotFound();
+          }
+        } else {
+          showArtworkNotFound();
         }
+      }
 
-        function renderArtworkDetail(artwork, settings) {
-            const detailContainer = document.getElementById('artwork-detail-content');
-            const currency = settings && settings.currency ? settings.currency : '₪';
+      function renderArtworkDetail(artwork, settings) {
+        const detailContainer = document.getElementById('artwork-detail-content');
+        const currency = settings && settings.currency ? settings.currency : '₪';
 
-            // Format the price
-            const formattedPrice = artwork.price ? `${currency}${artwork.price}` : 'Price on request';
+        // Format the price
+        const formattedPrice = artwork.price ? `${currency}${artwork.price}` : 'Price on request';
 
-            // Ensure image paths are absolute
-            const imagePath = artwork.image.startsWith('/') ? artwork.image : `/${artwork.image}`;
+        // Ensure image paths are absolute
+        const imagePath = artwork.image.startsWith('/') ? artwork.image : `/${artwork.image}`;
 
-            // Create the detail HTML
-            const detailHTML = `
+        // Create the detail HTML
+        const detailHTML = `
                 <div class="artwork-detail">
                     <div class="artwork-image-container">
                         <img src="${imagePath}" alt="${artwork.title}" class="artwork-detail-image"
@@ -266,34 +279,36 @@
                 </div>
             `;
 
-            detailContainer.innerHTML = detailHTML;
+        detailContainer.innerHTML = detailHTML;
+      }
+
+      function renderRelatedArtworks(currentArtwork, allArtworks, settings) {
+        const relatedContainer = document.getElementById('related-artworks');
+        const currency = settings && settings.currency ? settings.currency : '₪';
+
+        // Find related artworks (same category)
+        let relatedArtworks = allArtworks
+          .filter(
+            artwork =>
+              artwork.category === currentArtwork.category && artwork.id !== currentArtwork.id
+          )
+          .slice(0, 3); // Limit to 3
+
+        // If no related artworks, hide the section
+        if (relatedArtworks.length === 0) {
+          document.querySelector('.related-artworks').style.display = 'none';
+          return;
         }
 
-        function renderRelatedArtworks(currentArtwork, allArtworks, settings) {
-            const relatedContainer = document.getElementById('related-artworks');
-            const currency = settings && settings.currency ? settings.currency : '₪';
+        // Clear the container and add related artworks
+        relatedContainer.innerHTML = '';
+        relatedArtworks.forEach(artwork => {
+          const formattedPrice = artwork.price ? `${currency}${artwork.price}` : 'Price on request';
+          const imagePath = artwork.image.startsWith('/') ? artwork.image : `/${artwork.image}`;
 
-            // Find related artworks (same category)
-            let relatedArtworks = allArtworks.filter(artwork =>
-                artwork.category === currentArtwork.category &&
-                artwork.id !== currentArtwork.id
-            ).slice(0, 3); // Limit to 3
-
-            // If no related artworks, hide the section
-            if (relatedArtworks.length === 0) {
-                document.querySelector('.related-artworks').style.display = 'none';
-                return;
-            }
-
-            // Clear the container and add related artworks
-            relatedContainer.innerHTML = '';
-            relatedArtworks.forEach(artwork => {
-                const formattedPrice = artwork.price ? `${currency}${artwork.price}` : 'Price on request';
-                const imagePath = artwork.image.startsWith('/') ? artwork.image : `/${artwork.image}`;
-
-                const artworkElement = document.createElement('div');
-                artworkElement.className = 'artwork-item';
-                artworkElement.innerHTML = `
+          const artworkElement = document.createElement('div');
+          artworkElement.className = 'artwork-item';
+          artworkElement.innerHTML = `
                     <a href="/artwork/${artwork.id}" class="artwork-image">
                         <img src="${imagePath}" alt="${artwork.title}">
                     </a>
@@ -303,234 +318,236 @@
                         <a href="/artwork/${artwork.id}" class="btn outline-btn">View Details</a>
                     </div>
                 `;
-                relatedContainer.appendChild(artworkElement);
-            });
-        }
+          relatedContainer.appendChild(artworkElement);
+        });
+      }
 
-        function showArtworkNotFound() {
-            const detailContainer = document.getElementById('artwork-detail-content');
-            detailContainer.innerHTML = `
+      function showArtworkNotFound() {
+        const detailContainer = document.getElementById('artwork-detail-content');
+        detailContainer.innerHTML = `
                 <div class="artwork-not-found">
                     <h2>Artwork Not Found</h2>
                     <p>We couldn't find the artwork you're looking for.</p>
                     <a href="/gallery" class="btn primary-btn">Browse Gallery</a>
                 </div>
             `;
-            document.querySelector('.related-artworks').style.display = 'none';
-        }
+        document.querySelector('.related-artworks').style.display = 'none';
+      }
 
-        // Simple cart function
-        function addToCartFromDetail(artworkId) {
-            if (window.cartManager && window.cartManager.addToCart) {
-                // Get artwork data
-                let artworksData = window.artworkData;
-                if (!artworksData) {
-                    try {
-                        const savedData = localStorage.getItem('evgenia-artwork-data');
-                        if (savedData) artworksData = JSON.parse(savedData);
-                    } catch (e) { return; }
-                }
-
-                const artwork = artworksData.artworks.find(a => a.id === artworkId);
-                if (!artwork) return;
-
-                const currency = artworksData.settings?.currency || '₪';
-                const item = {
-                    id: artwork.id,
-                    title: artwork.title,
-                    price: artwork.price ? `${currency}${artwork.price}` : `${currency}0`,
-                    image: artwork.image.startsWith('/') ? artwork.image : `/${artwork.image}`,
-                    dimensions: artwork.dimensions || 'Dimensions not specified'
-                };
-
-                window.cartManager.addToCart(item);
-
-                // Simple feedback
-                const btn = document.querySelector('.add-to-cart-btn');
-                if (btn) {
-                    const original = btn.textContent;
-                    btn.textContent = 'Added!';
-                    btn.disabled = true;
-                    setTimeout(() => {
-                        btn.textContent = original;
-                        btn.disabled = false;
-                    }, 1500);
-                }
+      // Simple cart function
+      function addToCartFromDetail(artworkId) {
+        if (window.cartManager && window.cartManager.addToCart) {
+          // Get artwork data
+          let artworksData = window.artworkData;
+          if (!artworksData) {
+            try {
+              const savedData = localStorage.getItem('evgenia-artwork-data');
+              if (savedData) artworksData = JSON.parse(savedData);
+            } catch (e) {
+              return;
             }
-        }
+          }
 
-        // Simple lightbox function
-        function openLightbox(src, alt) {
-            if (window.lightboxManager && window.lightboxManager.openImage) {
-                window.lightboxManager.openImage(src, alt);
-            }
+          const artwork = artworksData.artworks.find(a => a.id === artworkId);
+          if (!artwork) return;
+
+          const currency = artworksData.settings?.currency || '₪';
+          const item = {
+            id: artwork.id,
+            title: artwork.title,
+            price: artwork.price ? `${currency}${artwork.price}` : `${currency}0`,
+            image: artwork.image.startsWith('/') ? artwork.image : `/${artwork.image}`,
+            dimensions: artwork.dimensions || 'Dimensions not specified',
+          };
+
+          window.cartManager.addToCart(item);
+
+          // Simple feedback
+          const btn = document.querySelector('.add-to-cart-btn');
+          if (btn) {
+            const original = btn.textContent;
+            btn.textContent = 'Added!';
+            btn.disabled = true;
+            setTimeout(() => {
+              btn.textContent = original;
+              btn.disabled = false;
+            }, 1500);
+          }
         }
+      }
+
+      // Simple lightbox function
+      function openLightbox(src, alt) {
+        if (window.lightboxManager && window.lightboxManager.openImage) {
+          window.lightboxManager.openImage(src, alt);
+        }
+      }
     </script>
 
     <style>
-        /* Artwork specific styles */
-        .artwork-detail-container {
-            padding: 60px 0;
-        }
+      /* Artwork specific styles */
+      .artwork-detail-container {
+        padding: 60px 0;
+      }
 
+      .artwork-detail {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 40px;
+        align-items: start;
+      }
+
+      .artwork-image-container {
+        position: relative;
+        overflow: hidden;
+        border-radius: 4px;
+        box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+      }
+
+      .artwork-image-container img {
+        width: 100%;
+        display: block;
+        transition: transform 0.5s ease;
+        cursor: zoom-in;
+      }
+
+      .artwork-image-container:hover img {
+        transform: scale(1.02);
+      }
+
+      .artwork-info {
+        padding: 20px 0;
+        text-align: center;
+      }
+
+      .artwork-info h1 {
+        font-family: 'Cormorant Garamond', serif;
+        font-size: 2.5rem;
+        margin-bottom: 10px;
+        color: #333;
+      }
+
+      .artwork-metadata {
+        margin-bottom: 20px;
+        font-family: 'Montserrat', sans-serif;
+        text-align: left;
+      }
+
+      .artwork-metadata p {
+        margin: 8px 0;
+        color: #555;
+      }
+
+      .artwork-description {
+        margin: 25px 0;
+        line-height: 1.8;
+        color: #444;
+      }
+
+      .artwork-actions {
+        display: flex;
+        justify-content: center;
+        gap: 15px;
+        margin-top: 25px;
+      }
+
+      .related-artworks {
+        margin-top: 60px;
+        padding-top: 40px;
+        border-top: 1px solid #eee;
+      }
+
+      .related-artworks h2 {
+        font-family: 'Cormorant Garamond', serif;
+        font-size: 2rem;
+        margin-bottom: 30px;
+        text-align: center;
+      }
+
+      .related-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+        gap: 30px;
+      }
+
+      .artwork-not-found {
+        text-align: center;
+        padding: 80px 0;
+      }
+
+      .artwork-not-found h2 {
+        font-size: 2rem;
+        margin-bottom: 20px;
+        color: #9e7e5c;
+      }
+
+      .artwork-not-found p {
+        margin-bottom: 30px;
+        color: #666;
+      }
+
+      /* Styles for related artwork items */
+      .related-grid .artwork-image {
+        cursor: pointer;
+        overflow: hidden;
+        border-radius: 4px;
+        margin-bottom: 10px;
+        display: block;
+        text-decoration: none;
+      }
+
+      .related-grid .artwork-image img {
+        width: 100%;
+        display: block;
+        transition: transform 0.3s ease;
+      }
+
+      .related-grid .artwork-image:hover img {
+        transform: scale(1.05);
+      }
+
+      .related-grid .artwork-details {
+        text-align: left;
+      }
+
+      .related-grid .artwork-details h3 {
+        margin-bottom: 8px;
+      }
+
+      .related-grid .artwork-details h3 a {
+        color: inherit;
+        text-decoration: none;
+        transition: color 0.2s ease;
+      }
+
+      .related-grid .artwork-details h3 a:hover {
+        color: #9e7e5c;
+      }
+
+      .related-grid .artwork-details p {
+        margin: 5px 0;
+        font-size: 0.9rem;
+        color: #555;
+      }
+
+      .related-grid .artwork-details .btn {
+        margin-top: 10px;
+        display: inline-block;
+      }
+
+      @media (max-width: 768px) {
         .artwork-detail {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 40px;
-            align-items: start;
-        }
-
-        .artwork-image-container {
-            position: relative;
-            overflow: hidden;
-            border-radius: 4px;
-            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
-        }
-
-        .artwork-image-container img {
-            width: 100%;
-            display: block;
-            transition: transform 0.5s ease;
-            cursor: zoom-in;
-        }
-
-        .artwork-image-container:hover img {
-            transform: scale(1.02);
-        }
-
-        .artwork-info {
-            padding: 20px 0;
-            text-align: center;
+          grid-template-columns: 1fr;
         }
 
         .artwork-info h1 {
-            font-family: 'Cormorant Garamond', serif;
-            font-size: 2.5rem;
-            margin-bottom: 10px;
-            color: #333;
-        }
-
-        .artwork-metadata {
-            margin-bottom: 20px;
-            font-family: 'Montserrat', sans-serif;
-            text-align: left;
-        }
-
-        .artwork-metadata p {
-            margin: 8px 0;
-            color: #555;
-        }
-
-        .artwork-description {
-            margin: 25px 0;
-            line-height: 1.8;
-            color: #444;
-        }
-
-        .artwork-actions {
-            display: flex;
-            justify-content: center;
-            gap: 15px;
-            margin-top: 25px;
-        }
-
-        .related-artworks {
-            margin-top: 60px;
-            padding-top: 40px;
-            border-top: 1px solid #eee;
-        }
-
-        .related-artworks h2 {
-            font-family: 'Cormorant Garamond', serif;
-            font-size: 2rem;
-            margin-bottom: 30px;
-            text-align: center;
+          font-size: 2rem;
         }
 
         .related-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-            gap: 30px;
+          grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
         }
-
-        .artwork-not-found {
-            text-align: center;
-            padding: 80px 0;
-        }
-
-        .artwork-not-found h2 {
-            font-size: 2rem;
-            margin-bottom: 20px;
-            color: #9e7e5c;
-        }
-
-        .artwork-not-found p {
-            margin-bottom: 30px;
-            color: #666;
-        }
-
-        /* Styles for related artwork items */
-        .related-grid .artwork-image {
-            cursor: pointer;
-            overflow: hidden;
-            border-radius: 4px;
-            margin-bottom: 10px;
-            display: block;
-            text-decoration: none;
-        }
-
-        .related-grid .artwork-image img {
-            width: 100%;
-            display: block;
-            transition: transform 0.3s ease;
-        }
-
-        .related-grid .artwork-image:hover img {
-            transform: scale(1.05);
-        }
-
-        .related-grid .artwork-details {
-            text-align: left;
-        }
-
-        .related-grid .artwork-details h3 {
-            margin-bottom: 8px;
-        }
-
-        .related-grid .artwork-details h3 a {
-            color: inherit;
-            text-decoration: none;
-            transition: color 0.2s ease;
-        }
-
-        .related-grid .artwork-details h3 a:hover {
-            color: #9e7e5c;
-        }
-
-        .related-grid .artwork-details p {
-            margin: 5px 0;
-            font-size: 0.9rem;
-            color: #555;
-        }
-
-        .related-grid .artwork-details .btn {
-            margin-top: 10px;
-            display: inline-block;
-        }
-
-        @media (max-width: 768px) {
-            .artwork-detail {
-                grid-template-columns: 1fr;
-            }
-
-            .artwork-info h1 {
-                font-size: 2rem;
-            }
-
-            .related-grid {
-                grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
-            }
-        }
+      }
     </style>
-</body>
+  </body>
 </html>

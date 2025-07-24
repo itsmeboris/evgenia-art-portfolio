@@ -1,188 +1,201 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Evgenia Portnov | Artist</title>
-    <link rel="stylesheet" href="public/css/style.css">
-    <link rel="stylesheet" href="public/css/additional-styles.css">
-    <link rel="stylesheet" href="public/css/search-modal.css">
-    <link rel="icon" href="public/assets/favicon/favicon.ico" type="image/x-icon">
-    <link rel="apple-touch-icon" href="public/assets/favicon/apple-touch-icon.png">
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@300;400;500;600;700&family=Montserrat:wght@300;400;500;600&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
-</head>
-<body>
+    <link rel="stylesheet" href="public/css/style.css" />
+    <link rel="stylesheet" href="public/css/additional-styles.css" />
+    <link rel="stylesheet" href="public/css/search-modal.css" />
+    <link rel="icon" href="public/assets/favicon/favicon.ico" type="image/x-icon" />
+    <link rel="apple-touch-icon" href="public/assets/favicon/apple-touch-icon.png" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@300;400;500;600;700&family=Montserrat:wght@300;400;500;600&display=swap"
+      rel="stylesheet"
+    />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css"
+    />
+  </head>
+  <body>
     <!-- Header -->
     <header>
-        <div class="container">
-            <nav>
-                <div class="logo">
-                    <a href="/">
-                        <img src="public/assets/logo.jpg" alt="Evgenia Portnov Logo" class="header-logo">
-                    </a>
-                    <a href="/" class="logo-name">Evgenia Portnov</a>
-                </div>
-                <div class="nav-links">
-                    <ul>
-                        <li><a href="/">Home</a></li>
-                        <li><a href="/gallery">Gallery</a></li>
-                        <li><a href="/about">About</a></li>
-                        <li><a href="/contact">Contact</a></li>
-                    </ul>
-                </div>
-                <div class="shop-icons">
-                    <a href="#" class="search-icon"><i class="fas fa-search"></i></a>
-                    <a href="#" class="cart-icon"><i class="fas fa-shopping-cart"></i><span class="cart-count">0</span></a>
-                    <div class="mobile-menu-toggle">
-                        <i class="fas fa-bars"></i>
-                    </div>
-                </div>
-            </nav>
-        </div>
+      <div class="container">
+        <nav>
+          <div class="logo">
+            <a href="/">
+              <img src="public/assets/logo.jpg" alt="Evgenia Portnov Logo" class="header-logo" />
+            </a>
+            <a href="/" class="logo-name">Evgenia Portnov</a>
+          </div>
+          <div class="nav-links">
+            <ul>
+              <li><a href="/">Home</a></li>
+              <li><a href="/gallery">Gallery</a></li>
+              <li><a href="/about">About</a></li>
+              <li><a href="/contact">Contact</a></li>
+            </ul>
+          </div>
+          <div class="shop-icons">
+            <a href="#" class="search-icon"><i class="fas fa-search"></i></a>
+            <a href="#" class="cart-icon"
+              ><i class="fas fa-shopping-cart"></i><span class="cart-count">0</span></a
+            >
+            <div class="mobile-menu-toggle">
+              <i class="fas fa-bars"></i>
+            </div>
+          </div>
+        </nav>
+      </div>
     </header>
 
     <!-- Hero Section -->
     <section class="hero">
-        <div class="hero-slider" data-dynamic="true">
-            <!-- First Slide - Main Artist Introduction -->
-            <div class="slide active">
-                <div class="slide-content">
-                    <h1>Evgenia Portnov</h1>
-                    <p>Blending Realism, Abstraction, and Mystic elements</p>
-                    <div class="cta-buttons">
-                        <a href="/gallery" class="btn primary-btn">View Collection</a>
-                        <a href="/about" class="btn secondary-btn">About the Artist</a>
-                    </div>
-                </div>
-                <div class="slide-image">
-                    <img src="public/assets/images/hero/me.jpg" 
-                         alt="Evgenia Portnov - Artist" 
-                         loading="eager">
-                </div>
+      <div class="hero-slider" data-dynamic="true">
+        <!-- First Slide - Main Artist Introduction -->
+        <div class="slide active">
+          <div class="slide-content">
+            <h1>Evgenia Portnov</h1>
+            <p>Blending Realism, Abstraction, and Mystic elements</p>
+            <div class="cta-buttons">
+              <a href="/gallery" class="btn primary-btn">View Collection</a>
+              <a href="/about" class="btn secondary-btn">About the Artist</a>
             </div>
-            <!-- Other slides will be dynamically generated from artwork-data.json -->
+          </div>
+          <div class="slide-image">
+            <img
+              src="public/assets/images/hero/me.jpg"
+              alt="Evgenia Portnov - Artist"
+              loading="eager"
+            />
+          </div>
         </div>
-        <div class="slider-controls">
-            <button class="prev-btn"><i class="fas fa-chevron-left"></i></button>
-            <button class="next-btn"><i class="fas fa-chevron-right"></i></button>
-        </div>
+        <!-- Other slides will be dynamically generated from artwork-data.json -->
+      </div>
+      <div class="slider-controls">
+        <button class="prev-btn"><i class="fas fa-chevron-left"></i></button>
+        <button class="next-btn"><i class="fas fa-chevron-right"></i></button>
+      </div>
     </section>
 
     <!-- Featured Collections -->
     <section class="featured-collections">
-        <div class="container">
-            <h2 class="section-title">Featured Collections</h2>
-            <div class="collection-grid">
-                <!-- Collections will be dynamically loaded from artwork.json -->
-            </div>
+      <div class="container">
+        <h2 class="section-title">Featured Collections</h2>
+        <div class="collection-grid">
+          <!-- Collections will be dynamically loaded from artwork.json -->
         </div>
+      </div>
     </section>
 
     <!-- Latest Artwork -->
     <section class="latest-artwork">
-        <div class="container">
-            <h2 class="section-title">Latest Artwork</h2>
-            <div class="artwork-grid">
-                <!-- Artwork will be dynamically loaded from artwork.json -->
-            </div>
-            <div class="view-all-container">
-                <a href="/gallery" class="btn secondary-btn">View All Artwork</a>
-            </div>
+      <div class="container">
+        <h2 class="section-title">Latest Artwork</h2>
+        <div class="artwork-grid">
+          <!-- Artwork will be dynamically loaded from artwork.json -->
         </div>
+        <div class="view-all-container">
+          <a href="/gallery" class="btn secondary-btn">View All Artwork</a>
+        </div>
+      </div>
     </section>
 
     <!-- Artist Quote Section -->
     <section class="artist-quote">
-        <div class="container">
-            <blockquote>
-                "Art has become my voice, my sanctuary, and my way of spreading positivity in the world. Each brushstroke is a step in my journey of healing and discovery."
-                <cite>— Evgenia Portnov</cite>
-            </blockquote>
-        </div>
+      <div class="container">
+        <blockquote>
+          "Art has become my voice, my sanctuary, and my way of spreading positivity in the world.
+          Each brushstroke is a step in my journey of healing and discovery."
+          <cite>— Evgenia Portnov</cite>
+        </blockquote>
+      </div>
     </section>
 
     <!-- Newsletter Section -->
     <section class="newsletter">
-        <div class="container">
-            <h2>Stay Updated</h2>
-            <p>Join my newsletter to receive updates on new artwork, exhibitions, and special offers.</p>
-            <form class="newsletter-form">
-                <input type="email" placeholder="Your email address" required>
-                <button type="submit" class="btn primary-btn">Subscribe</button>
-            </form>
-        </div>
+      <div class="container">
+        <h2>Stay Updated</h2>
+        <p>
+          Join my newsletter to receive updates on new artwork, exhibitions, and special offers.
+        </p>
+        <form class="newsletter-form">
+          <input type="email" placeholder="Your email address" required />
+          <button type="submit" class="btn primary-btn">Subscribe</button>
+        </form>
+      </div>
     </section>
 
     <!-- Footer -->
     <footer>
-        <div class="container">
-            <div class="footer-content">
-                <div class="footer-logo">
-                    <img src="public/assets/logo.jpg" alt="Evgenia Portnov Logo" class="footer-logo-img">
-                    <p>Artist & Creator</p>
-                </div>
-                <div class="footer-links">
-                    <div class="footer-nav">
-                        <h4>Navigation</h4>
-                        <ul>
-                            <li><a href="/">Home</a></li>
-                            <li><a href="/gallery">Gallery</a></li>
-                            <li><a href="/about">About</a></li>
-                            <li><a href="/contact">Contact</a></li>
-                        </ul>
-                    </div>
-                    <div class="footer-collections">
-                        <h4>Collections</h4>
-                        <ul class="footer-collection-links">
-                            <!-- Collection links will be dynamically populated -->
-                        </ul>
-                    </div>
-                    <div class="footer-social">
-                        <h4>Connect</h4>
-                        <div class="social-icons">
-                            <a href="#" target="_blank"><i class="fab fa-instagram"></i></a>
-                            <a href="#" target="_blank"><i class="fab fa-facebook"></i></a>
-                            <a href="#" target="_blank"><i class="fab fa-pinterest"></i></a>
-                        </div>
-                    </div>
-                </div>
+      <div class="container">
+        <div class="footer-content">
+          <div class="footer-logo">
+            <img src="public/assets/logo.jpg" alt="Evgenia Portnov Logo" class="footer-logo-img" />
+            <p>Artist & Creator</p>
+          </div>
+          <div class="footer-links">
+            <div class="footer-nav">
+              <h4>Navigation</h4>
+              <ul>
+                <li><a href="/">Home</a></li>
+                <li><a href="/gallery">Gallery</a></li>
+                <li><a href="/about">About</a></li>
+                <li><a href="/contact">Contact</a></li>
+              </ul>
             </div>
-            <div class="footer-bottom">
-                <p>&copy; 2025 Evgenia Portnov. All rights reserved.</p>
+            <div class="footer-collections">
+              <h4>Collections</h4>
+              <ul class="footer-collection-links">
+                <!-- Collection links will be dynamically populated -->
+              </ul>
             </div>
+            <div class="footer-social">
+              <h4>Connect</h4>
+              <div class="social-icons">
+                <a href="#" target="_blank"><i class="fab fa-instagram"></i></a>
+                <a href="#" target="_blank"><i class="fab fa-facebook"></i></a>
+                <a href="#" target="_blank"><i class="fab fa-pinterest"></i></a>
+              </div>
+            </div>
+          </div>
         </div>
+        <div class="footer-bottom">
+          <p>&copy; 2025 Evgenia Portnov. All rights reserved.</p>
+        </div>
+      </div>
     </footer>
 
     <!-- Cart Modal Overlay -->
     <div class="cart-modal-overlay">
-        <div class="cart-modal">
-            <div class="cart-header">
-                <h2>Your Cart</h2>
-                <button class="cart-close"><i class="fas fa-times"></i></button>
-            </div>
-            <div class="cart-items-container">
-                <!-- Cart items will be populated here -->
-            </div>
-            <div class="cart-footer">
-                <div class="cart-total">
-                    <span>Total:</span>
-                    <span class="cart-total-amount">₪0.00</span>
-                </div>
-                <div class="cart-actions">
-                    <button class="btn outline-btn cart-empty">Empty Cart</button>
-                    <button class="btn primary-btn cart-checkout">Checkout</button>
-                </div>
-            </div>
+      <div class="cart-modal">
+        <div class="cart-header">
+          <h2>Your Cart</h2>
+          <button class="cart-close"><i class="fas fa-times"></i></button>
         </div>
+        <div class="cart-items-container">
+          <!-- Cart items will be populated here -->
+        </div>
+        <div class="cart-footer">
+          <div class="cart-total">
+            <span>Total:</span>
+            <span class="cart-total-amount">₪0.00</span>
+          </div>
+          <div class="cart-actions">
+            <button class="btn outline-btn cart-empty">Empty Cart</button>
+            <button class="btn primary-btn cart-checkout">Checkout</button>
+          </div>
+        </div>
+      </div>
     </div>
 
     <!-- Webpack Bundles - Optimized and minified -->
-    <script src="/public/dist/js/common.c6403be95ee3501dee54.min.js"></script>
+    <script src="/public/dist/js/common.ed6ef3bc376fde6f442a.min.js"></script>
     <script src="/public/dist/js/lightbox.bf4274a9974dfb151230.min.js"></script>
     <script src="/public/dist/js/search.c7a336f5491da5aae2e0.min.js"></script>
-    <script src="/public/dist/js/main.a81f2ab68e72665a4dff.min.js"></script>
-</body>
+    <script src="/public/dist/js/main.2bd3fba61dd049dc79ce.min.js"></script>
+  </body>
 </html>

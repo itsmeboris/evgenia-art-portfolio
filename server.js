@@ -18,22 +18,22 @@ const port = process.env.PORT || 3000;
 const httpsPort = process.env.HTTPS_PORT || 3443;
 
 // Enhanced error handling for socket errors
-process.on('uncaughtException', (err) => {
-    if (err.code === 'ECONNRESET' || err.message.includes('Parse Error')) {
-        console.log('⚠️  Connection error (likely mobile browser issue):', err.message);
-        return; // Don't crash the server
-    }
-    console.error('Uncaught Exception:', err);
-    process.exit(1);
+process.on('uncaughtException', err => {
+  if (err.code === 'ECONNRESET' || err.message.includes('Parse Error')) {
+    console.log('⚠️  Connection error (likely mobile browser issue):', err.message);
+    return; // Don't crash the server
+  }
+  console.error('Uncaught Exception:', err);
+  process.exit(1);
 });
 
 // Enhanced server error handling
-app.on('error', (err) => {
-    if (err.code === 'ECONNRESET' || err.message.includes('Parse Error')) {
-        console.log('⚠️  Server connection error (likely mobile browser issue)');
-        return;
-    }
-    console.error('Server error:', err);
+app.on('error', err => {
+  if (err.code === 'ECONNRESET' || err.message.includes('Parse Error')) {
+    console.log('⚠️  Server connection error (likely mobile browser issue)');
+    return;
+  }
+  console.error('Server error:', err);
 });
 
 // Trust proxy (helps with mobile connections)
@@ -43,14 +43,14 @@ app.set('trust proxy', true);
 app.use((req, res, next) => {
   // Handle X-Forwarded-Proto header if behind a proxy
   const isSecure = req.secure || req.headers['x-forwarded-proto'] === 'https';
-  
+
   // Set security-related headers for mobile compatibility
   if (!isSecure && isDevelopment) {
     // In development, add headers to help with mobile browser compatibility
     res.setHeader('X-Frame-Options', 'SAMEORIGIN');
     res.setHeader('X-XSS-Protection', '1; mode=block');
   }
-  
+
   next();
 });
 
@@ -61,138 +61,156 @@ const SESSION_SECRET = process.env.SESSION_SECRET || uuidv4();
 
 // Validate that required environment variables are set
 if (!ADMIN_USERNAME || !ADMIN_PASSWORD_HASH) {
-    console.error('❌ ERROR: ADMIN_USERNAME and ADMIN_PASSWORD_HASH must be set in .env file');
-    process.exit(1);
+  console.error('❌ ERROR: ADMIN_USERNAME and ADMIN_PASSWORD_HASH must be set in .env file');
+  process.exit(1);
 }
 
 // Warn if using generated session secret (not recommended for production)
 if (!process.env.SESSION_SECRET) {
-    console.warn('⚠️  WARNING: SESSION_SECRET not set in .env file. Using generated secret (not recommended for production).');
+  console.warn(
+    '⚠️  WARNING: SESSION_SECRET not set in .env file. Using generated secret (not recommended for production).'
+  );
 }
 
 // Compression middleware (must be early in the chain)
-app.use(compression({
+app.use(
+  compression({
     level: 6, // Compression level (1-9, 6 is default)
     threshold: 1024, // Only compress responses larger than 1KB
     filter: (req, res) => {
-        // Skip compression for certain file types or conditions
-        if (req.headers['x-no-compression']) {
-            return false;
-        }
-        // Fall back to standard filter function
-        return compression.filter(req, res);
-    }
-}));
+      // Skip compression for certain file types or conditions
+      if (req.headers['x-no-compression']) {
+        return false;
+      }
+      // Fall back to standard filter function
+      return compression.filter(req, res);
+    },
+  })
+);
 
 // Security middleware - configured for development/production
 const isDevelopment = process.env.NODE_ENV !== 'production';
 
-app.use(helmet({
+app.use(
+  helmet({
     contentSecurityPolicy: {
-        directives: {
-            defaultSrc: ["'self'"],
-            scriptSrc: ["'self'", "'unsafe-inline'", "'unsafe-eval'"],
-            scriptSrcAttr: ["'unsafe-inline'", "'unsafe-hashes'"],
-            styleSrc: ["'self'", "'unsafe-inline'", "https://fonts.googleapis.com", "https://cdnjs.cloudflare.com"],
-            styleSrcElem: ["'self'", "'unsafe-inline'", "https://fonts.googleapis.com", "https://cdnjs.cloudflare.com"],
-            imgSrc: ["'self'", "data:", "https:", ...(isDevelopment ? ["http:"] : [])],
-            fontSrc: ["'self'", "https://fonts.gstatic.com", "https://cdnjs.cloudflare.com"],
-            connectSrc: ["'self'"],
-            frameSrc: ["'none'"],
-            objectSrc: ["'none'"],
-            baseUri: ["'self'"],
-            formAction: ["'self'"],
-        },
+      directives: {
+        defaultSrc: ["'self'"],
+        scriptSrc: ["'self'", "'unsafe-inline'", "'unsafe-eval'"],
+        scriptSrcAttr: ["'unsafe-inline'", "'unsafe-hashes'"],
+        styleSrc: [
+          "'self'",
+          "'unsafe-inline'",
+          'https://fonts.googleapis.com',
+          'https://cdnjs.cloudflare.com',
+        ],
+        styleSrcElem: [
+          "'self'",
+          "'unsafe-inline'",
+          'https://fonts.googleapis.com',
+          'https://cdnjs.cloudflare.com',
+        ],
+        imgSrc: ["'self'", 'data:', 'https:', ...(isDevelopment ? ['http:'] : [])],
+        fontSrc: ["'self'", 'https://fonts.gstatic.com', 'https://cdnjs.cloudflare.com'],
+        connectSrc: ["'self'"],
+        frameSrc: ["'none'"],
+        objectSrc: ["'none'"],
+        baseUri: ["'self'"],
+        formAction: ["'self'"],
+      },
     },
     crossOriginEmbedderPolicy: false,
     // Disable HSTS in development to avoid SSL issues
-    hsts: isDevelopment ? false : {
-        maxAge: 31536000,
-        includeSubDomains: true,
-        preload: true
-    }
-}));
+    hsts: isDevelopment
+      ? false
+      : {
+          maxAge: 31536000,
+          includeSubDomains: true,
+          preload: true,
+        },
+  })
+);
 
 // Rate limiting for form submissions
 const formLimiter = rateLimit({
-    windowMs: 15 * 60 * 1000, // 15 minutes
-    max: 10, // Limit each IP to 10 requests per windowMs
-    message: { success: false, message: 'Too many requests. Please try again later.' },
-    standardHeaders: true,
-    legacyHeaders: false,
-    // Fix trust proxy issue for development
-    trustProxy: isDevelopment ? false : true,
-    keyGenerator: (req) => {
-        // In development, use a simpler key generation
-        if (isDevelopment) {
-            return req.ip || req.connection.remoteAddress || 'unknown';
-        }
-        return req.ip;
+  windowMs: 15 * 60 * 1000, // 15 minutes
+  max: 10, // Limit each IP to 10 requests per windowMs
+  message: { success: false, message: 'Too many requests. Please try again later.' },
+  standardHeaders: true,
+  legacyHeaders: false,
+  // Fix trust proxy issue for development
+  trustProxy: isDevelopment ? false : true,
+  keyGenerator: req => {
+    // In development, use a simpler key generation
+    if (isDevelopment) {
+      return req.ip || req.connection.remoteAddress || 'unknown';
     }
+    return req.ip;
+  },
 });
 
 // Rate limiting for admin login
 const loginLimiter = rateLimit({
-    windowMs: 15 * 60 * 1000, // 15 minutes
-    max: 5, // Limit each IP to 5 login attempts per windowMs
-    message: { success: false, message: 'Too many login attempts. Please try again later.' },
-    standardHeaders: true,
-    legacyHeaders: false,
-    // Fix trust proxy issue for development
-    trustProxy: isDevelopment ? false : true,
-    keyGenerator: (req) => {
-        // In development, use a simpler key generation
-        if (isDevelopment) {
-            return req.ip || req.connection.remoteAddress || 'unknown';
-        }
-        return req.ip;
+  windowMs: 15 * 60 * 1000, // 15 minutes
+  max: 5, // Limit each IP to 5 login attempts per windowMs
+  message: { success: false, message: 'Too many login attempts. Please try again later.' },
+  standardHeaders: true,
+  legacyHeaders: false,
+  // Fix trust proxy issue for development
+  trustProxy: isDevelopment ? false : true,
+  keyGenerator: req => {
+    // In development, use a simpler key generation
+    if (isDevelopment) {
+      return req.ip || req.connection.remoteAddress || 'unknown';
     }
+    return req.ip;
+  },
 });
 
 // Input sanitization helper
 function sanitizeInput(input) {
-    if (typeof input !== 'string') return input;
-    return input
-        .replace(/[<>]/g, '') // Remove < and > to prevent basic XSS
-        .replace(/javascript:/gi, '') // Remove javascript: protocol
-        .replace(/on\w+=/gi, '') // Remove event handlers like onclick=
-        .trim();
+  if (typeof input !== 'string') return input;
+  return input
+    .replace(/[<>]/g, '') // Remove < and > to prevent basic XSS
+    .replace(/javascript:/gi, '') // Remove javascript: protocol
+    .replace(/on\w+=/gi, '') // Remove event handlers like onclick=
+    .trim();
 }
 
 // Session configuration - use memory store in development to avoid Windows file permission issues
 const sessionConfig = {
-    secret: SESSION_SECRET,
-    genid: () => uuidv4(), // Use UUID for session IDs
-    resave: false,
-    saveUninitialized: false,
-    cookie: {
-        secure: process.env.NODE_ENV === 'production', // HTTPS only in production
-        httpOnly: true, // Prevent XSS
-        maxAge: 1000 * 60 * 60 * 2, // 2 hours
-        sameSite: isDevelopment ? 'lax' : 'strict' // More permissive in development
-    },
-    name: 'evgenia.sid' // Custom session name
+  secret: SESSION_SECRET,
+  genid: () => uuidv4(), // Use UUID for session IDs
+  resave: false,
+  saveUninitialized: false,
+  cookie: {
+    secure: process.env.NODE_ENV === 'production', // HTTPS only in production
+    httpOnly: true, // Prevent XSS
+    maxAge: 1000 * 60 * 60 * 2, // 2 hours
+    sameSite: isDevelopment ? 'lax' : 'strict', // More permissive in development
+  },
+  name: 'evgenia.sid', // Custom session name
 };
 
 // Use file store only in production, memory store in development
 if (process.env.NODE_ENV === 'production') {
-    const sessionStore = new FileStore({
-        path: './sessions',
-        ttl: 7200,
-        retries: 1,
-        secret: SESSION_SECRET,
-        fileExtension: '.json',
-    });
+  const sessionStore = new FileStore({
+    path: './sessions',
+    ttl: 7200,
+    retries: 1,
+    secret: SESSION_SECRET,
+    fileExtension: '.json',
+  });
 
-    sessionStore.on('error', (error) => {
-        console.error('Session store error:', error.message);
-    });
+  sessionStore.on('error', error => {
+    console.error('Session store error:', error.message);
+  });
 
-    sessionConfig.store = sessionStore;
-    console.log('✅ Using file-based session storage (production)');
+  sessionConfig.store = sessionStore;
+  console.log('✅ Using file-based session storage (production)');
 } else {
-    console.log('⚠️  Using memory-based session storage (development)');
-    console.log('   Note: Sessions will be lost when server restarts');
+  console.log('⚠️  Using memory-based session storage (development)');
+  console.log('   Note: Sessions will be lost when server restarts');
 }
 
 app.use(session(sessionConfig));
@@ -215,8 +233,11 @@ app.use((req, res, next) => {
     res.setHeader('X-Content-Type-Options', 'nosniff');
 
     // Only set no-cache headers for HTML pages, not images or assets
-    if (req.originalUrl.endsWith('.html') || req.originalUrl.endsWith('/') ||
-        (!req.originalUrl.includes('.') && !req.originalUrl.startsWith('/public'))) {
+    if (
+      req.originalUrl.endsWith('.html') ||
+      req.originalUrl.endsWith('/') ||
+      (!req.originalUrl.includes('.') && !req.originalUrl.startsWith('/public'))
+    ) {
       res.setHeader('Cache-Control', 'no-cache, no-store, must-revalidate');
       res.setHeader('Pragma', 'no-cache');
       res.setHeader('Expires', '0');
@@ -267,7 +288,7 @@ function validateCSRF(req, res, next) {
     if (!token || !secret || !csrfProtection.verify(secret, token)) {
       return res.status(403).json({
         success: false,
-        message: 'Invalid CSRF token. Please refresh the page and try again.'
+        message: 'Invalid CSRF token. Please refresh the page and try again.',
       });
     }
     next();
@@ -275,7 +296,7 @@ function validateCSRF(req, res, next) {
     console.error('CSRF validation error:', error);
     return res.status(403).json({
       success: false,
-      message: 'CSRF validation failed. Please refresh the page and try again.'
+      message: 'CSRF validation failed. Please refresh the page and try again.',
     });
   }
 }
@@ -286,9 +307,9 @@ app.post('/admin/login', loginLimiter, validateCSRF, async (req, res) => {
 
   try {
     // Check username and verify password with bcrypt
-    if (username === ADMIN_USERNAME && await bcrypt.compare(password, ADMIN_PASSWORD_HASH)) {
+    if (username === ADMIN_USERNAME && (await bcrypt.compare(password, ADMIN_PASSWORD_HASH))) {
       // Regenerate session ID to prevent session fixation
-      req.session.regenerate((err) => {
+      req.session.regenerate(err => {
         if (err) {
           console.error('Session regeneration error:', err);
           return res.redirect('/admin/login?error=server');
@@ -298,11 +319,11 @@ app.post('/admin/login', loginLimiter, validateCSRF, async (req, res) => {
         req.session.user = {
           username: username,
           authenticated: true,
-          loginTime: new Date().toISOString()
+          loginTime: new Date().toISOString(),
         };
 
         // Save session
-        req.session.save((err) => {
+        req.session.save(err => {
           if (err) {
             console.error('Session save error:', err);
             return res.redirect('/admin/login?error=server');
@@ -322,7 +343,7 @@ app.post('/admin/login', loginLimiter, validateCSRF, async (req, res) => {
 
 // Admin logout endpoint
 app.post('/admin/logout', validateCSRF, (req, res) => {
-  req.session.destroy((err) => {
+  req.session.destroy(err => {
     if (err) {
       console.error('Session destruction error:', err);
     }
@@ -353,16 +374,16 @@ app.get('/api/health', (req, res) => {
       method: req.method,
       url: req.originalUrl,
       headers: {
-        'host': req.headers.host,
+        host: req.headers.host,
         'user-agent': req.headers['user-agent'],
-        'accept': req.headers.accept,
-        'connection': req.headers.connection
-      }
+        accept: req.headers.accept,
+        connection: req.headers.connection,
+      },
     },
     session: {
       id: req.session?.id || 'No session',
-      exists: !!req.session
-    }
+      exists: !!req.session,
+    },
   });
 });
 
@@ -446,22 +467,23 @@ app.get('/favicon.ico', (req, res) => {
 });
 
 // Serve static files from specific directories only
-app.use('/public', express.static(path.join(__dirname, 'public'), {
-  maxAge: '1d',
-  setHeaders: (res, filePath) => {
-    if (filePath.endsWith('.js')) {
-      res.setHeader('Content-Type', 'application/javascript; charset=utf-8');
-    }
-    if (filePath.endsWith('.css')) {
-      res.setHeader('Content-Type', 'text/css; charset=utf-8');
-    }
-    if (filePath.endsWith('.json')) {
-      res.setHeader('Content-Type', 'application/json; charset=utf-8');
-    }
-  }
-}));
-
-
+app.use(
+  '/public',
+  express.static(path.join(__dirname, 'public'), {
+    maxAge: '1d',
+    setHeaders: (res, filePath) => {
+      if (filePath.endsWith('.js')) {
+        res.setHeader('Content-Type', 'application/javascript; charset=utf-8');
+      }
+      if (filePath.endsWith('.css')) {
+        res.setHeader('Content-Type', 'text/css; charset=utf-8');
+      }
+      if (filePath.endsWith('.json')) {
+        res.setHeader('Content-Type', 'application/json; charset=utf-8');
+      }
+    },
+  })
+);
 
 // Route for individual artwork pages
 app.get('/artwork/:id', (req, res) => {
@@ -474,7 +496,8 @@ app.get('/webp-test.html', (req, res) => {
 });
 
 // Newsletter subscription endpoint
-app.post('/newsletter/subscribe',
+app.post(
+  '/newsletter/subscribe',
   formLimiter,
   validateCSRF,
   [
@@ -483,14 +506,14 @@ app.post('/newsletter/subscribe',
       .withMessage('Please enter a valid email address.')
       .normalizeEmail()
       .isLength({ max: 254 })
-      .withMessage('Email address is too long.')
+      .withMessage('Email address is too long.'),
   ],
   (req, res) => {
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
       return res.status(400).json({
         success: false,
-        message: errors.array()[0].msg
+        message: errors.array()[0].msg,
       });
     }
 
@@ -510,7 +533,8 @@ app.post('/newsletter/subscribe',
 );
 
 // Contact form endpoint
-app.post('/contact/submit',
+app.post(
+  '/contact/submit',
   formLimiter,
   validateCSRF,
   [
@@ -518,7 +542,7 @@ app.post('/contact/submit',
       .trim()
       .isLength({ min: 2, max: 100 })
       .withMessage('Name must be between 2 and 100 characters.')
-      .matches(/^[a-zA-Z\s\-\.]+$/)
+      .matches(/^[a-zA-Z\s\-.]+$/)
       .withMessage('Name can only contain letters, spaces, hyphens, and periods.'),
     body('email')
       .isEmail()
@@ -530,19 +554,19 @@ app.post('/contact/submit',
       .trim()
       .isLength({ min: 5, max: 200 })
       .withMessage('Subject must be between 5 and 200 characters.')
-      .matches(/^[a-zA-Z0-9\s\-\.\,\!\?]+$/)
+      .matches(/^[a-zA-Z0-9\s\-.,!?]+$/)
       .withMessage('Subject contains invalid characters.'),
     body('message')
       .trim()
       .isLength({ min: 10, max: 2000 })
-      .withMessage('Message must be between 10 and 2000 characters.')
+      .withMessage('Message must be between 10 and 2000 characters.'),
   ],
   (req, res) => {
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
       return res.status(400).json({
         success: false,
-        message: errors.array()[0].msg
+        message: errors.array()[0].msg,
       });
     }
 
@@ -570,7 +594,7 @@ app.post('/contact/submit',
     // For now, just return success
     res.json({
       success: true,
-      message: `Thank you for your message, ${sanitizedName}! I will get back to you as soon as possible.`
+      message: `Thank you for your message, ${sanitizedName}! I will get back to you as soon as possible.`,
     });
   }
 );
@@ -585,7 +609,7 @@ let httpsOptions = null;
 try {
   httpsOptions = {
     key: fs.readFileSync(path.join(__dirname, 'certs', 'key.pem')),
-    cert: fs.readFileSync(path.join(__dirname, 'certs', 'cert.pem'))
+    cert: fs.readFileSync(path.join(__dirname, 'certs', 'cert.pem')),
   };
   console.log('✅ SSL certificates loaded successfully');
 } catch (err) {
@@ -616,16 +640,20 @@ if (httpsOptions) {
 }
 
 console.log(`✅ Compression middleware enabled (gzip/deflate)`);
-console.log(`✅ Security headers configured for ${isDevelopment ? 'development' : 'production'} environment`);
-console.log(`✅ HSTS ${isDevelopment ? 'disabled' : 'enabled'} (development mode: ${isDevelopment})`);
+console.log(
+  `✅ Security headers configured for ${isDevelopment ? 'development' : 'production'} environment`
+);
+console.log(
+  `✅ HSTS ${isDevelopment ? 'disabled' : 'enabled'} (development mode: ${isDevelopment})`
+);
 
 // Show local network access information
 const interfaces = require('os').networkInterfaces();
 const localIPs = [];
 
 // Get all local IP addresses
-Object.keys(interfaces).forEach((interfaceName) => {
-  interfaces[interfaceName].forEach((iface) => {
+Object.keys(interfaces).forEach(interfaceName => {
+  interfaces[interfaceName].forEach(iface => {
     // Skip internal/non-IPv4 addresses
     if (iface.family === 'IPv4' && !iface.internal) {
       localIPs.push(iface.address);
@@ -635,7 +663,7 @@ Object.keys(interfaces).forEach((interfaceName) => {
 
 if (localIPs.length > 0) {
   console.log('\n📱 Mobile device access:');
-  localIPs.forEach((ip) => {
+  localIPs.forEach(ip => {
     console.log(`   HTTP:  http://${ip}:${port}`);
     if (httpsOptions) {
       console.log(`   HTTPS: https://${ip}:${httpsPort} (self-signed certificate)`);
@@ -662,7 +690,7 @@ if (httpsServer) {
 
 // Add connection debugging with better mobile error handling
 function addConnectionDebugging(srv, serverType = 'HTTP') {
-  srv.on('connection', (socket) => {
+  srv.on('connection', socket => {
     console.log(`New ${serverType} connection from ${socket.remoteAddress}:${socket.remotePort}`);
 
     // Set socket options for better mobile compatibility
@@ -675,48 +703,62 @@ function addConnectionDebugging(srv, serverType = 'HTTP') {
     let dataLogged = false;
 
     if (serverType === 'HTTP') {
-      socket.on('data', (chunk) => {
+      socket.on('data', chunk => {
         if (!dataLogged && rawRequestData.length < 500) {
           rawRequestData = Buffer.concat([rawRequestData, chunk]);
-          
+
           // Log the first bit of raw data to see what's causing parsing issues
           if (rawRequestData.length > 10) {
-            const preview = rawRequestData.toString('ascii', 0, Math.min(200, rawRequestData.length))
+            const preview = rawRequestData
+              .toString('ascii', 0, Math.min(200, rawRequestData.length))
               .replace(/\r/g, '\\r')
               .replace(/\n/g, '\\n')
               .replace(/[^\x20-\x7E\\]/g, '?'); // Replace non-printable chars
-            
+
             console.log(`🔍 Raw ${serverType} data from ${socket.remoteAddress}: "${preview}"`);
-            
+
             // Check if it looks like a valid HTTP request or TLS handshake
             const validMethodPattern = /^(GET|POST|PUT|DELETE|HEAD|OPTIONS|PATCH)\s+/;
             const isTlsHandshake = rawRequestData[0] === 0x16 && rawRequestData[1] === 0x03;
-            
+
             if (isTlsHandshake) {
               console.log(`🔒 TLS/HTTPS handshake detected on HTTP server`);
               console.log(`   Mobile browser should use HTTPS port ${httpsPort} instead`);
             } else if (!validMethodPattern.test(preview)) {
-              console.log(`❌ Invalid HTTP method detected. First bytes: ${Array.from(rawRequestData.slice(0, 20)).map(b => `0x${b.toString(16).padStart(2, '0')}`).join(' ')}`);
+              console.log(
+                `❌ Invalid HTTP method detected. First bytes: ${Array.from(
+                  rawRequestData.slice(0, 20)
+                )
+                  .map(b => `0x${b.toString(16).padStart(2, '0')}`)
+                  .join(' ')}`
+              );
             }
-            
+
             dataLogged = true;
           }
         }
       });
     }
 
-    socket.on('error', (err) => {
+    socket.on('error', err => {
       // Handle common mobile browser parsing errors more gracefully
-      if (err.message.includes('Parse Error') || err.code === 'HPE_INVALID_METHOD' || err.code === 'ECONNRESET') {
-        console.log(`⚠️  Mobile browser error on ${serverType} from ${socket.remoteAddress}: ${err.message}`);
-        
+      if (
+        err.message.includes('Parse Error') ||
+        err.code === 'HPE_INVALID_METHOD' ||
+        err.code === 'ECONNRESET'
+      ) {
+        console.log(
+          `⚠️  Mobile browser error on ${serverType} from ${socket.remoteAddress}: ${err.message}`
+        );
+
         // Show what data was received if available
         if (rawRequestData.length > 0) {
-          const preview = rawRequestData.toString('ascii', 0, Math.min(100, rawRequestData.length))
+          const preview = rawRequestData
+            .toString('ascii', 0, Math.min(100, rawRequestData.length))
             .replace(/[^\x20-\x7E]/g, '?');
           console.log(`   Received data: "${preview}"`);
         }
-        
+
         // Safely destroy the socket
         if (!socket.destroyed) {
           socket.destroy();
@@ -727,13 +769,15 @@ function addConnectionDebugging(srv, serverType = 'HTTP') {
     });
 
     socket.on('timeout', () => {
-      console.warn(`${serverType} socket timeout from ${socket.remoteAddress}:${socket.remotePort}`);
+      console.warn(
+        `${serverType} socket timeout from ${socket.remoteAddress}:${socket.remotePort}`
+      );
       if (!socket.destroyed) {
         socket.destroy();
       }
     });
 
-    socket.on('close', (hadError) => {
+    socket.on('close', hadError => {
       if (hadError) {
         console.log(`⚠️  ${serverType} socket closed with error from ${socket.remoteAddress}`);
       }
@@ -748,10 +792,12 @@ if (httpsServer) {
 
 // Handle server errors
 function addServerErrorHandling(srv, serverType, serverPort) {
-  srv.on('error', (err) => {
+  srv.on('error', err => {
     console.error(`${serverType} server error:`, err);
     if (err.code === 'EADDRINUSE') {
-      console.error(`Port ${serverPort} is already in use. Please stop other servers or use a different port.`);
+      console.error(
+        `Port ${serverPort} is already in use. Please stop other servers or use a different port.`
+      );
     }
   });
 }
@@ -764,25 +810,28 @@ if (httpsServer) {
 // Handle server-level parsing errors for mobile browsers
 function addClientErrorHandling(srv, serverType) {
   srv.on('clientError', (err, socket) => {
-    const isParsingError = err.code === 'HPE_INVALID_METHOD' || 
-                          err.message.includes('Parse Error') ||
-                          err.code === 'HPE_INVALID_CONSTANT' ||
-                          err.code === 'HPE_INVALID_VERSION' ||
-                          err.code === 'HPE_INVALID_HEADER_TOKEN';
+    const isParsingError =
+      err.code === 'HPE_INVALID_METHOD' ||
+      err.message.includes('Parse Error') ||
+      err.code === 'HPE_INVALID_CONSTANT' ||
+      err.code === 'HPE_INVALID_VERSION' ||
+      err.code === 'HPE_INVALID_HEADER_TOKEN';
 
     if (isParsingError) {
       console.log(`⚠️  Mobile browser ${serverType} parsing error (${err.code}): ${err.message}`);
       if (serverType === 'HTTP') {
-        console.log(`💡 Tip: Mobile browser likely trying HTTPS - use https://your-ip:${httpsPort} instead`);
+        console.log(
+          `💡 Tip: Mobile browser likely trying HTTPS - use https://your-ip:${httpsPort} instead`
+        );
       }
-      
+
       // For TLS handshake attempts on HTTP or parsing errors on HTTPS, just close the connection
       if (socket.writable && !socket.destroyed) {
         socket.destroy();
       }
       return;
     }
-    
+
     // Handle other client errors
     console.error(`${serverType} client error:`, err.message);
     if (socket.writable && !socket.destroyed) {
@@ -803,20 +852,20 @@ if (httpsServer) {
 // Graceful shutdown
 function gracefulShutdown(signal) {
   console.log(`\nReceived ${signal}, shutting down gracefully...`);
-  
+
   const servers = [server];
   if (httpsServer) {
     servers.push(httpsServer);
   }
-  
+
   let closedCount = 0;
   const totalServers = servers.length;
-  
+
   servers.forEach((srv, index) => {
     srv.close(() => {
       closedCount++;
       console.log(`${index === 0 ? 'HTTP' : 'HTTPS'} server closed.`);
-      
+
       if (closedCount === totalServers) {
         console.log('All servers closed.');
         process.exit(0);

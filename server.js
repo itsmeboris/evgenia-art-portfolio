@@ -1,6 +1,8 @@
 // Simple Express server to serve the website locally
 require('dotenv').config();
 const express = require('express');
+const https = require('https');
+const fs = require('fs');
 const path = require('path');
 const bcrypt = require('bcrypt');
 const helmet = require('helmet');
@@ -13,6 +15,7 @@ const compression = require('compression');
 const csrf = require('csrf');
 const app = express();
 const port = process.env.PORT || 3000;
+const httpsPort = process.env.HTTPS_PORT || 3443;
 
 // Enhanced error handling for socket errors
 process.on('uncaughtException', (err) => {
@@ -35,6 +38,21 @@ app.on('error', (err) => {
 
 // Trust proxy (helps with mobile connections)
 app.set('trust proxy', true);
+
+// Add middleware to handle potential HTTPS issues with mobile browsers
+app.use((req, res, next) => {
+  // Handle X-Forwarded-Proto header if behind a proxy
+  const isSecure = req.secure || req.headers['x-forwarded-proto'] === 'https';
+  
+  // Set security-related headers for mobile compatibility
+  if (!isSecure && isDevelopment) {
+    // In development, add headers to help with mobile browser compatibility
+    res.setHeader('X-Frame-Options', 'SAMEORIGIN');
+    res.setHeader('X-XSS-Protection', '1; mode=block');
+  }
+  
+  next();
+});
 
 // Admin authentication configuration from environment variables
 const ADMIN_USERNAME = process.env.ADMIN_USERNAME;
@@ -147,11 +165,11 @@ if (process.env.NODE_ENV === 'production') {
         secret: SESSION_SECRET,
         fileExtension: '.json',
     });
-    
+
     sessionStore.on('error', (error) => {
         console.error('Session store error:', error.message);
     });
-    
+
     sessionConfig.store = sessionStore;
     console.log('✅ Using file-based session storage (production)');
 } else {
@@ -169,25 +187,29 @@ app.use(express.urlencoded({ extended: true, limit: '10mb' }));
 app.use((req, res, next) => {
   const userAgent = req.get('User-Agent') || '';
   const isMobile = /Mobile|Android|iPhone|iPad|BlackBerry|Windows Phone/i.test(userAgent);
-  
+
   if (isMobile) {
     console.log(`📱 Mobile request from ${req.ip}: ${req.method} ${req.originalUrl}`);
     console.log(`   User-Agent: ${userAgent}`);
-    
+
+    // Add mobile-friendly headers
+    res.setHeader('Connection', 'close'); // Force connection close for mobile
+    res.setHeader('X-Content-Type-Options', 'nosniff');
+
     // Only set no-cache headers for HTML pages, not images or assets
-    if (req.originalUrl.endsWith('.html') || req.originalUrl.endsWith('/') || 
+    if (req.originalUrl.endsWith('.html') || req.originalUrl.endsWith('/') ||
         (!req.originalUrl.includes('.') && !req.originalUrl.startsWith('/public'))) {
       res.setHeader('Cache-Control', 'no-cache, no-store, must-revalidate');
       res.setHeader('Pragma', 'no-cache');
       res.setHeader('Expires', '0');
     }
   }
-  
+
   // Log all requests in development
   if (isDevelopment) {
     console.log(`${req.method} ${req.originalUrl} - ${req.ip}`);
   }
-  
+
   next();
 });
 
@@ -223,19 +245,19 @@ function validateCSRF(req, res, next) {
   try {
     const token = req.body._csrf || req.query._csrf || req.headers['x-csrf-token'];
     const secret = req.session?.csrfSecret;
-    
+
     if (!token || !secret || !csrfProtection.verify(secret, token)) {
-      return res.status(403).json({ 
-        success: false, 
-        message: 'Invalid CSRF token. Please refresh the page and try again.' 
+      return res.status(403).json({
+        success: false,
+        message: 'Invalid CSRF token. Please refresh the page and try again.'
       });
     }
     next();
   } catch (error) {
     console.error('CSRF validation error:', error);
-    return res.status(403).json({ 
-      success: false, 
-      message: 'CSRF validation failed. Please refresh the page and try again.' 
+    return res.status(403).json({
+      success: false,
+      message: 'CSRF validation failed. Please refresh the page and try again.'
     });
   }
 }
@@ -295,22 +317,42 @@ app.post('/admin/logout', validateCSRF, (req, res) => {
 app.get('/api/health', (req, res) => {
   const userAgent = req.get('User-Agent') || '';
   const isMobile = /Mobile|Android|iPhone|iPad|BlackBerry|Windows Phone/i.test(userAgent);
-  
+
+  // Set simple response headers for mobile compatibility
+  res.setHeader('Content-Type', 'application/json; charset=utf-8');
+  res.setHeader('Cache-Control', 'no-cache');
+
   res.json({
     status: 'OK',
     timestamp: new Date().toISOString(),
     server: 'Evgenia Portnov Art Website',
+    protocol: req.protocol,
+    secure: req.secure,
     client: {
       ip: req.ip,
       userAgent: userAgent,
       isMobile: isMobile,
-      headers: req.headers
+      method: req.method,
+      url: req.originalUrl,
+      headers: {
+        'host': req.headers.host,
+        'user-agent': req.headers['user-agent'],
+        'accept': req.headers.accept,
+        'connection': req.headers.connection
+      }
     },
     session: {
       id: req.session?.id || 'No session',
       exists: !!req.session
     }
   });
+});
+
+// Simple mobile-friendly test endpoint
+app.get('/test', (req, res) => {
+  res.setHeader('Content-Type', 'text/plain; charset=utf-8');
+  res.setHeader('Cache-Control', 'no-cache');
+  res.send('Mobile test successful! Server is working correctly.');
 });
 
 // CSRF token endpoint
@@ -414,7 +456,7 @@ app.get('/webp-test.html', (req, res) => {
 });
 
 // Newsletter subscription endpoint
-app.post('/newsletter/subscribe', 
+app.post('/newsletter/subscribe',
   formLimiter,
   validateCSRF,
   [
@@ -428,9 +470,9 @@ app.post('/newsletter/subscribe',
   (req, res) => {
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
-      return res.status(400).json({ 
-        success: false, 
-        message: errors.array()[0].msg 
+      return res.status(400).json({
+        success: false,
+        message: errors.array()[0].msg
       });
     }
 
@@ -450,7 +492,7 @@ app.post('/newsletter/subscribe',
 );
 
 // Contact form endpoint
-app.post('/contact/submit', 
+app.post('/contact/submit',
   formLimiter,
   validateCSRF,
   [
@@ -487,7 +529,7 @@ app.post('/contact/submit',
     }
 
     const { name, email, subject, message } = req.body;
-    
+
     // Sanitize all inputs
     const sanitizedName = sanitizeInput(name);
     const sanitizedEmail = sanitizeInput(email);
@@ -520,83 +562,250 @@ app.use((req, res) => {
   res.status(404).send('Page not found');
 });
 
+// Load SSL certificates for HTTPS
+let httpsOptions = null;
+try {
+  httpsOptions = {
+    key: fs.readFileSync(path.join(__dirname, 'certs', 'key.pem')),
+    cert: fs.readFileSync(path.join(__dirname, 'certs', 'cert.pem'))
+  };
+  console.log('✅ SSL certificates loaded successfully');
+} catch (err) {
+  console.warn('⚠️  Could not load SSL certificates:', err.message);
+  console.warn('   HTTPS server will not be available');
+}
+
 // Configure server timeout settings for mobile devices
 const server = app.listen(port, '0.0.0.0', () => {
-  console.log(`Evgenia's art website running at http://localhost:${port}`);
-  console.log(`- Main site: http://localhost:${port}/`);
-  console.log(`- Gallery: http://localhost:${port}/gallery`);
-  console.log(`- Admin panel: http://localhost:${port}/admin/`);
-  console.log(`✅ Compression middleware enabled (gzip/deflate)`);
-  console.log(`✅ Security headers configured for ${isDevelopment ? 'development' : 'production'} environment`);
-  console.log(`✅ HSTS ${isDevelopment ? 'disabled' : 'enabled'} (development mode: ${isDevelopment})`);
+  console.log(`🌐 Evgenia's art website running:`);
+  console.log(`   HTTP:  http://localhost:${port}`);
+  console.log(`   Main site: http://localhost:${port}/`);
+  console.log(`   Gallery: http://localhost:${port}/gallery`);
+  console.log(`   Admin panel: http://localhost:${port}/admin/`);
+});
 
-  // Show local network access information
-  const interfaces = require('os').networkInterfaces();
-  const localIPs = [];
+// Create HTTPS server if certificates are available
+let httpsServer = null;
+if (httpsOptions) {
+  httpsServer = https.createServer(httpsOptions, app);
+  httpsServer.listen(httpsPort, '0.0.0.0', () => {
+    console.log(`🔒 HTTPS server running on port ${httpsPort}`);
+    console.log(`   HTTPS: https://localhost:${httpsPort}`);
+    console.log(`   Main site: https://localhost:${httpsPort}/`);
+    console.log(`   Gallery: https://localhost:${httpsPort}/gallery`);
+    console.log(`   Admin panel: https://localhost:${httpsPort}/admin/`);
+  });
+}
 
-  // Get all local IP addresses
-  Object.keys(interfaces).forEach((interfaceName) => {
-    interfaces[interfaceName].forEach((iface) => {
-      // Skip internal/non-IPv4 addresses
-      if (iface.family === 'IPv4' && !iface.internal) {
-        localIPs.push(iface.address);
+console.log(`✅ Compression middleware enabled (gzip/deflate)`);
+console.log(`✅ Security headers configured for ${isDevelopment ? 'development' : 'production'} environment`);
+console.log(`✅ HSTS ${isDevelopment ? 'disabled' : 'enabled'} (development mode: ${isDevelopment})`);
+
+// Show local network access information
+const interfaces = require('os').networkInterfaces();
+const localIPs = [];
+
+// Get all local IP addresses
+Object.keys(interfaces).forEach((interfaceName) => {
+  interfaces[interfaceName].forEach((iface) => {
+    // Skip internal/non-IPv4 addresses
+    if (iface.family === 'IPv4' && !iface.internal) {
+      localIPs.push(iface.address);
+    }
+  });
+});
+
+if (localIPs.length > 0) {
+  console.log('\n📱 Mobile device access:');
+  localIPs.forEach((ip) => {
+    console.log(`   HTTP:  http://${ip}:${port}`);
+    if (httpsOptions) {
+      console.log(`   HTTPS: https://${ip}:${httpsPort} (self-signed certificate)`);
+    }
+  });
+  console.log('\n💡 For mobile browsers having issues:');
+  console.log('   1. Try HTTPS first (accept security warning)');
+  console.log('   2. If still issues, check firewall settings');
+  console.log('   3. Both devices must be on same WiFi network');
+  console.log('   4. Some mobile browsers auto-upgrade to HTTPS');
+}
+
+// Configure server timeouts for better mobile support
+function configureServerTimeouts(srv) {
+  srv.timeout = 120000; // 2 minutes
+  srv.headersTimeout = 120000; // 2 minutes
+  srv.keepAliveTimeout = 65000; // 65 seconds
+}
+
+configureServerTimeouts(server);
+if (httpsServer) {
+  configureServerTimeouts(httpsServer);
+}
+
+// Add connection debugging with better mobile error handling
+function addConnectionDebugging(srv, serverType = 'HTTP') {
+  srv.on('connection', (socket) => {
+    console.log(`New ${serverType} connection from ${socket.remoteAddress}:${socket.remotePort}`);
+
+    // Set socket options for better mobile compatibility
+    socket.setNoDelay(true);
+    socket.setKeepAlive(true, 30000);
+    socket.setTimeout(10000); // 10 second timeout for problematic connections
+
+    // Buffer to capture raw request data for debugging (only for HTTP server)
+    let rawRequestData = Buffer.alloc(0);
+    let dataLogged = false;
+
+    if (serverType === 'HTTP') {
+      socket.on('data', (chunk) => {
+        if (!dataLogged && rawRequestData.length < 500) {
+          rawRequestData = Buffer.concat([rawRequestData, chunk]);
+          
+          // Log the first bit of raw data to see what's causing parsing issues
+          if (rawRequestData.length > 10) {
+            const preview = rawRequestData.toString('ascii', 0, Math.min(200, rawRequestData.length))
+              .replace(/\r/g, '\\r')
+              .replace(/\n/g, '\\n')
+              .replace(/[^\x20-\x7E\\]/g, '?'); // Replace non-printable chars
+            
+            console.log(`🔍 Raw ${serverType} data from ${socket.remoteAddress}: "${preview}"`);
+            
+            // Check if it looks like a valid HTTP request or TLS handshake
+            const validMethodPattern = /^(GET|POST|PUT|DELETE|HEAD|OPTIONS|PATCH)\s+/;
+            const isTlsHandshake = rawRequestData[0] === 0x16 && rawRequestData[1] === 0x03;
+            
+            if (isTlsHandshake) {
+              console.log(`🔒 TLS/HTTPS handshake detected on HTTP server`);
+              console.log(`   Mobile browser should use HTTPS port ${httpsPort} instead`);
+            } else if (!validMethodPattern.test(preview)) {
+              console.log(`❌ Invalid HTTP method detected. First bytes: ${Array.from(rawRequestData.slice(0, 20)).map(b => `0x${b.toString(16).padStart(2, '0')}`).join(' ')}`);
+            }
+            
+            dataLogged = true;
+          }
+        }
+      });
+    }
+
+    socket.on('error', (err) => {
+      // Handle common mobile browser parsing errors more gracefully
+      if (err.message.includes('Parse Error') || err.code === 'HPE_INVALID_METHOD' || err.code === 'ECONNRESET') {
+        console.log(`⚠️  Mobile browser error on ${serverType} from ${socket.remoteAddress}: ${err.message}`);
+        
+        // Show what data was received if available
+        if (rawRequestData.length > 0) {
+          const preview = rawRequestData.toString('ascii', 0, Math.min(100, rawRequestData.length))
+            .replace(/[^\x20-\x7E]/g, '?');
+          console.log(`   Received data: "${preview}"`);
+        }
+        
+        // Safely destroy the socket
+        if (!socket.destroyed) {
+          socket.destroy();
+        }
+        return;
+      }
+      console.error(`${serverType} socket error from ${socket.remoteAddress}:`, err.message);
+    });
+
+    socket.on('timeout', () => {
+      console.warn(`${serverType} socket timeout from ${socket.remoteAddress}:${socket.remotePort}`);
+      if (!socket.destroyed) {
+        socket.destroy();
+      }
+    });
+
+    socket.on('close', (hadError) => {
+      if (hadError) {
+        console.log(`⚠️  ${serverType} socket closed with error from ${socket.remoteAddress}`);
       }
     });
   });
+}
 
-  if (localIPs.length > 0) {
-    console.log('\n📱 Mobile device access (HTTP only in development):');
-    localIPs.forEach((ip) => {
-      console.log(`   http://${ip}:${port}`);
-    });
-    console.log('\n⚠️  Note: Use HTTP (not HTTPS) for mobile access in development');
-    console.log('💡 If mobile devices can\'t connect, check:');
-    console.log('   1. Firewall settings (allow port 3000)');
-    console.log('   2. Antivirus software blocking connections');
-    console.log('   3. Router/network configuration');
-    console.log('   4. Both devices on same WiFi network');
-  }
-});
-
-// Configure server timeouts for better mobile support
-server.timeout = 120000; // 2 minutes
-server.headersTimeout = 120000; // 2 minutes  
-server.keepAliveTimeout = 65000; // 65 seconds
-
-// Add connection debugging
-server.on('connection', (socket) => {
-  console.log(`New connection from ${socket.remoteAddress}:${socket.remotePort}`);
-  
-  socket.on('error', (err) => {
-    console.error(`Socket error from ${socket.remoteAddress}:`, err.message);
-  });
-  
-  socket.on('timeout', () => {
-    console.warn(`Socket timeout from ${socket.remoteAddress}:${socket.remotePort}`);
-  });
-});
+addConnectionDebugging(server, 'HTTP');
+if (httpsServer) {
+  addConnectionDebugging(httpsServer, 'HTTPS');
+}
 
 // Handle server errors
-server.on('error', (err) => {
-  console.error('Server error:', err);
-  if (err.code === 'EADDRINUSE') {
-    console.error(`Port ${port} is already in use. Please stop other servers or use a different port.`);
-  }
-});
+function addServerErrorHandling(srv, serverType, serverPort) {
+  srv.on('error', (err) => {
+    console.error(`${serverType} server error:`, err);
+    if (err.code === 'EADDRINUSE') {
+      console.error(`Port ${serverPort} is already in use. Please stop other servers or use a different port.`);
+    }
+  });
+}
+
+addServerErrorHandling(server, 'HTTP', port);
+if (httpsServer) {
+  addServerErrorHandling(httpsServer, 'HTTPS', httpsPort);
+}
+
+// Handle server-level parsing errors for mobile browsers
+function addClientErrorHandling(srv, serverType) {
+  srv.on('clientError', (err, socket) => {
+    const isParsingError = err.code === 'HPE_INVALID_METHOD' || 
+                          err.message.includes('Parse Error') ||
+                          err.code === 'HPE_INVALID_CONSTANT' ||
+                          err.code === 'HPE_INVALID_VERSION' ||
+                          err.code === 'HPE_INVALID_HEADER_TOKEN';
+
+    if (isParsingError) {
+      console.log(`⚠️  Mobile browser ${serverType} parsing error (${err.code}): ${err.message}`);
+      if (serverType === 'HTTP') {
+        console.log(`💡 Tip: Mobile browser likely trying HTTPS - use https://your-ip:${httpsPort} instead`);
+      }
+      
+      // For TLS handshake attempts on HTTP or parsing errors on HTTPS, just close the connection
+      if (socket.writable && !socket.destroyed) {
+        socket.destroy();
+      }
+      return;
+    }
+    
+    // Handle other client errors
+    console.error(`${serverType} client error:`, err.message);
+    if (socket.writable && !socket.destroyed) {
+      try {
+        socket.end('HTTP/1.1 400 Bad Request\r\nConnection: close\r\nContent-Length: 0\r\n\r\n');
+      } catch (writeErr) {
+        socket.destroy();
+      }
+    }
+  });
+}
+
+addClientErrorHandling(server, 'HTTP');
+if (httpsServer) {
+  addClientErrorHandling(httpsServer, 'HTTPS');
+}
 
 // Graceful shutdown
-process.on('SIGTERM', () => {
-  console.log('Received SIGTERM, shutting down gracefully...');
-  server.close(() => {
-    console.log('Server closed.');
-    process.exit(0);
+function gracefulShutdown(signal) {
+  console.log(`\nReceived ${signal}, shutting down gracefully...`);
+  
+  const servers = [server];
+  if (httpsServer) {
+    servers.push(httpsServer);
+  }
+  
+  let closedCount = 0;
+  const totalServers = servers.length;
+  
+  servers.forEach((srv, index) => {
+    srv.close(() => {
+      closedCount++;
+      console.log(`${index === 0 ? 'HTTP' : 'HTTPS'} server closed.`);
+      
+      if (closedCount === totalServers) {
+        console.log('All servers closed.');
+        process.exit(0);
+      }
+    });
   });
-});
+}
 
-process.on('SIGINT', () => {
-  console.log('\nReceived SIGINT, shutting down gracefully...');
-  server.close(() => {
-    console.log('Server closed.');
-    process.exit(0);
-  });
-});
+process.on('SIGTERM', () => gracefulShutdown('SIGTERM'));
+process.on('SIGINT', () => gracefulShutdown('SIGINT'));

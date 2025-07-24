@@ -128,7 +128,8 @@ window.app.dev.exportData()
 ├── contact.html             # Contact page
 ├── artwork.html             # Individual artwork details
 ├── shop.html                # Shopping page
-├── server.js                # Node.js server with proper routing
+├── server.js                # Node.js server with HTTP/HTTPS support
+├── certs/                   # SSL certificates for HTTPS development
 ├── public/                  # Public assets
 │   ├── css/                 # CSS files
 │   │   ├── style.css        # Main stylesheet
@@ -285,7 +286,18 @@ To run this project locally and avoid CORS issues:
    ```bash
    npm start
    ```
-5. **Open your browser** to [http://localhost:3000](http://localhost:3000)
+5. **Access the website**:
+   - **HTTP**: [http://localhost:3000](http://localhost:3000)
+   - **HTTPS**: [https://localhost:3443](https://localhost:3443) (with self-signed certificate)
+
+### Mobile Device Access
+
+The server supports both HTTP and HTTPS for mobile device compatibility:
+
+- **HTTP**: `http://your-local-ip:3000`
+- **HTTPS**: `https://your-local-ip:3443` (accept security warning for self-signed certificate)
+
+**Note**: Some mobile browsers automatically upgrade to HTTPS, which may cause connection issues with HTTP-only servers. This setup provides both protocols to ensure compatibility.
 
 ### Development Features
 
@@ -391,18 +403,19 @@ For static hosting (GitHub Pages, Netlify, etc.):
 ## Accessing Your Site
 
 ### Local Network Access
-The server is configured to listen on all network interfaces, so you can access it from other devices on your local network:
+The server is configured to listen on all network interfaces with both HTTP and HTTPS support:
 
 1. Start the server:
    ```
    npm start
    ```
-2. Look for the local network URL in the console output, which will show something like:
+2. Look for the local network URLs in the console output:
    ```
-   You can also access this site from other devices on your network:
-   http://192.168.1.93:3000
+   📱 Mobile device access:
+      HTTP:  http://192.168.1.57:3000
+      HTTPS: https://192.168.1.57:3443 (self-signed certificate)
    ```
-3. Use that URL on any device connected to the same network
+3. **For mobile devices**: Use HTTPS first if your mobile browser has connection issues with HTTP
 
 ### Remote Access with ngrok
 To make your locally running website accessible from anywhere on the internet:
@@ -538,6 +551,8 @@ All artwork data is stored in a single JSON file at `public/data/artwork-data.js
 - ✅ **Comprehensive testing** and development tools
 - ✅ **Mobile optimization** and accessibility improvements
 - ✅ **Server routing fixes** and static file handling
+- ✅ **HTTPS support** with self-signed certificates for mobile compatibility
+- ✅ **Dual HTTP/HTTPS servers** for comprehensive development testing
 
 ## License
 

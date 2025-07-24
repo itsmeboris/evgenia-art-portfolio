@@ -123,3 +123,16 @@ webpack-stats.json
 *.min.js.map
 *.chunk.js
 *.chunk.css
+
+# ESLint and Prettier cache
+.eslintcache
+.prettiercache
+
+# Editor temporary files
+*.tmp
+*~
+.#*
+
+# Claude Code temporary files
+CLAUDE.*.md
+*.claude.md

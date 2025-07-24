@@ -290,9 +290,10 @@ _Last updated: January 2025_
 
 - [x] Move credentials to .env file ✅ DONE
 - [x] Add compression middleware ✅ DONE
-- [ ] Set up ESLint/Prettier
+- [x] Set up ESLint/Prettier ✅ DONE
 - [ ] Add proper 404 page
 - [ ] Implement loading skeletons
+- [ ] Automate HTML bundle update process
 
 ### Major Projects (Require significant time)
 

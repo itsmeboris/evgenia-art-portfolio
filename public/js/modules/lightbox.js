@@ -26,10 +26,30 @@ class LightboxManager {
         this.preloadCount = 2; // Number of images to preload in each direction
         this.animationDuration = 300;
 
+        // Zoom and pan settings
+        this.zoomLevel = 1;
+        this.minZoom = 0.5;
+        this.maxZoom = 4;
+        this.zoomStep = 0.1;
+        this.panX = 0;
+        this.panY = 0;
+        this.isDragging = false;
+        this.dragStartX = 0;
+        this.dragStartY = 0;
+        this.originalImageWidth = 0;
+        this.originalImageHeight = 0;
+
         // Bind methods
         this.handleKeydown = this.handleKeydown.bind(this);
         this.handleWheel = this.handleWheel.bind(this);
         this.handleResize = this.debounce(this.handleResize.bind(this), 250);
+        this.handleMouseDown = this.handleMouseDown.bind(this);
+        this.handleMouseMove = this.handleMouseMove.bind(this);
+        this.handleMouseUp = this.handleMouseUp.bind(this);
+        this.handleDoubleClick = this.handleDoubleClick.bind(this);
+        this.handleTouchStart = this.handleTouchStart.bind(this);
+        this.handleTouchMove = this.handleTouchMove.bind(this);
+        this.handleTouchEnd = this.handleTouchEnd.bind(this);
     }
 
     // Initialize the lightbox system
@@ -113,6 +133,32 @@ class LightboxManager {
         this.counterElement = document.createElement('div');
         this.counterElement.className = 'lightbox-counter';
 
+        // Zoom controls
+        const zoomControls = document.createElement('div');
+        zoomControls.className = 'lightbox-zoom-controls';
+
+        this.zoomInButton = document.createElement('button');
+        this.zoomInButton.className = 'lightbox-zoom-btn lightbox-zoom-in';
+        this.zoomInButton.innerHTML = '<i class="fas fa-plus"></i>';
+        this.zoomInButton.setAttribute('aria-label', 'Zoom in');
+        this.zoomInButton.title = 'Zoom in';
+
+        this.zoomOutButton = document.createElement('button');
+        this.zoomOutButton.className = 'lightbox-zoom-btn lightbox-zoom-out';
+        this.zoomOutButton.innerHTML = '<i class="fas fa-minus"></i>';
+        this.zoomOutButton.setAttribute('aria-label', 'Zoom out');
+        this.zoomOutButton.title = 'Zoom out';
+
+        this.zoomResetButton = document.createElement('button');
+        this.zoomResetButton.className = 'lightbox-zoom-btn lightbox-zoom-reset';
+        this.zoomResetButton.innerHTML = '<i class="fas fa-expand-arrows-alt"></i>';
+        this.zoomResetButton.setAttribute('aria-label', 'Reset zoom');
+        this.zoomResetButton.title = 'Reset zoom (double-click image)';
+
+        zoomControls.appendChild(this.zoomInButton);
+        zoomControls.appendChild(this.zoomOutButton);
+        zoomControls.appendChild(this.zoomResetButton);
+
         // Assemble the lightbox
         imageContainer.appendChild(loadingIndicator);
         imageContainer.appendChild(this.imageElement);
@@ -123,6 +169,7 @@ class LightboxManager {
         this.overlay.appendChild(this.closeButton);
         this.overlay.appendChild(this.captionElement);
         this.overlay.appendChild(this.counterElement);
+        this.overlay.appendChild(zoomControls);
 
         // Add styles
         this.addLightboxStyles();
@@ -214,21 +261,39 @@ class LightboxManager {
 
             .lightbox-container {
                 position: relative;
-                max-width: 90vw;
-                max-height: 90vh;
+                width: 100vw;
+                height: 100vh;
                 display: flex;
                 align-items: center;
                 justify-content: center;
+                overflow: hidden;
+                cursor: grab;
+            }
+
+            .lightbox-container.dragging {
+                cursor: grabbing;
             }
 
             .lightbox-image {
-                max-width: 100%;
-                max-height: 100%;
+                max-width: 90vw;
+                max-height: 90vh;
                 object-fit: contain;
                 border-radius: 4px;
                 box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
                 transform: scale(0.9);
                 transition: transform ${this.animationDuration}ms ease;
+                user-select: none;
+                -webkit-user-drag: none;
+                cursor: grab;
+            }
+
+                            .lightbox-image.zoomed {
+                    cursor: grab;
+                    transition: transform 0.2s ease;
+                }
+
+            .lightbox-image.dragging {
+                cursor: grabbing;
             }
 
             .lightbox-overlay.active .lightbox-image {
@@ -353,6 +418,53 @@ class LightboxManager {
                 backdrop-filter: blur(10px);
             }
 
+            .lightbox-zoom-controls {
+                position: absolute;
+                bottom: 20px;
+                right: 20px;
+                display: flex;
+                flex-direction: column;
+                gap: 10px;
+                z-index: 2;
+            }
+
+            .lightbox-zoom-btn {
+                background: rgba(255, 255, 255, 0.1);
+                border: none;
+                color: white;
+                font-size: 16px;
+                padding: 12px;
+                cursor: pointer;
+                border-radius: 50%;
+                transition: all 0.2s ease;
+                backdrop-filter: blur(10px);
+                width: 44px;
+                height: 44px;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+            }
+
+            .lightbox-zoom-btn:hover {
+                background: rgba(255, 255, 255, 0.2);
+                transform: scale(1.1);
+            }
+
+            .lightbox-zoom-btn:focus {
+                outline: 2px solid white;
+                outline-offset: 2px;
+            }
+
+            .lightbox-zoom-btn:disabled {
+                opacity: 0.5;
+                cursor: not-allowed;
+            }
+
+            .lightbox-zoom-btn:disabled:hover {
+                transform: none;
+                background: rgba(255, 255, 255, 0.1);
+            }
+
             @media (max-width: 768px) {
                 .lightbox-nav {
                     padding: 12px;
@@ -376,6 +488,19 @@ class LightboxManager {
                     top: 10px;
                     left: 10px;
                 }
+
+                .lightbox-zoom-controls {
+                    bottom: 80px;
+                    right: 10px;
+                    gap: 8px;
+                }
+
+                .lightbox-zoom-btn {
+                    width: 38px;
+                    height: 38px;
+                    font-size: 14px;
+                    padding: 8px;
+                }
             }
         `;
         document.head.appendChild(style);
@@ -398,12 +523,35 @@ class LightboxManager {
             this.nextButton.addEventListener('click', () => this.next());
         }
 
+        // Zoom controls
+        if (this.zoomInButton) {
+            this.zoomInButton.addEventListener('click', () => this.zoomIn());
+        }
+        if (this.zoomOutButton) {
+            this.zoomOutButton.addEventListener('click', () => this.zoomOut());
+        }
+        if (this.zoomResetButton) {
+            this.zoomResetButton.addEventListener('click', () => this.resetZoom());
+        }
+
         // Overlay click to close
         this.overlay.addEventListener('click', (e) => {
             if (e.target === this.overlay) {
                 this.close();
             }
         });
+
+        // Image interactions
+        if (this.imageElement) {
+            // Mouse events for pan/zoom
+            this.imageElement.addEventListener('mousedown', this.handleMouseDown);
+            this.imageElement.addEventListener('dblclick', this.handleDoubleClick);
+
+            // Touch events for mobile
+            this.imageElement.addEventListener('touchstart', this.handleTouchStart, { passive: false });
+            this.imageElement.addEventListener('touchmove', this.handleTouchMove, { passive: false });
+            this.imageElement.addEventListener('touchend', this.handleTouchEnd, { passive: false });
+        }
 
         // Window resize
         window.addEventListener('resize', this.handleResize);
@@ -495,6 +643,9 @@ class LightboxManager {
         this.currentIndex = index;
         this.currentImage = { src, alt };
 
+        // Reset zoom and pan for new image
+        this.resetZoomAndPan();
+
         // Update gallery images
         this.updateGalleryImages();
 
@@ -541,6 +692,13 @@ class LightboxManager {
 
             // Update caption
             this.updateCaption(alt);
+
+            // Store original image dimensions for zoom calculations
+            this.originalImageWidth = img.naturalWidth;
+            this.originalImageHeight = img.naturalHeight;
+
+            // Update zoom buttons state
+            this.updateZoomButtons();
 
             // Cache the image
             this.imageCache.set(src, img);
@@ -724,6 +882,19 @@ class LightboxManager {
                 e.preventDefault();
                 this.next();
                 break;
+            case '+':
+            case '=':
+                e.preventDefault();
+                this.zoomIn();
+                break;
+            case '-':
+                e.preventDefault();
+                this.zoomOut();
+                break;
+            case '0':
+                e.preventDefault();
+                this.resetZoom();
+                break;
             case ' ':
             case 'Enter':
                 if (e.target === this.overlay) {
@@ -734,22 +905,251 @@ class LightboxManager {
         }
     }
 
-    // Handle wheel events for zoom (future enhancement)
-    handleWheel(e) {
-        if (!this.isOpen) return;
+    // ===== ZOOM AND PAN FUNCTIONALITY =====
 
-        // Prevent page scroll while lightbox is open
-        e.preventDefault();
-
-        // Future: implement zoom functionality
+    // Reset zoom and pan values
+    resetZoomAndPan() {
+        this.zoomLevel = 1;
+        this.panX = 0;
+        this.panY = 0;
+        this.updateImageTransform();
+        this.updateZoomButtons();
     }
 
-    // Handle window resize
-    handleResize() {
-        if (!this.isOpen || !this.imageElement) return;
+    // Zoom in
+    zoomIn() {
+        if (this.zoomLevel < this.maxZoom) {
+            this.zoomLevel = Math.min(this.maxZoom, this.zoomLevel + this.zoomStep);
+            this.updateImageTransform();
+            this.updateZoomButtons();
+        }
+    }
 
-        // Recalculate image dimensions
-        // The CSS handles most of this, but we could add custom logic here
+    // Zoom out
+    zoomOut() {
+        if (this.zoomLevel > this.minZoom) {
+            this.zoomLevel = Math.max(this.minZoom, this.zoomLevel - this.zoomStep);
+            
+            // If zoom level is 1.0 or below, center the image
+            if (this.zoomLevel <= 1.0) {
+                this.panX = 0;
+                this.panY = 0;
+            }
+            
+            this.updateImageTransform();
+            this.updateZoomButtons();
+        }
+    }
+
+    // Reset zoom to fit
+    resetZoom() {
+        this.resetZoomAndPan();
+    }
+
+    // Update image transform based on zoom and pan
+    updateImageTransform() {
+        if (!this.imageElement) return;
+
+        const transform = `translate(${this.panX}px, ${this.panY}px) scale(${this.zoomLevel})`;
+        this.imageElement.style.transform = transform;
+
+        // Update image classes based on zoom level
+        if (this.zoomLevel > 1) {
+            this.imageElement.classList.add('zoomed');
+        } else {
+            this.imageElement.classList.remove('zoomed');
+        }
+    }
+
+    // Update zoom button states
+    updateZoomButtons() {
+        if (this.zoomInButton) {
+            this.zoomInButton.disabled = this.zoomLevel >= this.maxZoom;
+        }
+        if (this.zoomOutButton) {
+            this.zoomOutButton.disabled = this.zoomLevel <= this.minZoom;
+        }
+    }
+
+        // Handle mouse wheel for zoom
+    handleWheel(e) {
+        if (!this.isOpen || !this.imageElement) return;
+        
+        e.preventDefault();
+        
+        // Use smaller steps for wheel zoom for finer control
+        const wheelZoomStep = 0.05;
+        const delta = e.deltaY > 0 ? -wheelZoomStep : wheelZoomStep;
+        const newZoom = Math.max(this.minZoom, Math.min(this.maxZoom, this.zoomLevel + delta));
+        
+        if (newZoom !== this.zoomLevel) {
+            this.zoomLevel = newZoom;
+            
+            // If zoom level is 1.0 or below, center the image
+            if (this.zoomLevel <= 1.0) {
+                this.panX = 0;
+                this.panY = 0;
+            }
+            
+            this.updateImageTransform();
+            this.updateZoomButtons();
+        }
+    }
+
+        // Mouse event handlers for panning
+    handleMouseDown(e) {
+        if (!this.isOpen) return;
+        
+        // Allow limited dragging even at zoom level 1.0 to fix positioning issues
+        e.preventDefault();
+        this.isDragging = true;
+        this.dragStartX = e.clientX - this.panX;
+        this.dragStartY = e.clientY - this.panY;
+        
+        this.imageElement.classList.add('dragging');
+        
+        // Add global mouse event listeners
+        document.addEventListener('mousemove', this.handleMouseMove);
+        document.addEventListener('mouseup', this.handleMouseUp);
+        
+        // Prevent text selection
+        document.body.style.userSelect = 'none';
+    }
+
+        handleMouseMove(e) {
+        if (!this.isDragging) return;
+        
+        e.preventDefault();
+        
+        let newPanX = e.clientX - this.dragStartX;
+        let newPanY = e.clientY - this.dragStartY;
+        
+        // If zoom level is 1.0 or below, constrain movement to stay mostly centered
+        if (this.zoomLevel <= 1.0) {
+            const maxOffset = 50; // Maximum pixels off-center when not zoomed
+            newPanX = Math.max(-maxOffset, Math.min(maxOffset, newPanX));
+            newPanY = Math.max(-maxOffset, Math.min(maxOffset, newPanY));
+        }
+        
+        this.panX = newPanX;
+        this.panY = newPanY;
+        
+        this.updateImageTransform();
+    }
+
+    handleMouseUp(e) {
+        if (!this.isDragging) return;
+
+        this.isDragging = false;
+        this.imageElement.classList.remove('dragging');
+
+        // Remove global mouse event listeners
+        document.removeEventListener('mousemove', this.handleMouseMove);
+        document.removeEventListener('mouseup', this.handleMouseUp);
+
+        // Restore text selection
+        document.body.style.userSelect = '';
+    }
+
+    // Double click to toggle zoom
+    handleDoubleClick(e) {
+        e.preventDefault();
+        if (this.zoomLevel > 1) {
+            this.resetZoom();
+        } else {
+            this.zoomLevel = 2;
+            this.updateImageTransform();
+            this.updateZoomButtons();
+        }
+    }
+
+    // Touch event handlers for mobile zoom and pan
+    handleTouchStart(e) {
+        if (!this.isOpen) return;
+
+        e.preventDefault();
+
+        if (e.touches.length === 1) {
+            // Single touch - panning (allow even at zoom 1.0 for repositioning)
+            this.isDragging = true;
+            this.dragStartX = e.touches[0].clientX - this.panX;
+            this.dragStartY = e.touches[0].clientY - this.panY;
+            this.imageElement.classList.add('dragging');
+        } else if (e.touches.length === 2) {
+            // Two touches - pinch to zoom
+            const touch1 = e.touches[0];
+            const touch2 = e.touches[1];
+            this.initialPinchDistance = Math.hypot(
+                touch2.clientX - touch1.clientX,
+                touch2.clientY - touch1.clientY
+            );
+            this.initialZoomLevel = this.zoomLevel;
+        }
+    }
+
+    handleTouchMove(e) {
+        if (!this.isOpen) return;
+
+        e.preventDefault();
+
+        if (e.touches.length === 1 && this.isDragging) {
+            // Single touch panning
+            let newPanX = e.touches[0].clientX - this.dragStartX;
+            let newPanY = e.touches[0].clientY - this.dragStartY;
+            
+            // If zoom level is 1.0 or below, constrain movement to stay mostly centered
+            if (this.zoomLevel <= 1.0) {
+                const maxOffset = 50; // Maximum pixels off-center when not zoomed
+                newPanX = Math.max(-maxOffset, Math.min(maxOffset, newPanX));
+                newPanY = Math.max(-maxOffset, Math.min(maxOffset, newPanY));
+            }
+            
+            this.panX = newPanX;
+            this.panY = newPanY;
+            this.updateImageTransform();
+        } else if (e.touches.length === 2 && this.initialPinchDistance) {
+            // Pinch to zoom
+            const touch1 = e.touches[0];
+            const touch2 = e.touches[1];
+            const currentDistance = Math.hypot(
+                touch2.clientX - touch1.clientX,
+                touch2.clientY - touch1.clientY
+            );
+
+                        const scale = currentDistance / this.initialPinchDistance;
+            const newZoom = Math.max(this.minZoom, Math.min(this.maxZoom, this.initialZoomLevel * scale));
+            
+            if (newZoom !== this.zoomLevel) {
+                this.zoomLevel = newZoom;
+                
+                // If zoom level is 1.0 or below, center the image
+                if (this.zoomLevel <= 1.0) {
+                    this.panX = 0;
+                    this.panY = 0;
+                }
+                
+                this.updateImageTransform();
+                this.updateZoomButtons();
+            }
+        }
+    }
+
+    handleTouchEnd(e) {
+        if (!this.isOpen) return;
+
+        e.preventDefault();
+
+        if (e.touches.length === 0) {
+            // No more touches
+            this.isDragging = false;
+            this.imageElement.classList.remove('dragging');
+            this.initialPinchDistance = null;
+            this.initialZoomLevel = null;
+        } else if (e.touches.length === 1) {
+            // One touch remaining, reset pinch data
+            this.initialPinchDistance = null;
+            this.initialZoomLevel = null;
+        }
     }
 
     // Debounce utility
@@ -773,6 +1173,14 @@ class LightboxManager {
     // Public method to open lightbox (for external use)
     open(src, alt = '', index = 0) {
         this.openImage(src, alt, index);
+    }
+
+        // Handle window resize
+    handleResize() {
+        if (!this.isOpen || !this.imageElement) return;
+        
+        // Reset zoom and pan on resize to prevent issues
+        this.resetZoomAndPan();
     }
 
     // Clean up resources

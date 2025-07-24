@@ -146,6 +146,8 @@
     <script src="/public/js/modules/image-utils.js"></script>
     <script src="/public/js/modules/cart.js"></script>
     <script src="/public/js/modules/lightbox.js"></script>
+    <script src="/public/js/modules/search.js"></script>
+    <script src="/public/js/modules/ui.js"></script>
 
     <!-- Artwork Data Loader -->
     <script src="/public/js/artwork-loader.js"></script>
@@ -153,6 +155,9 @@
     <!-- Artwork Detail Script -->
     <script>
         document.addEventListener('DOMContentLoaded', function() {
+            // Initialize search and UI modules
+            initializeModules();
+
             // Simple initialization - no complex module waiting
             window.addEventListener('artwork-data-loaded', initArtworkDetail);
 
@@ -161,6 +166,24 @@
                 initArtworkDetail();
             }
         });
+
+        function initializeModules() {
+            try {
+                // Initialize search manager
+                if (window.SearchManager) {
+                    window.searchManager = new SearchManager();
+                    window.searchManager.init();
+                }
+
+                // Initialize UI manager
+                if (window.UIManager) {
+                    window.uiManager = new UIManager();
+                    window.uiManager.init();
+                }
+            } catch (error) {
+                console.error('Error initializing modules:', error);
+            }
+        }
 
         function initArtworkDetail() {
             // Get the artwork ID from the URL

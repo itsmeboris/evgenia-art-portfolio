@@ -808,7 +808,7 @@ class SearchManager {
 
         resultItem.innerHTML = `
             <a href="/artwork/${artwork.id}" class="search-result-link">
-                <img src="${artwork.image}" alt="${artwork.title}" class="search-result-image"
+                <img src="${window.utils ? window.utils.ensureAbsolutePath(artwork.image) : (artwork.image.startsWith('/') ? artwork.image : '/' + artwork.image)}" alt="${artwork.title}" class="search-result-image"
                      onerror="this.onerror=null;this.src='data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNkYPhfDwAChwGA60e6kgAAAABJRU5ErkJggg==';">
                 <div class="search-result-info">
                     <h3>${highlightedTitle}</h3>

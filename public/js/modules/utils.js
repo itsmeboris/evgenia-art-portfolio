@@ -561,6 +561,14 @@ class Utils {
         }
     };
 
+    // Ensure absolute path for images/assets
+    ensureAbsolutePath(path) {
+        if (!path) return '';
+        if (path.startsWith('/')) return path;
+        if (path.startsWith('http://') || path.startsWith('https://')) return path;
+        return '/' + path;
+    }
+
     // Clear all timers and cache
     cleanup() {
         this.debounceTimers.forEach(timer => clearTimeout(timer));

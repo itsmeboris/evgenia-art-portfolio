@@ -128,7 +128,7 @@ function initGalleryGrid(data) {
             artworkItem.innerHTML = `
                 <div class="artwork-image">
                     <a href="/artwork/${artwork.id}">
-                        <img src="${artwork.image}" 
+                        <img src="${window.utils ? window.utils.ensureAbsolutePath(artwork.image) : (artwork.image.startsWith('/') ? artwork.image : '/' + artwork.image)}" 
                              alt="${artwork.title} Painting" 
                              loading="lazy"
                              onerror="this.onerror=null;this.src='${placeholderImageURI}';">
@@ -208,7 +208,7 @@ function initAddToCartButtons(data) {
                     id: artwork.id,
                     title: artwork.title,
                     price: formattedPrice,
-                    image: artwork.image,
+                    image: window.utils ? window.utils.ensureAbsolutePath(artwork.image) : (artwork.image.startsWith('/') ? artwork.image : '/' + artwork.image),
                     dimensions: artwork.dimensions || 'Dimensions not specified'
                 };
 
@@ -275,7 +275,7 @@ function initLatestArtwork(data) {
         artworkItem.innerHTML = `
             <div class="artwork-image">
                 <a href="/artwork/${artwork.id}">
-                    <img src="${artwork.image}" 
+                    <img src="${window.utils ? window.utils.ensureAbsolutePath(artwork.image) : (artwork.image.startsWith('/') ? artwork.image : '/' + artwork.image)}" 
                          alt="${artwork.title} Painting" 
                          loading="lazy"
                          onerror="this.onerror=null;this.src='${placeholderImageURI}';">
@@ -324,7 +324,7 @@ function initFeaturedCollections(data) {
 
         collectionItem.innerHTML = `
             <div class="collection-image">
-                <img src="${collection.image}" alt="${collection.title} Collection" onerror="this.onerror=null;this.src='${placeholderImageURI}';">
+                <img src="${window.utils ? window.utils.ensureAbsolutePath(collection.image) : (collection.image.startsWith('/') ? collection.image : '/' + collection.image)}" alt="${collection.title} Collection" onerror="this.onerror=null;this.src='${placeholderImageURI}';">
             </div>
             <div class="collection-info">
                 <h3>${collection.title}</h3>
@@ -453,7 +453,7 @@ function initHeroSliderDynamic(data) {
                     </div>
                 </div>
                 <div class="slide-image">
-                    <img src="${collection.image}" 
+                    <img src="${window.utils ? window.utils.ensureAbsolutePath(collection.image) : (collection.image.startsWith('/') ? collection.image : '/' + collection.image)}" 
                          alt="${collection.title}" 
                          loading="lazy"
                          onerror="this.onerror=null;this.src='${placeholderImageURI}';">

@@ -13,6 +13,343 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@300;400;500;600;700&family=Montserrat:wght@300;400;500;600&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+</head>
+<body>
+    <!-- Header -->
+    <header>
+        <div class="container">
+            <nav>
+                <div class="logo">
+                    <a href="/">
+                        <img src="/public/assets/logo.jpg" alt="Evgenia Portnov Logo" class="header-logo">
+                    </a>
+                    <a href="/" class="logo-name">Evgenia Portnov</a>
+                </div>
+                <div class="nav-links">
+                    <ul>
+                        <li><a href="/">Home</a></li>
+                        <li><a href="/gallery" class="active">Gallery</a></li>
+                        <li><a href="/about">About</a></li>
+                        <li><a href="/contact">Contact</a></li>
+                    </ul>
+                </div>
+                <div class="shop-icons">
+                    <a href="#" class="search-icon"><i class="fas fa-search"></i></a>
+                    <a href="#" class="cart-icon"><i class="fas fa-shopping-cart"></i><span class="cart-count">0</span></a>
+                    <div class="mobile-menu-toggle">
+                        <i class="fas fa-bars"></i>
+                    </div>
+                </div>
+            </nav>
+        </div>
+    </header>
+
+    <!-- Artwork Detail Section -->
+    <section class="artwork-detail-container">
+        <div class="container">
+            <div id="artwork-detail-content">
+                <!-- This will be populated with the artwork details -->
+                <div class="artwork-not-found">
+                    <h2>Loading Artwork...</h2>
+                    <p>Please wait while we retrieve the artwork details.</p>
+                </div>
+            </div>
+
+            <!-- Related Artworks -->
+            <div class="related-artworks">
+                <h2>You Might Also Like</h2>
+                <div class="related-grid" id="related-artworks">
+                    <!-- Related artwork will be loaded here -->
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Newsletter Section -->
+    <section class="newsletter">
+        <div class="container">
+            <h2>Stay Updated</h2>
+            <p>Join my newsletter to receive updates on new artwork, exhibitions, and special offers.</p>
+            <form class="newsletter-form">
+                <input type="email" placeholder="Your email address" required>
+                <button type="submit" class="btn primary-btn">Subscribe</button>
+            </form>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer>
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-logo">
+                    <img src="/public/assets/logo.jpg" alt="Evgenia Portnov Logo" class="footer-logo-img">
+                    <p>Artist & Creator</p>
+                </div>
+                <div class="footer-links">
+                    <div class="footer-nav">
+                        <h4>Navigation</h4>
+                        <ul>
+                            <li><a href="/">Home</a></li>
+                            <li><a href="/gallery">Gallery</a></li>
+                            <li><a href="/about">About</a></li>
+                            <li><a href="/contact">Contact</a></li>
+                        </ul>
+                    </div>
+                    <div class="footer-collections">
+                        <h4>Collections</h4>
+                        <ul class="footer-collection-links">
+                            <!-- Collection links will be dynamically populated -->
+                        </ul>
+                    </div>
+                    <div class="footer-social">
+                        <h4>Connect</h4>
+                        <div class="social-icons">
+                            <a href="#" target="_blank"><i class="fab fa-instagram"></i></a>
+                            <a href="#" target="_blank"><i class="fab fa-facebook"></i></a>
+                            <a href="#" target="_blank"><i class="fab fa-pinterest"></i></a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <p>&copy; 2025 Evgenia Portnov. All rights reserved.</p>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Cart Modal Overlay -->
+    <div class="cart-modal-overlay">
+        <div class="cart-modal">
+            <div class="cart-header">
+                <h2>Your Cart</h2>
+                <button class="cart-close"><i class="fas fa-times"></i></button>
+            </div>
+            <div class="cart-items-container">
+                <!-- Cart items will be populated here -->
+            </div>
+            <div class="cart-footer">
+                <div class="cart-total">
+                    <span>Total:</span>
+                    <span class="cart-total-amount">₪0.00</span>
+                </div>
+                <div class="cart-actions">
+                    <button class="btn outline-btn cart-empty">Empty Cart</button>
+                    <button class="btn primary-btn cart-checkout">Checkout</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Essential Scripts Only -->
+    <script src="/public/js/modules/utils.js"></script>
+    <script src="/public/js/modules/error-handler.js"></script>
+    <script src="/public/js/modules/image-utils.js"></script>
+    <script src="/public/js/modules/cart.js"></script>
+    <script src="/public/js/modules/lightbox.js"></script>
+
+    <!-- Artwork Data Loader -->
+    <script src="/public/js/artwork-loader.js"></script>
+
+    <!-- Artwork Detail Script -->
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Simple initialization - no complex module waiting
+            window.addEventListener('artwork-data-loaded', initArtworkDetail);
+
+            // If artwork data is already loaded, initialize right away
+            if (window.artworkData) {
+                initArtworkDetail();
+            }
+        });
+
+        function initArtworkDetail() {
+            // Get the artwork ID from the URL
+            const pathParts = window.location.pathname.split('/');
+            const artworkId = pathParts[pathParts.length - 1];
+
+            // Find the artwork in the data
+            let artwork = null;
+            let artworksData = window.artworkData;
+
+            if (!artworksData || !artworksData.artworks) {
+                // Try to get from localStorage as fallback
+                try {
+                    const savedData = localStorage.getItem('evgenia-artwork-data');
+                    if (savedData) {
+                        artworksData = JSON.parse(savedData);
+                    }
+                } catch (e) {
+                    console.error('Error retrieving artwork data:', e);
+                }
+            }
+
+            if (artworksData && artworksData.artworks) {
+                // Find by ID first
+                artwork = artworksData.artworks.find(a => a.id === artworkId);
+
+                // If not found by ID, try with generated ID
+                if (!artwork) {
+                    artwork = artworksData.artworks.find(a => {
+                        const generatedId = a.title.toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, '');
+                        return generatedId === artworkId;
+                    });
+                }
+
+                // If artwork is found, render it
+                if (artwork) {
+                    renderArtworkDetail(artwork, artworksData.settings);
+                    renderRelatedArtworks(artwork, artworksData.artworks, artworksData.settings);
+                    document.title = `${artwork.title} | Evgenia Portnov`;
+                } else {
+                    showArtworkNotFound();
+                }
+            } else {
+                showArtworkNotFound();
+            }
+        }
+
+        function renderArtworkDetail(artwork, settings) {
+            const detailContainer = document.getElementById('artwork-detail-content');
+            const currency = settings && settings.currency ? settings.currency : '₪';
+
+            // Format the price
+            const formattedPrice = artwork.price ? `${currency}${artwork.price}` : 'Price on request';
+
+            // Ensure image paths are absolute
+            const imagePath = artwork.image.startsWith('/') ? artwork.image : `/${artwork.image}`;
+
+            // Create the detail HTML
+            const detailHTML = `
+                <div class="artwork-detail">
+                    <div class="artwork-image-container">
+                        <img src="${imagePath}" alt="${artwork.title}" class="artwork-detail-image"
+                            onclick="openLightbox('${imagePath}', '${artwork.title}')">
+                    </div>
+                    <div class="artwork-info">
+                        <h1>${artwork.title}</h1>
+                        <div class="artwork-metadata">
+                            <p><strong>Medium:</strong> ${artwork.medium || 'Not specified'}</p>
+                            <p><strong>Dimensions:</strong> ${artwork.dimensions || 'Not specified'}</p>
+                            <p><strong>Collection:</strong> <a href="/gallery?collection=${artwork.category}">${artwork.category || 'Uncategorized'}</a></p>
+                            <p><strong>Price:</strong> ${formattedPrice}</p>
+                            ${artwork.year ? `<p><strong>Year:</strong> ${artwork.year}</p>` : ''}
+                        </div>
+                        <div class="artwork-description">
+                            ${artwork.description || 'No description available for this artwork.'}
+                        </div>
+                        <div class="artwork-actions">
+                            <button class="btn primary-btn add-to-cart-btn" onclick="addToCartFromDetail('${artwork.id}')">
+                                Add to Cart
+                            </button>
+                            <a href="/gallery" class="btn outline-btn">
+                                Back to Gallery
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            `;
+
+            detailContainer.innerHTML = detailHTML;
+        }
+
+        function renderRelatedArtworks(currentArtwork, allArtworks, settings) {
+            const relatedContainer = document.getElementById('related-artworks');
+            const currency = settings && settings.currency ? settings.currency : '₪';
+
+            // Find related artworks (same category)
+            let relatedArtworks = allArtworks.filter(artwork =>
+                artwork.category === currentArtwork.category &&
+                artwork.id !== currentArtwork.id
+            ).slice(0, 3); // Limit to 3
+
+            // If no related artworks, hide the section
+            if (relatedArtworks.length === 0) {
+                document.querySelector('.related-artworks').style.display = 'none';
+                return;
+            }
+
+            // Clear the container and add related artworks
+            relatedContainer.innerHTML = '';
+            relatedArtworks.forEach(artwork => {
+                const formattedPrice = artwork.price ? `${currency}${artwork.price}` : 'Price on request';
+                const imagePath = artwork.image.startsWith('/') ? artwork.image : `/${artwork.image}`;
+
+                const artworkElement = document.createElement('div');
+                artworkElement.className = 'artwork-item';
+                artworkElement.innerHTML = `
+                    <a href="/artwork/${artwork.id}" class="artwork-image">
+                        <img src="${imagePath}" alt="${artwork.title}">
+                    </a>
+                    <div class="artwork-details">
+                        <h3><a href="/artwork/${artwork.id}">${artwork.title}</a></h3>
+                        <p><strong>Price:</strong> ${formattedPrice}</p>
+                        <a href="/artwork/${artwork.id}" class="btn outline-btn">View Details</a>
+                    </div>
+                `;
+                relatedContainer.appendChild(artworkElement);
+            });
+        }
+
+        function showArtworkNotFound() {
+            const detailContainer = document.getElementById('artwork-detail-content');
+            detailContainer.innerHTML = `
+                <div class="artwork-not-found">
+                    <h2>Artwork Not Found</h2>
+                    <p>We couldn't find the artwork you're looking for.</p>
+                    <a href="/gallery" class="btn primary-btn">Browse Gallery</a>
+                </div>
+            `;
+            document.querySelector('.related-artworks').style.display = 'none';
+        }
+
+        // Simple cart function
+        function addToCartFromDetail(artworkId) {
+            if (window.cartManager && window.cartManager.addToCart) {
+                // Get artwork data
+                let artworksData = window.artworkData;
+                if (!artworksData) {
+                    try {
+                        const savedData = localStorage.getItem('evgenia-artwork-data');
+                        if (savedData) artworksData = JSON.parse(savedData);
+                    } catch (e) { return; }
+                }
+
+                const artwork = artworksData.artworks.find(a => a.id === artworkId);
+                if (!artwork) return;
+
+                const currency = artworksData.settings?.currency || '₪';
+                const item = {
+                    id: artwork.id,
+                    title: artwork.title,
+                    price: artwork.price ? `${currency}${artwork.price}` : `${currency}0`,
+                    image: artwork.image.startsWith('/') ? artwork.image : `/${artwork.image}`,
+                    dimensions: artwork.dimensions || 'Dimensions not specified'
+                };
+
+                window.cartManager.addToCart(item);
+
+                // Simple feedback
+                const btn = document.querySelector('.add-to-cart-btn');
+                if (btn) {
+                    const original = btn.textContent;
+                    btn.textContent = 'Added!';
+                    btn.disabled = true;
+                    setTimeout(() => {
+                        btn.textContent = original;
+                        btn.disabled = false;
+                    }, 1500);
+                }
+            }
+        }
+
+        // Simple lightbox function
+        function openLightbox(src, alt) {
+            if (window.lightboxManager && window.lightboxManager.openImage) {
+                window.lightboxManager.openImage(src, alt);
+            }
+        }
+    </script>
+
     <style>
         /* Artwork specific styles */
         .artwork-detail-container {
@@ -178,385 +515,5 @@
             }
         }
     </style>
-</head>
-<body>
-    <!-- Header -->
-    <header>
-        <div class="container">
-            <nav>
-                <div class="logo">
-                    <a href="/">
-                        <img src="/public/assets/logo.jpg" alt="Evgenia Portnov Logo" class="header-logo">
-                    </a>
-                    <a href="/" class="logo-name">Evgenia Portnov</a>
-                </div>
-                <div class="nav-links">
-                    <ul>
-                        <li><a href="/">Home</a></li>
-                        <li><a href="/gallery" class="active">Gallery</a></li>
-                        <li><a href="/about">About</a></li>
-                        <li><a href="/contact">Contact</a></li>
-                    </ul>
-                </div>
-                <div class="shop-icons">
-                    <a href="#" class="search-icon"><i class="fas fa-search"></i></a>
-                    <a href="#" class="cart-icon"><i class="fas fa-shopping-cart"></i><span class="cart-count">0</span></a>
-                    <div class="mobile-menu-toggle">
-                        <i class="fas fa-bars"></i>
-                    </div>
-                </div>
-            </nav>
-        </div>
-    </header>
-
-    <!-- Artwork Detail Section -->
-    <section class="artwork-detail-container">
-        <div class="container">
-            <div id="artwork-detail-content">
-                <!-- This will be populated with the artwork details -->
-                <div class="artwork-not-found">
-                    <h2>Loading Artwork...</h2>
-                    <p>Please wait while we retrieve the artwork details.</p>
-                </div>
-            </div>
-
-            <!-- Related Artworks -->
-            <div class="related-artworks">
-                <h2>You Might Also Like</h2>
-                <div class="related-grid" id="related-artworks">
-                    <!-- Related artwork will be loaded here -->
-                </div>
-            </div>
-        </div>
-    </section>
-
-    <!-- Newsletter Section -->
-    <section class="newsletter">
-        <div class="container">
-            <h2>Stay Updated</h2>
-            <p>Join my newsletter to receive updates on new artwork, exhibitions, and special offers.</p>
-            <form class="newsletter-form">
-                <input type="email" placeholder="Your email address" required>
-                <button type="submit" class="btn primary-btn">Subscribe</button>
-            </form>
-        </div>
-    </section>
-
-    <!-- Footer -->
-    <footer>
-        <div class="container">
-            <div class="footer-content">
-                <div class="footer-logo">
-                    <img src="/public/assets/logo.jpg" alt="Evgenia Portnov Logo" class="footer-logo-img">
-                    <p>Artist & Creator</p>
-                </div>
-                <div class="footer-links">
-                    <div class="footer-nav">
-                        <h4>Navigation</h4>
-                        <ul>
-                            <li><a href="/">Home</a></li>
-                            <li><a href="/gallery">Gallery</a></li>
-                            <li><a href="/about">About</a></li>
-                            <li><a href="/contact">Contact</a></li>
-                        </ul>
-                    </div>
-                    <div class="footer-collections">
-                        <h4>Collections</h4>
-                        <ul class="footer-collection-links">
-                            <!-- Collection links will be dynamically populated -->
-                        </ul>
-                    </div>
-                    <div class="footer-social">
-                        <h4>Connect</h4>
-                        <div class="social-icons">
-                            <a href="#" target="_blank"><i class="fab fa-instagram"></i></a>
-                            <a href="#" target="_blank"><i class="fab fa-facebook"></i></a>
-                            <a href="#" target="_blank"><i class="fab fa-pinterest"></i></a>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            <div class="footer-bottom">
-                <p>&copy; 2025 Evgenia Portnov. All rights reserved.</p>
-            </div>
-        </div>
-    </footer>
-
-    <!-- Artwork Detail Script -->
-    <script>
-        document.addEventListener('DOMContentLoaded', function() {
-            // Load artwork data first, then initialize the artwork detail
-            window.addEventListener('artwork-data-loaded', initArtworkDetail);
-
-            // If artwork data is already loaded, initialize right away
-            if (window.artworkData) {
-                initArtworkDetail();
-            }
-        });
-
-        function initArtworkDetail() {
-            // Get the artwork ID from the URL
-            const pathParts = window.location.pathname.split('/');
-            const artworkId = pathParts[pathParts.length - 1];
-
-            // Find the artwork in the data
-            let artwork = null;
-            let artworksData = window.artworkData;
-
-            if (!artworksData || !artworksData.artworks) {
-                // Try to get from localStorage as fallback
-                try {
-                    const savedData = localStorage.getItem('evgenia-artwork-data');
-                    if (savedData) {
-                        artworksData = JSON.parse(savedData);
-                    }
-                } catch (e) {
-                    console.error('Error retrieving artwork data:', e);
-                }
-            }
-
-            if (artworksData && artworksData.artworks) {
-                // Find by ID first
-                artwork = artworksData.artworks.find(a => a.id === artworkId);
-
-                // If not found by ID, try with generated ID (lowercase title with hyphens)
-                if (!artwork) {
-                    artwork = artworksData.artworks.find(a => {
-                        const generatedId = a.title.toLowerCase().replace(/\s+/g, '-');
-                        return generatedId === artworkId;
-                    });
-                }
-
-                // If artwork is found, render it
-                if (artwork) {
-                    renderArtworkDetail(artwork, artworksData.settings);
-                    renderRelatedArtworks(artwork, artworksData.artworks, artworksData.settings);
-                    // Update page title
-                    document.title = `${artwork.title} | Evgenia Portnov`;
-                } else {
-                    showArtworkNotFound();
-                }
-            } else {
-                showArtworkNotFound();
-            }
-        }
-
-        function renderArtworkDetail(artwork, settings) {
-            const detailContainer = document.getElementById('artwork-detail-content');
-            const currency = settings && settings.currency ? settings.currency : '₪';
-
-            // Format the price
-            const formattedPrice = artwork.price ? `${currency}${artwork.price}` : 'Price on request';
-
-            // Ensure image paths are absolute
-            const imagePath = artwork.image.startsWith('/') ? artwork.image : `/${artwork.image}`;
-
-            // Create the detail HTML
-            const detailHTML = `
-                <div class="artwork-detail">
-                    <div class="artwork-image-container">
-                        <img src="${imagePath}" alt="${artwork.title}" class="artwork-detail-image"
-                            onclick="openLightbox('${imagePath}', '${artwork.title}')">
-                    </div>
-                    <div class="artwork-info">
-                        <h1>${artwork.title}</h1>
-                        <div class="artwork-metadata">
-                            <p><strong>Medium:</strong> ${artwork.medium || 'Not specified'}</p>
-                            <p><strong>Dimensions:</strong> ${artwork.dimensions || 'Not specified'}</p>
-                            <p><strong>Collection:</strong> <a href="/gallery?collection=${artwork.category}">${artwork.category || 'Uncategorized'}</a></p>
-                            <p><strong>Price:</strong> ${formattedPrice}</p>
-                            ${artwork.year ? `<p><strong>Year:</strong> ${artwork.year}</p>` : ''}
-                        </div>
-                        <div class="artwork-description">
-                            ${artwork.description || 'No description available for this artwork.'}
-                        </div>
-                        <div class="artwork-actions">
-                            <button class="btn primary-btn add-to-cart-btn" onclick="addToCartFromDetail('${artwork.id}')">
-                                Add to Cart
-                            </button>
-                            <a href="/gallery" class="btn outline-btn">
-                                Back to Gallery
-                            </a>
-                        </div>
-                    </div>
-                </div>
-            `;
-
-            detailContainer.innerHTML = detailHTML;
-        }
-
-        function renderRelatedArtworks(currentArtwork, allArtworks, settings) {
-            const relatedContainer = document.getElementById('related-artworks');
-            const currency = settings && settings.currency ? settings.currency : '₪';
-
-            // Find related artworks (same category or collection)
-            let relatedArtworks = allArtworks.filter(artwork =>
-                artwork.category === currentArtwork.category &&
-                artwork.id !== currentArtwork.id
-            );
-
-            // If not enough related artworks by category, add some random ones
-            if (relatedArtworks.length < 3) {
-                const randomArtworks = allArtworks
-                    .filter(artwork =>
-                        artwork.id !== currentArtwork.id &&
-                        !relatedArtworks.some(related => related.id === artwork.id)
-                    )
-                    .sort(() => 0.5 - Math.random()) // Shuffle
-                    .slice(0, 3 - relatedArtworks.length);
-
-                relatedArtworks = [...relatedArtworks, ...randomArtworks];
-            }
-
-            // Limit to 3 related artworks
-            relatedArtworks = relatedArtworks.slice(0, 3);
-
-            // If no related artworks, hide the section
-            if (relatedArtworks.length === 0) {
-                document.querySelector('.related-artworks').style.display = 'none';
-                return;
-            }
-
-            // Clear the container
-            relatedContainer.innerHTML = '';
-
-            // Add each related artwork
-            relatedArtworks.forEach(artwork => {
-                const formattedPrice = artwork.price ? `${currency}${artwork.price}` : 'Price on request';
-
-                // Ensure image paths are absolute
-                const imagePath = artwork.image.startsWith('/') ? artwork.image : `/${artwork.image}`;
-
-                const artworkElement = document.createElement('div');
-                artworkElement.className = 'artwork-item';
-
-                artworkElement.innerHTML = `
-                    <a href="/artwork/${artwork.id}" class="artwork-image">
-                        <img src="${imagePath}" alt="${artwork.title}">
-                    </a>
-                    <div class="artwork-details">
-                        <h3><a href="/artwork/${artwork.id}">${artwork.title}</a></h3>
-                        <p><strong>Dimensions:</strong> ${artwork.dimensions || 'Not specified'}</p>
-                        <p><strong>Medium:</strong> ${artwork.medium || 'Not specified'}</p>
-                        <p><strong>Price:</strong> ${formattedPrice}</p>
-                        <a href="/artwork/${artwork.id}" class="btn outline-btn">View Details</a>
-                    </div>
-                `;
-
-                relatedContainer.appendChild(artworkElement);
-            });
-        }
-
-        function showArtworkNotFound() {
-            const detailContainer = document.getElementById('artwork-detail-content');
-            detailContainer.innerHTML = `
-                <div class="artwork-not-found">
-                    <h2>Artwork Not Found</h2>
-                    <p>We couldn't find the artwork you're looking for. It may have been removed or the URL might be incorrect.</p>
-                    <a href="/gallery" class="btn primary-btn">Browse Gallery</a>
-                </div>
-            `;
-
-            // Hide related artworks
-            document.querySelector('.related-artworks').style.display = 'none';
-        }
-
-        // Helper function to add artwork to cart from the detail page
-        function addToCartFromDetail(artworkId) {
-            // Find the artwork in the data
-            let artworksData = window.artworkData;
-
-            if (!artworksData || !artworksData.artworks) {
-                // Try to get from localStorage as fallback
-                try {
-                    const savedData = localStorage.getItem('evgenia-artwork-data');
-                    if (savedData) {
-                        artworksData = JSON.parse(savedData);
-                    }
-                } catch (e) {
-                    console.error('Error retrieving artwork data:', e);
-                    return;
-                }
-            }
-
-            if (!artworksData || !artworksData.artworks) {
-                console.error('No artwork data available');
-                return;
-            }
-
-            // Find the artwork
-            const artwork = artworksData.artworks.find(a => a.id === artworkId);
-
-            if (!artwork) {
-                console.error('Artwork not found:', artworkId);
-                return;
-            }
-
-            // Get the currency from settings
-            const currency = artworksData.settings && artworksData.settings.currency
-                ? artworksData.settings.currency
-                : '₪';
-
-            // Format the price
-            const formattedPrice = artwork.price ? `${currency}${artwork.price}` : `${currency}0`;
-
-            // Ensure image path is absolute
-            const imagePath = artwork.image.startsWith('/') ? artwork.image : `/${artwork.image}`;
-
-            // Create item to add to cart
-            const item = {
-                id: artwork.id,
-                title: artwork.title,
-                price: formattedPrice,
-                image: imagePath,
-                dimensions: artwork.dimensions || 'Dimensions not specified'
-            };
-
-            // Add to cart
-            if (window.addToCart) {
-                window.addToCart(item);
-
-                // Show feedback
-                const addToCartBtn = document.querySelector('.add-to-cart-btn');
-                if (addToCartBtn) {
-                    const originalText = addToCartBtn.textContent;
-                    addToCartBtn.textContent = 'Added to Cart!';
-                    addToCartBtn.disabled = true;
-
-                    setTimeout(() => {
-                        addToCartBtn.textContent = originalText;
-                        addToCartBtn.disabled = false;
-                    }, 1500);
-                }
-            }
-        }
-    </script>
-
-    <!-- Cart Modal Overlay -->
-    <div class="cart-modal-overlay">
-        <div class="cart-modal">
-            <div class="cart-header">
-                <h2>Your Cart</h2>
-                <button class="cart-close"><i class="fas fa-times"></i></button>
-            </div>
-            <div class="cart-items-container">
-                <!-- Cart items will be populated here -->
-            </div>
-            <div class="cart-footer">
-                <div class="cart-total">
-                    <span>Total:</span>
-                    <span class="cart-total-amount">₪0.00</span>
-                </div>
-                <div class="cart-actions">
-                    <button class="btn outline-btn cart-empty">Empty Cart</button>
-                    <button class="btn primary-btn cart-checkout">Checkout</button>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- Scripts -->
-    <script src="/public/js/main.js"></script>
-    <script src="/public/js/artwork-loader.js"></script>
 </body>
 </html>

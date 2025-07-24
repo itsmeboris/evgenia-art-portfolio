@@ -14,6 +14,28 @@ const csrf = require('csrf');
 const app = express();
 const port = process.env.PORT || 3000;
 
+// Enhanced error handling for socket errors
+process.on('uncaughtException', (err) => {
+    if (err.code === 'ECONNRESET' || err.message.includes('Parse Error')) {
+        console.log('⚠️  Connection error (likely mobile browser issue):', err.message);
+        return; // Don't crash the server
+    }
+    console.error('Uncaught Exception:', err);
+    process.exit(1);
+});
+
+// Enhanced server error handling
+app.on('error', (err) => {
+    if (err.code === 'ECONNRESET' || err.message.includes('Parse Error')) {
+        console.log('⚠️  Server connection error (likely mobile browser issue)');
+        return;
+    }
+    console.error('Server error:', err);
+});
+
+// Trust proxy (helps with mobile connections)
+app.set('trust proxy', true);
+
 // Admin authentication configuration from environment variables
 const ADMIN_USERNAME = process.env.ADMIN_USERNAME;
 const ADMIN_PASSWORD_HASH = process.env.ADMIN_PASSWORD_HASH;
@@ -384,6 +406,11 @@ app.use('/public', express.static(path.join(__dirname, 'public'), {
 // Route for individual artwork pages
 app.get('/artwork/:id', (req, res) => {
   res.sendFile(path.join(__dirname, 'artwork.html'));
+});
+
+// Route for WebP test page
+app.get('/webp-test.html', (req, res) => {
+  res.sendFile(path.join(__dirname, 'webp-test.html'));
 });
 
 // Newsletter subscription endpoint

@@ -128,7 +128,10 @@ function initGalleryGrid(data) {
             artworkItem.innerHTML = `
                 <div class="artwork-image">
                     <a href="/artwork/${artwork.id}">
-                        <img src="${artwork.image}" alt="${artwork.title} Painting" onerror="this.onerror=null;this.src='${placeholderImageURI}';">
+                        <img src="${artwork.image}" 
+                             alt="${artwork.title} Painting" 
+                             loading="lazy"
+                             onerror="this.onerror=null;this.src='${placeholderImageURI}';">
                     </a>
                 </div>
                 <div class="artwork-info">
@@ -272,7 +275,10 @@ function initLatestArtwork(data) {
         artworkItem.innerHTML = `
             <div class="artwork-image">
                 <a href="/artwork/${artwork.id}">
-                    <img src="${artwork.image}" alt="${artwork.title} Painting" onerror="this.onerror=null;this.src='${placeholderImageURI}';">
+                    <img src="${artwork.image}" 
+                         alt="${artwork.title} Painting" 
+                         loading="lazy"
+                         onerror="this.onerror=null;this.src='${placeholderImageURI}';">
                 </a>
             </div>
             <div class="artwork-info">
@@ -447,7 +453,10 @@ function initHeroSliderDynamic(data) {
                     </div>
                 </div>
                 <div class="slide-image">
-                    <img src="${collection.image}" alt="${collection.title}" onerror="this.onerror=null;this.src='${placeholderImageURI}';">
+                    <img src="${collection.image}" 
+                         alt="${collection.title}" 
+                         loading="lazy"
+                         onerror="this.onerror=null;this.src='${placeholderImageURI}';">
                 </div>
             `;
 

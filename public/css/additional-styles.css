@@ -606,3 +606,291 @@ body.menu-open {
         margin-left: 10px;
     }
 } 
+
+/*
+=========================
+  IMAGE OPTIMIZATION STYLES
+=========================
+*/
+
+/* Image loading states */
+.image-optimized {
+    transition: opacity 0.3s ease, transform 0.3s ease;
+}
+
+.image-optimized.loading {
+    opacity: 0.7;
+    background-color: #f0f0f0;
+    background-image: linear-gradient(
+        90deg,
+        #f0f0f0 25%,
+        #e0e0e0 50%,
+        #f0f0f0 75%
+    );
+    background-size: 200% 100%;
+    animation: imageLoadingShimmer 1.5s infinite;
+}
+
+.image-optimized.loaded {
+    opacity: 1;
+}
+
+.image-optimized.error {
+    opacity: 0.5;
+    filter: grayscale(100%);
+}
+
+/* Loading shimmer animation */
+@keyframes imageLoadingShimmer {
+    0% {
+        background-position: -200% 0;
+    }
+    100% {
+        background-position: 200% 0;
+    }
+}
+
+/* Image fade-in animation */
+@keyframes imageFadeIn {
+    from {
+        opacity: 0;
+        transform: scale(0.95);
+    }
+    to {
+        opacity: 1;
+        transform: scale(1);
+    }
+}
+
+.image-optimized.loaded {
+    animation: imageFadeIn 0.3s ease;
+}
+
+/* Responsive image container */
+.responsive-image-container {
+    position: relative;
+    overflow: hidden;
+    background-color: #f8f8f8;
+}
+
+.responsive-image-container img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    object-position: center;
+}
+
+/* Loading placeholder styles */
+.image-placeholder {
+    background-color: #f0f0f0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 200px;
+    background-image: linear-gradient(
+        45deg,
+        #f8f8f8 25%,
+        transparent 25%,
+        transparent 75%,
+        #f8f8f8 75%,
+        #f8f8f8
+    );
+    background-size: 20px 20px;
+    animation: placeholderPulse 2s ease-in-out infinite;
+}
+
+@keyframes placeholderPulse {
+    0%, 100% {
+        opacity: 0.8;
+    }
+    50% {
+        opacity: 1;
+    }
+}
+
+/* Error state for images */
+.image-error {
+    background-color: #f5f5f5;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 200px;
+    color: #999;
+    font-size: 14px;
+    text-align: center;
+    border: 1px dashed #ddd;
+}
+
+.image-error::before {
+    content: '📷';
+    font-size: 48px;
+    display: block;
+    margin-bottom: 10px;
+}
+
+/* Progressive enhancement for modern browsers */
+@supports (object-fit: cover) {
+    .image-optimized {
+        object-fit: cover;
+    }
+}
+
+/* Prefers-reduced-motion support */
+@media (prefers-reduced-motion: reduce) {
+    .image-optimized,
+    .image-optimized.loading,
+    .image-optimized.loaded {
+        animation: none;
+        transition: none;
+    }
+    
+    @keyframes imageLoadingShimmer {
+        0%, 100% {
+            background-position: 0 0;
+        }
+    }
+}
+
+/* High contrast mode support */
+@media (prefers-contrast: high) {
+    .image-optimized.loading {
+        background-color: #000;
+        color: #fff;
+    }
+    
+    .image-error {
+        background-color: #fff;
+        color: #000;
+        border-color: #000;
+    }
+}
+
+/* Dark mode support */
+@media (prefers-color-scheme: dark) {
+    .image-optimized.loading {
+        background-color: #2a2a2a;
+        background-image: linear-gradient(
+            90deg,
+            #2a2a2a 25%,
+            #3a3a3a 50%,
+            #2a2a2a 75%
+        );
+    }
+    
+    .image-placeholder {
+        background-color: #2a2a2a;
+        background-image: linear-gradient(
+            45deg,
+            #333 25%,
+            transparent 25%,
+            transparent 75%,
+            #333 75%,
+            #333
+        );
+    }
+    
+    .image-error {
+        background-color: #1a1a1a;
+        color: #ccc;
+        border-color: #444;
+    }
+}
+
+/* Performance optimization classes */
+.will-change-opacity {
+    will-change: opacity;
+}
+
+.will-change-transform {
+    will-change: transform;
+}
+
+/* Remove will-change after animation completes */
+.image-optimized.loaded {
+    will-change: auto;
+}
+
+/* Touch device optimizations */
+@media (hover: none) and (pointer: coarse) {
+    .image-optimized:hover {
+        transform: none;
+    }
+    
+    /* Reduce animations on touch devices to save battery */
+    .image-optimized.loading {
+        animation-duration: 2s;
+    }
+}
+
+/* Print styles */
+@media print {
+    .image-optimized.loading {
+        background: none;
+        animation: none;
+        opacity: 1;
+    }
+    
+    .image-placeholder,
+    .image-error {
+        display: none;
+    }
+}
+
+/*
+=========================
+  RESPONSIVE IMAGE UTILITIES
+=========================
+*/
+
+/* Responsive image sizes */
+.img-responsive {
+    max-width: 100%;
+    height: auto;
+}
+
+.img-cover {
+    object-fit: cover;
+}
+
+.img-contain {
+    object-fit: contain;
+}
+
+.img-center {
+    object-position: center;
+}
+
+/* Aspect ratio containers for consistent image dimensions */
+.aspect-ratio-16-9 {
+    position: relative;
+    overflow: hidden;
+    padding-bottom: 56.25%; /* 16:9 */
+}
+
+.aspect-ratio-4-3 {
+    position: relative;
+    overflow: hidden;
+    padding-bottom: 75%; /* 4:3 */
+}
+
+.aspect-ratio-1-1 {
+    position: relative;
+    overflow: hidden;
+    padding-bottom: 100%; /* 1:1 */
+}
+
+.aspect-ratio-16-9 img,
+.aspect-ratio-4-3 img,
+.aspect-ratio-1-1 img {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+/* Performance hint for browsers */
+.image-optimized[loading="lazy"] {
+    content-visibility: auto;
+} 

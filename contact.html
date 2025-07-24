@@ -174,9 +174,6 @@
         </div>
     </footer>
 
-    <script src="public/js/main.js"></script>
-    <script src="public/js/artwork-loader.js"></script>
-
     <!-- Cart Modal Overlay -->
     <div class="cart-modal-overlay">
         <div class="cart-modal">
@@ -199,5 +196,22 @@
             </div>
         </div>
     </div>
+
+    <!-- Module Scripts - Load in correct order at bottom -->
+    <script src="public/js/modules/utils.js"></script>
+    <script src="public/js/modules/error-handler.js"></script>
+    <script src="public/js/modules/image-utils.js"></script>
+    <script src="public/js/modules/image-optimizer.js"></script>
+    <script src="public/js/modules/ui.js"></script>
+    <script src="public/js/modules/cart.js"></script>
+    <script src="public/js/modules/lightbox.js"></script>
+    <script src="public/js/modules/search.js"></script>
+    <script src="public/js/modules/forms.js"></script>
+
+    <!-- Main Application -->
+    <script src="public/js/main.js"></script>
+
+    <!-- Artwork Data Loader -->
+    <script src="public/js/artwork-loader.js"></script>
 </body>
 </html>

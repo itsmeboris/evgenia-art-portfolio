@@ -65,7 +65,7 @@ class LightboxManager {
         this.overlay.setAttribute('role', 'dialog');
         this.overlay.setAttribute('aria-modal', 'true');
         this.overlay.setAttribute('aria-labelledby', 'lightbox-caption');
-        this.overlay.setAttribute('aria-hidden', 'true');
+        this.overlay.style.display = 'none'; // Use display instead of aria-hidden
 
         // Image container
         const imageContainer = document.createElement('div');
@@ -148,7 +148,7 @@ class LightboxManager {
         // Add accessibility attributes
         this.overlay.setAttribute('role', 'dialog');
         this.overlay.setAttribute('aria-modal', 'true');
-        this.overlay.setAttribute('aria-hidden', 'true');
+        this.overlay.style.display = 'none'; // Use display instead of aria-hidden
 
         // Add navigation if not present
         if (!this.overlay.querySelector('.lightbox-nav')) {
@@ -499,7 +499,7 @@ class LightboxManager {
         this.updateGalleryImages();
 
         // Show overlay
-        this.overlay.setAttribute('aria-hidden', 'false');
+        this.overlay.style.display = 'flex';
         this.overlay.classList.add('active');
         document.body.style.overflow = 'hidden';
 
@@ -695,7 +695,7 @@ class LightboxManager {
 
         this.isOpen = false;
         this.overlay.classList.remove('active');
-        this.overlay.setAttribute('aria-hidden', 'true');
+        this.overlay.style.display = 'none'; // Use display instead of aria-hidden
         document.body.style.overflow = '';
 
         // Remove event listeners

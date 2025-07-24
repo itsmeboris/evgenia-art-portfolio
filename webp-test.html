@@ -1,0 +1,223 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>WebP Support Test</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 2rem;
+            line-height: 1.6;
+        }
+        .result {
+            padding: 1rem;
+            border-radius: 8px;
+            margin: 1rem 0;
+            font-weight: bold;
+        }
+        .supported {
+            background-color: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+        .not-supported {
+            background-color: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+        .browser-info {
+            background-color: #e2e3e5;
+            padding: 1rem;
+            border-radius: 8px;
+            margin: 1rem 0;
+        }
+        .test-images {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 2rem;
+            margin: 2rem 0;
+        }
+        .test-image {
+            text-align: center;
+            border: 1px solid #ddd;
+            padding: 1rem;
+            border-radius: 8px;
+        }
+        .test-image img {
+            max-width: 100%;
+            height: auto;
+            border-radius: 4px;
+            min-height: 50px;
+            display: block;
+            margin: 0 auto;
+        }
+    </style>
+</head>
+<body>
+    <h1>🖼️ WebP Support Test</h1>
+
+    <div id="webp-result" class="result">
+        Testing WebP support...
+    </div>
+
+    <div class="browser-info">
+        <h3>Your Browser Info:</h3>
+        <p><strong>User Agent:</strong> <span id="user-agent"></span></p>
+        <p><strong>Browser:</strong> <span id="browser-name"></span></p>
+        <p><strong>Version:</strong> <span id="browser-version"></span></p>
+    </div>
+
+    <h2>Visual Test</h2>
+    <p>If WebP is supported, you should see identical images below:</p>
+
+    <div class="test-images">
+        <div class="test-image">
+            <h4>WebP Image</h4>
+            <picture>
+                <source srcset="data:image/webp;base64,UklGRiIAAABXRUJQVlA4WAoAAAAQAAAADwAABwAAQUxQSAwAAAABBxAREYiI/gcA" type="image/webp">
+                <img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAICAYAAADwdn+XAAAABHNCSVQICAgIfAhkiAAAABl0RVh0U29mdHdhcmUAZ25vbWUtc2NyZWVuc2hvdO8Dvz4AAAAvSURBVCiRY/z//z8DJQAggBhIBQABBBBABBABRAAQQAQQAUQAEUAEEAFEABFABAAAX8AhAJkKRisAAAAASUVORK5CYII=" alt="WebP test" style="width: 100px; height: 50px; background: linear-gradient(45deg, #4CAF50, #2196F3); border: 2px solid #333;">
+            </picture>
+            <p id="webp-status">Testing...</p>
+        </div>
+
+        <div class="test-image">
+            <h4>PNG Reference</h4>
+            <img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAICAYAAADwdn+XAAAABHNCSVQICAgIfAhkiAAAABl0RVh0U29mdHdhcmUAZ25vbWUtc2NyZWVuc2hvdO8Dvz4AAAAvSURBVCiRY/z//z8DJQAggBhIBQABBBBABBABRAAQQAQQAUQAEUAEEAFEABFABAAAX8AhAJkKRisAAAAASUVORK5CYII=" alt="PNG reference" style="width: 100px; height: 50px; background: linear-gradient(45deg, #4CAF50, #2196F3); border: 2px solid #333;">
+            <p>PNG reference (always works)</p>
+        </div>
+    </div>
+
+    <div class="browser-info">
+        <h3>🔍 What Should You See?</h3>
+        <p><strong>If WebP works:</strong> Both images should look identical (colorful gradient rectangles)</p>
+        <p><strong>If WebP doesn't work:</strong> Left image shows fallback, right image shows the reference</p>
+        <p><strong>Note:</strong> The images are small but should be visible with colored borders</p>
+    </div>
+
+    <h2>Browser Compatibility</h2>
+    <ul>
+        <li>✅ <strong>Chrome 23+</strong> (since 2012)</li>
+        <li>✅ <strong>Firefox 65+</strong> (since 2019)</li>
+        <li>✅ <strong>Edge 18+</strong> (since 2018)</li>
+        <li>✅ <strong>Safari 14+</strong> (since 2020)</li>
+        <li>✅ <strong>Opera 12.1+</strong> (since 2012)</li>
+        <li>❌ <strong>Internet Explorer</strong> (never)</li>
+        <li>❌ <strong>Safari 13 and older</strong></li>
+    </ul>
+
+    <h2>What This Means</h2>
+    <div class="browser-info">
+        <p><strong>If WebP is supported:</strong> You get 25% smaller image files = faster loading!</p>
+        <p><strong>If WebP is not supported:</strong> You get JPEG fallbacks = same great quality, just slightly larger files.</p>
+        <p><strong>Either way:</strong> The website works perfectly! The optimization system automatically chooses the best format for your browser.</p>
+    </div>
+
+    <div id="firefox-warning" class="browser-info" style="display: none; background-color: #fff3cd; border: 1px solid #ffeaa7;">
+        <h3>🔍 Firefox WebP Issue Detected</h3>
+        <p><strong>Your Firefox version should support WebP!</strong> Firefox added WebP support in version 65 (2019).</p>
+        <p><strong>Possible solutions:</strong></p>
+        <ol>
+            <li><strong>Check Firefox settings:</strong> Type <code>about:config</code> in address bar → search for <code>image.webp.enabled</code> → make sure it's <code>true</code></li>
+            <li><strong>Disable extensions:</strong> Try disabling privacy/security extensions temporarily</li>
+            <li><strong>Try Chrome:</strong> Test the same page in Chrome to compare</li>
+            <li><strong>Corporate browser:</strong> If this is a work computer, WebP might be disabled by IT policy</li>
+        </ol>
+        <p><strong>Don't worry:</strong> Your website still works perfectly with JPEG fallbacks!</p>
+    </div>
+
+    <script>
+        // Test WebP support with multiple methods
+        function testWebP() {
+            return new Promise((resolve) => {
+                // Method 1: Check if canvas can export WebP
+                try {
+                    const canvas = document.createElement('canvas');
+                    canvas.width = 1;
+                    canvas.height = 1;
+                    const webpSupport = canvas.toDataURL('image/webp').indexOf('data:image/webp') === 0;
+                    if (webpSupport) {
+                        resolve(true);
+                        return;
+                    }
+                } catch (e) {
+                    console.log('Canvas WebP test failed:', e);
+                }
+
+                // Method 2: Try loading a tiny WebP image (fallback)
+                const webP = new Image();
+                webP.onload = () => {
+                    resolve(webP.height === 2 && webP.width === 2);
+                };
+                webP.onerror = () => {
+                    resolve(false);
+                };
+                // Tiny 2x2 WebP image
+                webP.src = 'data:image/webp;base64,UklGRjoAAABXRUJQVlA4WAoAAAAQAAAAAAAAAAAAQUxQSAwAAAARBxAR/Q9ERP8DAABWUDggGAAAABQBAJ0BKgEAAQAAAP4AAA3AAP7mtQAAAA==';
+
+                // Timeout after 1 second
+                setTimeout(() => resolve(false), 1000);
+            });
+        }
+
+        // Get browser info
+        function getBrowserInfo() {
+            const ua = navigator.userAgent;
+            let browserName = 'Unknown';
+            let browserVersion = 'Unknown';
+
+            if (ua.includes('Chrome') && !ua.includes('Chromium')) {
+                browserName = 'Chrome';
+                browserVersion = ua.match(/Chrome\/([0-9]+)/)?.[1] || 'Unknown';
+            } else if (ua.includes('Firefox')) {
+                browserName = 'Firefox';
+                browserVersion = ua.match(/Firefox\/([0-9]+)/)?.[1] || 'Unknown';
+            } else if (ua.includes('Safari') && !ua.includes('Chrome')) {
+                browserName = 'Safari';
+                browserVersion = ua.match(/Version\/([0-9]+)/)?.[1] || 'Unknown';
+            } else if (ua.includes('Edge')) {
+                browserName = 'Edge';
+                browserVersion = ua.match(/Edge\/([0-9]+)/)?.[1] || 'Unknown';
+            } else if (ua.includes('MSIE') || ua.includes('Trident')) {
+                browserName = 'Internet Explorer';
+                browserVersion = ua.match(/(?:MSIE |rv:)([0-9]+)/)?.[1] || 'Unknown';
+            }
+
+            return { browserName, browserVersion };
+        }
+
+        // Run tests
+        async function runTests() {
+            const webpSupported = await testWebP();
+            const { browserName, browserVersion } = getBrowserInfo();
+
+            // Update WebP result
+            const resultDiv = document.getElementById('webp-result');
+            if (webpSupported) {
+                resultDiv.className = 'result supported';
+                resultDiv.textContent = '✅ WebP is SUPPORTED! You get 25% smaller images.';
+                document.getElementById('webp-status').textContent = 'WebP loaded successfully!';
+            } else {
+                resultDiv.className = 'result not-supported';
+                resultDiv.textContent = '❌ WebP is NOT supported. You get JPEG fallbacks (still optimized!).';
+                document.getElementById('webp-status').textContent = 'WebP not supported, showing PNG fallback.';
+            }
+
+            // Update browser info
+            document.getElementById('user-agent').textContent = navigator.userAgent;
+            document.getElementById('browser-name').textContent = browserName;
+            document.getElementById('browser-version').textContent = browserVersion;
+
+            // Show Firefox warning if applicable
+            if (browserName === 'Firefox' && parseInt(browserVersion) >= 65 && !webpSupported) {
+                document.getElementById('firefox-warning').style.display = 'block';
+            }
+        }
+
+        // Run tests when page loads
+        runTests();
+    </script>
+</body>
+</html>

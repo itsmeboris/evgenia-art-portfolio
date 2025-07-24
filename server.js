@@ -120,6 +120,15 @@ const formLimiter = rateLimit({
     message: { success: false, message: 'Too many requests. Please try again later.' },
     standardHeaders: true,
     legacyHeaders: false,
+    // Fix trust proxy issue for development
+    trustProxy: isDevelopment ? false : true,
+    keyGenerator: (req) => {
+        // In development, use a simpler key generation
+        if (isDevelopment) {
+            return req.ip || req.connection.remoteAddress || 'unknown';
+        }
+        return req.ip;
+    }
 });
 
 // Rate limiting for admin login
@@ -129,6 +138,15 @@ const loginLimiter = rateLimit({
     message: { success: false, message: 'Too many login attempts. Please try again later.' },
     standardHeaders: true,
     legacyHeaders: false,
+    // Fix trust proxy issue for development
+    trustProxy: isDevelopment ? false : true,
+    keyGenerator: (req) => {
+        // In development, use a simpler key generation
+        if (isDevelopment) {
+            return req.ip || req.connection.remoteAddress || 'unknown';
+        }
+        return req.ip;
+    }
 });
 
 // Input sanitization helper

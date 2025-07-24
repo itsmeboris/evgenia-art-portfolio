@@ -108,3 +108,18 @@ temp/
 
 # SSL certificates (development certs are included for mobile testing)
 # certs/
+
+# Webpack build outputs
+public/dist/
+src/js/main.js.map
+src/js/artwork-entry.js.map
+src/js/core-entry.js.map
+
+# Bundle analysis reports
+bundle-report.html
+webpack-stats.json
+
+# Build artifacts
+*.min.js.map
+*.chunk.js
+*.chunk.css

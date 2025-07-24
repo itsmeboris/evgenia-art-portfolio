@@ -101,21 +101,12 @@ function sanitizeInput(input) {
         .trim();
 }
 
-// Session configuration
-app.use(session({
+// Session configuration - use memory store in development to avoid Windows file permission issues
+const sessionConfig = {
     secret: SESSION_SECRET,
     genid: () => uuidv4(), // Use UUID for session IDs
     resave: false,
     saveUninitialized: false,
-    store: new FileStore({
-        path: './sessions', // Directory to store session files
-        ttl: 7200, // 2 hours in seconds
-        retries: 5,
-        factor: 1,
-        minTimeout: 50,
-        maxTimeout: 100,
-        secret: SESSION_SECRET
-    }),
     cookie: {
         secure: process.env.NODE_ENV === 'production', // HTTPS only in production
         httpOnly: true, // Prevent XSS
@@ -123,11 +114,60 @@ app.use(session({
         sameSite: isDevelopment ? 'lax' : 'strict' // More permissive in development
     },
     name: 'evgenia.sid' // Custom session name
-}));
+};
+
+// Use file store only in production, memory store in development
+if (process.env.NODE_ENV === 'production') {
+    const sessionStore = new FileStore({
+        path: './sessions',
+        ttl: 7200,
+        retries: 1,
+        secret: SESSION_SECRET,
+        fileExtension: '.json',
+    });
+    
+    sessionStore.on('error', (error) => {
+        console.error('Session store error:', error.message);
+    });
+    
+    sessionConfig.store = sessionStore;
+    console.log('✅ Using file-based session storage (production)');
+} else {
+    console.log('⚠️  Using memory-based session storage (development)');
+    console.log('   Note: Sessions will be lost when server restarts');
+}
+
+app.use(session(sessionConfig));
 
 // Middleware to parse JSON and URL-encoded data
 app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ extended: true, limit: '10mb' }));
+
+// Mobile connection debugging middleware
+app.use((req, res, next) => {
+  const userAgent = req.get('User-Agent') || '';
+  const isMobile = /Mobile|Android|iPhone|iPad|BlackBerry|Windows Phone/i.test(userAgent);
+  
+  if (isMobile) {
+    console.log(`📱 Mobile request from ${req.ip}: ${req.method} ${req.originalUrl}`);
+    console.log(`   User-Agent: ${userAgent}`);
+    
+    // Only set no-cache headers for HTML pages, not images or assets
+    if (req.originalUrl.endsWith('.html') || req.originalUrl.endsWith('/') || 
+        (!req.originalUrl.includes('.') && !req.originalUrl.startsWith('/public'))) {
+      res.setHeader('Cache-Control', 'no-cache, no-store, must-revalidate');
+      res.setHeader('Pragma', 'no-cache');
+      res.setHeader('Expires', '0');
+    }
+  }
+  
+  // Log all requests in development
+  if (isDevelopment) {
+    console.log(`${req.method} ${req.originalUrl} - ${req.ip}`);
+  }
+  
+  next();
+});
 
 // CSRF protection setup
 const csrfProtection = csrf();
@@ -226,6 +266,28 @@ app.post('/admin/logout', validateCSRF, (req, res) => {
     }
     res.clearCookie('evgenia.sid');
     res.redirect('/admin/login');
+  });
+});
+
+// Health check endpoint for mobile debugging
+app.get('/api/health', (req, res) => {
+  const userAgent = req.get('User-Agent') || '';
+  const isMobile = /Mobile|Android|iPhone|iPad|BlackBerry|Windows Phone/i.test(userAgent);
+  
+  res.json({
+    status: 'OK',
+    timestamp: new Date().toISOString(),
+    server: 'Evgenia Portnov Art Website',
+    client: {
+      ip: req.ip,
+      userAgent: userAgent,
+      isMobile: isMobile,
+      headers: req.headers
+    },
+    session: {
+      id: req.session?.id || 'No session',
+      exists: !!req.session
+    }
   });
 });
 
@@ -431,8 +493,8 @@ app.use((req, res) => {
   res.status(404).send('Page not found');
 });
 
-// Start the server
-app.listen(port, '0.0.0.0', () => {
+// Configure server timeout settings for mobile devices
+const server = app.listen(port, '0.0.0.0', () => {
   console.log(`Evgenia's art website running at http://localhost:${port}`);
   console.log(`- Main site: http://localhost:${port}/`);
   console.log(`- Gallery: http://localhost:${port}/gallery`);
@@ -461,5 +523,53 @@ app.listen(port, '0.0.0.0', () => {
       console.log(`   http://${ip}:${port}`);
     });
     console.log('\n⚠️  Note: Use HTTP (not HTTPS) for mobile access in development');
+    console.log('💡 If mobile devices can\'t connect, check:');
+    console.log('   1. Firewall settings (allow port 3000)');
+    console.log('   2. Antivirus software blocking connections');
+    console.log('   3. Router/network configuration');
+    console.log('   4. Both devices on same WiFi network');
   }
+});
+
+// Configure server timeouts for better mobile support
+server.timeout = 120000; // 2 minutes
+server.headersTimeout = 120000; // 2 minutes  
+server.keepAliveTimeout = 65000; // 65 seconds
+
+// Add connection debugging
+server.on('connection', (socket) => {
+  console.log(`New connection from ${socket.remoteAddress}:${socket.remotePort}`);
+  
+  socket.on('error', (err) => {
+    console.error(`Socket error from ${socket.remoteAddress}:`, err.message);
+  });
+  
+  socket.on('timeout', () => {
+    console.warn(`Socket timeout from ${socket.remoteAddress}:${socket.remotePort}`);
+  });
+});
+
+// Handle server errors
+server.on('error', (err) => {
+  console.error('Server error:', err);
+  if (err.code === 'EADDRINUSE') {
+    console.error(`Port ${port} is already in use. Please stop other servers or use a different port.`);
+  }
+});
+
+// Graceful shutdown
+process.on('SIGTERM', () => {
+  console.log('Received SIGTERM, shutting down gracefully...');
+  server.close(() => {
+    console.log('Server closed.');
+    process.exit(0);
+  });
+});
+
+process.on('SIGINT', () => {
+  console.log('\nReceived SIGINT, shutting down gracefully...');
+  server.close(() => {
+    console.log('Server closed.');
+    process.exit(0);
+  });
 });

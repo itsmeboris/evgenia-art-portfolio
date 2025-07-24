@@ -2,6 +2,8 @@ const path = require('path');
 const TerserPlugin = require('terser-webpack-plugin');
 const CssMinimizerPlugin = require('css-minimizer-webpack-plugin');
 const MiniCssExtractPlugin = require('mini-css-extract-plugin');
+const { WebpackManifestPlugin } = require('webpack-manifest-plugin');
+const WebpackHtmlUpdaterPlugin = require('./scripts/webpack-html-updater-plugin');
 
 module.exports = (env, argv) => {
   const isProduction = argv.mode === 'production';
@@ -130,6 +132,24 @@ module.exports = (env, argv) => {
       new MiniCssExtractPlugin({
         filename: isProduction ? 'css/[name].[contenthash].min.css' : 'css/[name].css',
         chunkFilename: isProduction ? 'css/[name].[contenthash].chunk.css' : 'css/[name].chunk.css',
+      }),
+
+      // Generate manifest file for bundle tracking
+      new WebpackManifestPlugin({
+        fileName: 'manifest.json',
+        publicPath: '/public/dist/',
+        filter: file => file.isInitial && file.name.endsWith('.js'),
+        map: file => {
+          // Clean up the file names for easier mapping
+          file.name = file.name.replace(/\.[^.]+\./, '.').replace('.min.js', '');
+          return file;
+        },
+      }),
+
+      // Automatically update HTML files after build
+      new WebpackHtmlUpdaterPlugin({
+        enabled: true,
+        alwaysRun: false, // Only run in production builds
       }),
     ],
 

@@ -341,7 +341,6 @@
       </div>
     </div>
 
-    <script src="/public/dist/js/admin.63f33606f2cc5757a450.min.js"></script>
     <script>
       // Fetch and populate CSRF token for logout form
       document.addEventListener('DOMContentLoaded', function () {
@@ -358,5 +357,7 @@
           .catch(error => console.error('Error fetching CSRF token:', error));
       });
     </script>
-  </body>
+    <!-- Admin Bundle -->
+    <script src="/public/dist/js/admin.63f33606f2cc5757a450.min.js"></script>
+</body>
 </html>

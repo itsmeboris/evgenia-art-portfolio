@@ -19,16 +19,30 @@ import './modules/lightbox.js';
 // Import artwork loader
 import './artwork-loader.js';
 
-// Import main application logic
-import AppManager from './main-app.js';
-
 // Initialize the application when DOM is ready
 document.addEventListener('DOMContentLoaded', async () => {
-  // Create global app instance
-  window.app = new AppManager();
+  console.log('🚀 Initializing Evgenia Portnov Art Website...');
 
-  // Initialize the app
-  await window.app.init();
+  // Simple module availability check
+  const moduleMap = {
+    'error-handler': 'errorHandler',
+    utils: 'utils',
+    'image-utils': 'imageUtils',
+    cart: 'cartManager',
+    forms: 'formsManager',
+    lightbox: 'lightboxManager',
+    search: 'searchManager',
+    ui: 'uiManager',
+  };
+
+  // Log available modules
+  Object.entries(moduleMap).forEach(([moduleName, globalName]) => {
+    if (window[globalName]) {
+      console.log(`✅ Loaded ${moduleName}`);
+    } else {
+      console.log(`⚠️ ${moduleName} not available`);
+    }
+  });
 
   console.log('📦 Main bundle initialized successfully');
 });

@@ -107,7 +107,7 @@ tmp/
 temp/
 
 # SSL certificates (development certs are included for mobile testing)
-# certs/
+certs/
 
 # Webpack build outputs
 public/dist/

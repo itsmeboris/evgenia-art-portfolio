@@ -7,6 +7,7 @@ const path = require('path');
 const bcrypt = require('bcrypt');
 const helmet = require('helmet');
 const rateLimit = require('express-rate-limit');
+const { ipKeyGenerator } = require('express-rate-limit');
 const { body, validationResult } = require('express-validator');
 const session = require('express-session');
 const FileStore = require('session-file-store')(session);
@@ -140,13 +141,7 @@ const formLimiter = rateLimit({
   legacyHeaders: false,
   // Fix trust proxy issue for development
   trustProxy: isDevelopment ? false : true,
-  keyGenerator: req => {
-    // In development, use a simpler key generation
-    if (isDevelopment) {
-      return req.ip || req.connection.remoteAddress || 'unknown';
-    }
-    return req.ip;
-  },
+  keyGenerator: req => ipKeyGenerator(req),
 });
 
 // Rate limiting for admin login
@@ -158,13 +153,7 @@ const loginLimiter = rateLimit({
   legacyHeaders: false,
   // Fix trust proxy issue for development
   trustProxy: isDevelopment ? false : true,
-  keyGenerator: req => {
-    // In development, use a simpler key generation
-    if (isDevelopment) {
-      return req.ip || req.connection.remoteAddress || 'unknown';
-    }
-    return req.ip;
-  },
+  keyGenerator: req => ipKeyGenerator(req),
 });
 
 // Input sanitization helper

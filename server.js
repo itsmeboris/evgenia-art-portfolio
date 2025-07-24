@@ -10,6 +10,7 @@ const session = require('express-session');
 const FileStore = require('session-file-store')(session);
 const { v4: uuidv4 } = require('uuid');
 const compression = require('compression');
+const csrf = require('csrf');
 const app = express();
 const port = process.env.PORT || 3000;
 
@@ -128,6 +129,24 @@ app.use(session({
 app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ extended: true, limit: '10mb' }));
 
+// CSRF protection setup
+const csrfProtection = csrf();
+
+// Middleware to add CSRF token to locals for templates
+app.use((req, res, next) => {
+  if (req.session) {
+    // Initialize session secret if not exists
+    if (!req.session.csrfSecret) {
+      req.session.csrfSecret = csrfProtection.secretSync();
+    }
+    // Generate or retrieve CSRF token
+    const token = csrfProtection.create(req.session.csrfSecret);
+    res.locals.csrfToken = token;
+    req.csrfToken = () => token;
+  }
+  next();
+});
+
 // Authentication middleware
 function requireAuth(req, res, next) {
   if (req.session && req.session.user && req.session.user.authenticated) {
@@ -137,8 +156,30 @@ function requireAuth(req, res, next) {
   }
 }
 
+// CSRF validation middleware
+function validateCSRF(req, res, next) {
+  try {
+    const token = req.body._csrf || req.query._csrf || req.headers['x-csrf-token'];
+    const secret = req.session?.csrfSecret;
+    
+    if (!token || !secret || !csrfProtection.verify(secret, token)) {
+      return res.status(403).json({ 
+        success: false, 
+        message: 'Invalid CSRF token. Please refresh the page and try again.' 
+      });
+    }
+    next();
+  } catch (error) {
+    console.error('CSRF validation error:', error);
+    return res.status(403).json({ 
+      success: false, 
+      message: 'CSRF validation failed. Please refresh the page and try again.' 
+    });
+  }
+}
+
 // Admin login endpoint
-app.post('/admin/login', loginLimiter, async (req, res) => {
+app.post('/admin/login', loginLimiter, validateCSRF, async (req, res) => {
   const { username, password } = req.body;
 
   try {
@@ -178,7 +219,7 @@ app.post('/admin/login', loginLimiter, async (req, res) => {
 });
 
 // Admin logout endpoint
-app.post('/admin/logout', (req, res) => {
+app.post('/admin/logout', validateCSRF, (req, res) => {
   req.session.destroy((err) => {
     if (err) {
       console.error('Session destruction error:', err);
@@ -186,6 +227,20 @@ app.post('/admin/logout', (req, res) => {
     res.clearCookie('evgenia.sid');
     res.redirect('/admin/login');
   });
+});
+
+// CSRF token endpoint
+app.get('/api/csrf-token', (req, res) => {
+  if (req.session) {
+    // Initialize session secret if not exists
+    if (!req.session.csrfSecret) {
+      req.session.csrfSecret = csrfProtection.secretSync();
+    }
+    const token = csrfProtection.create(req.session.csrfSecret);
+    res.json({ csrfToken: token });
+  } else {
+    res.status(500).json({ error: 'Session not available' });
+  }
 });
 
 // Login page (no authentication required) - clean URL
@@ -272,6 +327,7 @@ app.get('/artwork/:id', (req, res) => {
 // Newsletter subscription endpoint
 app.post('/newsletter/subscribe', 
   formLimiter,
+  validateCSRF,
   [
     body('email')
       .isEmail()
@@ -307,6 +363,7 @@ app.post('/newsletter/subscribe',
 // Contact form endpoint
 app.post('/contact/submit', 
   formLimiter,
+  validateCSRF,
   [
     body('name')
       .trim()

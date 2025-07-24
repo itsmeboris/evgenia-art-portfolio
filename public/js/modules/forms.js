@@ -107,13 +107,17 @@ class FormsManager {
             this.submissionInProgress.add(formId);
             this.setLoadingState(submitButton, true, 'Subscribing...');
 
+            // Get CSRF token
+            const csrfToken = await this.getCSRFToken();
+
             // Make API request
             const response = await fetch('/newsletter/subscribe', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
+                    'X-CSRF-Token': csrfToken
                 },
-                body: JSON.stringify({ email }),
+                body: JSON.stringify({ email, _csrf: csrfToken }),
                 signal: AbortSignal.timeout(15000) // 15 second timeout
             });
 
@@ -222,11 +226,18 @@ class FormsManager {
             this.submissionInProgress.add(formId);
             this.setLoadingState(submitButton, true, 'Sending...');
 
+            // Get CSRF token
+            const csrfToken = await this.getCSRFToken();
+
+            // Add CSRF token to form data
+            formData._csrf = csrfToken;
+
             // Make API request
             const response = await fetch('/contact/submit', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
+                    'X-CSRF-Token': csrfToken
                 },
                 body: JSON.stringify(formData),
                 signal: AbortSignal.timeout(30000) // 30 second timeout
@@ -759,6 +770,26 @@ class FormsManager {
             return this.validateContactForm(form);
         }
         return { isValid: true };
+    }
+
+    // Get CSRF token
+    async getCSRFToken() {
+        try {
+            const response = await fetch('/api/csrf-token', {
+                method: 'GET',
+                credentials: 'same-origin'
+            });
+            
+            if (!response.ok) {
+                throw new Error('Failed to fetch CSRF token');
+            }
+            
+            const data = await response.json();
+            return data.csrfToken;
+        } catch (error) {
+            console.error('Error fetching CSRF token:', error);
+            throw error;
+        }
     }
 
     // Clean up

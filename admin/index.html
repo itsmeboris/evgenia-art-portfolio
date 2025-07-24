@@ -1,297 +1,362 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Artwork Admin | Evgenia Portnov</title>
-    <link rel="icon" href="../public/assets/favicon/favicon.ico" type="image/x-icon">
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@300;400;500;600;700&family=Montserrat:wght@300;400;500;600&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
-    <link rel="stylesheet" href="css/admin.css">
-</head>
-<body>
+    <link rel="icon" href="../public/assets/favicon/favicon.ico" type="image/x-icon" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@300;400;500;600;700&family=Montserrat:wght@300;400;500;600&display=swap"
+      rel="stylesheet"
+    />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css"
+    />
+    <link rel="stylesheet" href="css/admin.css" />
+  </head>
+  <body>
     <header>
-        <div class="container">
-            <div style="display: flex; justify-content: space-between; align-items: center;">
-                <div>
-                    <h1>Evgenia Portnov - Artwork Admin</h1>
-                    <p style="color: #888; font-size: 0.8rem;">Version 2.0 - JSON Based</p>
-                </div>
-                <div>
-                    <form method="POST" action="/admin/logout" style="display: inline;" id="logout-form">
-                        <input type="hidden" name="_csrf" id="logout-csrf-token" value="">
-                        <button type="submit" class="btn btn-danger" style="background: #dc3545; color: white; padding: 0.5rem 1rem; border: none; border-radius: 4px; cursor: pointer;">
-                            <i class="fas fa-sign-out-alt"></i> Logout
-                        </button>
-                    </form>
-                </div>
-            </div>
+      <div class="container">
+        <div style="display: flex; justify-content: space-between; align-items: center">
+          <div>
+            <h1>Evgenia Portnov - Artwork Admin</h1>
+            <p style="color: #888; font-size: 0.8rem">Version 2.0 - JSON Based</p>
+          </div>
+          <div>
+            <form method="POST" action="/admin/logout" style="display: inline" id="logout-form">
+              <input type="hidden" name="_csrf" id="logout-csrf-token" value="" />
+              <button
+                type="submit"
+                class="btn btn-danger"
+                style="
+                  background: #dc3545;
+                  color: white;
+                  padding: 0.5rem 1rem;
+                  border: none;
+                  border-radius: 4px;
+                  cursor: pointer;
+                "
+              >
+                <i class="fas fa-sign-out-alt"></i> Logout
+              </button>
+            </form>
+          </div>
         </div>
+      </div>
     </header>
 
     <div class="container">
-        <div class="admin-layout">
-            <div class="sidebar">
-                <ul>
-                    <li><a href="#" class="active" data-tab="tab-dashboard"><i class="fas fa-tachometer-alt"></i> Dashboard</a></li>
-                    <li><a href="#" data-tab="tab-artworks"><i class="fas fa-palette"></i> Artworks</a></li>
-                    <li><a href="#" data-tab="tab-categories"><i class="fas fa-tags"></i> Categories</a></li>
-                    <li><a href="#" data-tab="tab-upload"><i class="fas fa-upload"></i> Batch Upload</a></li>
-                    <li><a href="#" data-tab="tab-settings"><i class="fas fa-cog"></i> Settings</a></li>
-                    <li><a href="/">
-                        <i class="fas fa-home"></i> Back to Website
-                    </a></li>
-                </ul>
-            </div>
-
-            <div class="content">
-                <!-- Dashboard Tab -->
-                <div id="tab-dashboard" class="tab-content active">
-                    <h2>Dashboard</h2>
-                    <div class="dashboard-stats">
-                        <div class="stats-card">
-                            <h3>Total Artworks</h3>
-                            <p id="total-artworks">0</p>
-                        </div>
-                        <div class="stats-card">
-                            <h3>Categories</h3>
-                            <p id="total-categories">0</p>
-                        </div>
-                    </div>
-
-                    <h3>Featured Artworks</h3>
-                    <div class="artwork-grid" id="featured-artworks">
-                        <!-- Featured artworks will be loaded here -->
-                    </div>
-                </div>
-
-                <!-- Artworks Tab -->
-                <div id="tab-artworks" class="tab-content">
-                    <h2>Manage Artworks</h2>
-                    <div class="controls">
-                        <div class="filter-controls">
-                            <select id="category-filter">
-                                <option value="all">All Categories</option>
-                                <!-- Categories will be loaded here -->
-                            </select>
-                            <input type="text" id="search-artworks" placeholder="Search artworks...">
-                        </div>
-                        <div class="action-controls">
-                            <button class="btn" id="add-artwork-btn"><i class="fas fa-plus"></i> Add Artwork</button>
-                            <button class="btn btn-secondary" id="export-json-btn"><i class="fas fa-download"></i> Export</button>
-                            <button class="btn btn-secondary" id="export-js-btn"><i class="fas fa-code"></i> Export JS</button>
-                            <button class="btn btn-secondary" id="import-json-btn"><i class="fas fa-upload"></i> Import</button>
-                        </div>
-                    </div>
-
-                    <div class="artwork-grid" id="artwork-list">
-                        <!-- Artworks will be loaded here -->
-                    </div>
-
-                    <div class="pagination" id="artwork-pagination">
-                        <!-- Pagination will be loaded here -->
-                    </div>
-                </div>
-
-                <!-- Categories Tab -->
-                <div id="tab-categories" class="tab-content">
-                    <h2>Manage Categories</h2>
-                    <div class="controls">
-                        <button class="btn" id="add-category-btn"><i class="fas fa-plus"></i> Add Category</button>
-                    </div>
-
-                    <ul class="category-list" id="category-list">
-                        <!-- Categories will be loaded here -->
-                    </ul>
-                </div>
-
-                <!-- Batch Upload Tab -->
-                <div id="tab-upload" class="tab-content">
-                    <h2>Batch Upload</h2>
-                    <div class="dropzone" id="upload-dropzone">
-                        <i class="fas fa-cloud-upload-alt fa-3x"></i>
-                        <p>Drag & drop images here, or click to select files</p>
-                        <input type="file" id="file-upload" multiple accept="image/*" style="display: none">
-                    </div>
-
-                    <div class="batch-settings">
-                        <h3>Batch Settings</h3>
-                        <div class="form-group">
-                            <label>Default Category</label>
-                            <select id="batch-category">
-                                <!-- Categories will be loaded here -->
-                            </select>
-                        </div>
-                        <div class="form-group">
-                            <label>Default Medium</label>
-                            <input type="text" id="batch-medium" value="Acrylic on Canvas">
-                        </div>
-                    </div>
-
-                    <div id="upload-preview">
-                        <!-- Upload preview will be displayed here -->
-                    </div>
-                </div>
-
-                <!-- Settings Tab -->
-                <div id="tab-settings" class="tab-content">
-                    <h2>Settings</h2>
-                    <div class="form-group">
-                        <label>Image Base Path</label>
-                        <input type="text" id="image-base-path" value="public/assets/images/artwork/">
-                    </div>
-                    <div class="form-group">
-                        <label>Default Currency</label>
-                        <input type="text" id="default-currency" value="$">
-                    </div>
-                    <button class="btn" id="save-settings-btn">Save Settings</button>
-
-                    <h3 style="margin-top: 2rem;">Data Management</h3>
-                    <p>This admin panel uses a central JSON file for all artwork data:</p>
-                    <code style="display: block; background: #f5f5f5; padding: 0.5rem; margin: 1rem 0; font-family: monospace;">
-                        public/data/artwork-data.json
-                    </code>
-
-                    <div class="data-management-info" style="margin-top: 1rem;">
-                        <h4>How It Works:</h4>
-                        <ol style="margin-left: 1.5rem; margin-bottom: 1rem;">
-                            <li>When you make changes in the admin panel, you'll be prompted to download the updated JSON file</li>
-                            <li>Replace the existing file with your downloaded version</li>
-                            <li>Both the admin panel and the main site will use this file as the data source</li>
-                        </ol>
-
-                        <div class="action-buttons" style="margin-top: 1rem;">
-                            <a href="#" class="btn btn-secondary" id="backup-json-btn">
-                                <i class="fas fa-download"></i> Download Backup Copy
-                            </a>
-                            <a href="README.md" class="btn btn-secondary" target="_blank">
-                                <i class="fas fa-book"></i> View Documentation
-                            </a>
-                        </div>
-                    </div>
-                </div>
-            </div>
+      <div class="admin-layout">
+        <div class="sidebar">
+          <ul>
+            <li>
+              <a href="#" class="active" data-tab="tab-dashboard"
+                ><i class="fas fa-tachometer-alt"></i> Dashboard</a
+              >
+            </li>
+            <li>
+              <a href="#" data-tab="tab-artworks"><i class="fas fa-palette"></i> Artworks</a>
+            </li>
+            <li>
+              <a href="#" data-tab="tab-categories"><i class="fas fa-tags"></i> Categories</a>
+            </li>
+            <li>
+              <a href="#" data-tab="tab-upload"><i class="fas fa-upload"></i> Batch Upload</a>
+            </li>
+            <li>
+              <a href="#" data-tab="tab-settings"><i class="fas fa-cog"></i> Settings</a>
+            </li>
+            <li>
+              <a href="/"> <i class="fas fa-home"></i> Back to Website </a>
+            </li>
+          </ul>
         </div>
+
+        <div class="content">
+          <!-- Dashboard Tab -->
+          <div id="tab-dashboard" class="tab-content active">
+            <h2>Dashboard</h2>
+            <div class="dashboard-stats">
+              <div class="stats-card">
+                <h3>Total Artworks</h3>
+                <p id="total-artworks">0</p>
+              </div>
+              <div class="stats-card">
+                <h3>Categories</h3>
+                <p id="total-categories">0</p>
+              </div>
+            </div>
+
+            <h3>Featured Artworks</h3>
+            <div class="artwork-grid" id="featured-artworks">
+              <!-- Featured artworks will be loaded here -->
+            </div>
+          </div>
+
+          <!-- Artworks Tab -->
+          <div id="tab-artworks" class="tab-content">
+            <h2>Manage Artworks</h2>
+            <div class="controls">
+              <div class="filter-controls">
+                <select id="category-filter">
+                  <option value="all">All Categories</option>
+                  <!-- Categories will be loaded here -->
+                </select>
+                <input type="text" id="search-artworks" placeholder="Search artworks..." />
+              </div>
+              <div class="action-controls">
+                <button class="btn" id="add-artwork-btn">
+                  <i class="fas fa-plus"></i> Add Artwork
+                </button>
+                <button class="btn btn-secondary" id="export-json-btn">
+                  <i class="fas fa-download"></i> Export
+                </button>
+                <button class="btn btn-secondary" id="export-js-btn">
+                  <i class="fas fa-code"></i> Export JS
+                </button>
+                <button class="btn btn-secondary" id="import-json-btn">
+                  <i class="fas fa-upload"></i> Import
+                </button>
+              </div>
+            </div>
+
+            <div class="artwork-grid" id="artwork-list">
+              <!-- Artworks will be loaded here -->
+            </div>
+
+            <div class="pagination" id="artwork-pagination">
+              <!-- Pagination will be loaded here -->
+            </div>
+          </div>
+
+          <!-- Categories Tab -->
+          <div id="tab-categories" class="tab-content">
+            <h2>Manage Categories</h2>
+            <div class="controls">
+              <button class="btn" id="add-category-btn">
+                <i class="fas fa-plus"></i> Add Category
+              </button>
+            </div>
+
+            <ul class="category-list" id="category-list">
+              <!-- Categories will be loaded here -->
+            </ul>
+          </div>
+
+          <!-- Batch Upload Tab -->
+          <div id="tab-upload" class="tab-content">
+            <h2>Batch Upload</h2>
+            <div class="dropzone" id="upload-dropzone">
+              <i class="fas fa-cloud-upload-alt fa-3x"></i>
+              <p>Drag & drop images here, or click to select files</p>
+              <input type="file" id="file-upload" multiple accept="image/*" style="display: none" />
+            </div>
+
+            <div class="batch-settings">
+              <h3>Batch Settings</h3>
+              <div class="form-group">
+                <label>Default Category</label>
+                <select id="batch-category">
+                  <!-- Categories will be loaded here -->
+                </select>
+              </div>
+              <div class="form-group">
+                <label>Default Medium</label>
+                <input type="text" id="batch-medium" value="Acrylic on Canvas" />
+              </div>
+            </div>
+
+            <div id="upload-preview">
+              <!-- Upload preview will be displayed here -->
+            </div>
+          </div>
+
+          <!-- Settings Tab -->
+          <div id="tab-settings" class="tab-content">
+            <h2>Settings</h2>
+            <div class="form-group">
+              <label>Image Base Path</label>
+              <input type="text" id="image-base-path" value="public/assets/images/artwork/" />
+            </div>
+            <div class="form-group">
+              <label>Default Currency</label>
+              <input type="text" id="default-currency" value="$" />
+            </div>
+            <button class="btn" id="save-settings-btn">Save Settings</button>
+
+            <h3 style="margin-top: 2rem">Data Management</h3>
+            <p>This admin panel uses a central JSON file for all artwork data:</p>
+            <code
+              style="
+                display: block;
+                background: #f5f5f5;
+                padding: 0.5rem;
+                margin: 1rem 0;
+                font-family: monospace;
+              "
+            >
+              public/data/artwork-data.json
+            </code>
+
+            <div class="data-management-info" style="margin-top: 1rem">
+              <h4>How It Works:</h4>
+              <ol style="margin-left: 1.5rem; margin-bottom: 1rem">
+                <li>
+                  When you make changes in the admin panel, you'll be prompted to download the
+                  updated JSON file
+                </li>
+                <li>Replace the existing file with your downloaded version</li>
+                <li>
+                  Both the admin panel and the main site will use this file as the data source
+                </li>
+              </ol>
+
+              <div class="action-buttons" style="margin-top: 1rem">
+                <a href="#" class="btn btn-secondary" id="backup-json-btn">
+                  <i class="fas fa-download"></i> Download Backup Copy
+                </a>
+                <a href="README.md" class="btn btn-secondary" target="_blank">
+                  <i class="fas fa-book"></i> View Documentation
+                </a>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
     </div>
 
     <!-- Add/Edit Artwork Modal -->
     <div class="modal" id="artwork-modal">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h2 id="artwork-modal-title">Add New Artwork</h2>
-                <button class="close-modal">&times;</button>
-            </div>
-            <form id="artwork-form">
-                <input type="hidden" id="artwork-id">
-                <div class="form-group">
-                    <label for="artwork-title">Title</label>
-                    <input type="text" id="artwork-title" required>
-                </div>
-                <div class="form-row">
-                    <div class="form-group">
-                        <label for="artwork-category">Category</label>
-                        <select id="artwork-category" required>
-                            <!-- Categories will be loaded here -->
-                        </select>
-                    </div>
-                    <div class="form-group">
-                        <label for="artwork-subcategory">Subcategory (Optional)</label>
-                        <select id="artwork-subcategory">
-                            <option value="">None</option>
-                            <!-- Subcategories will be loaded here based on selected category -->
-                        </select>
-                    </div>
-                </div>
-                <div class="form-row">
-                    <div class="form-group">
-                        <label for="artwork-dimensions">Dimensions</label>
-                        <input type="text" id="artwork-dimensions" placeholder="e.g. 16&quot; x 20&quot;">
-                    </div>
-                    <div class="form-group">
-                        <label for="artwork-medium">Medium</label>
-                        <input type="text" id="artwork-medium" placeholder="e.g. Acrylic on Canvas">
-                    </div>
-                </div>
-                <div class="form-group">
-                    <label for="artwork-price">Price</label>
-                    <input type="text" id="artwork-price" placeholder="e.g. $350">
-                </div>
-                <div class="form-group">
-                    <label for="artwork-description">Description</label>
-                    <textarea id="artwork-description" placeholder="Enter a description of the artwork"></textarea>
-                </div>
-                <div class="form-group">
-                    <label for="artwork-image">Image Path</label>
-                    <input type="text" id="artwork-image" placeholder="e.g. public/assets/images/artwork/floral/floral1.jpg">
-                </div>
-                <div class="checkbox-group">
-                    <input type="checkbox" id="artwork-featured">
-                    <label for="artwork-featured">Featured Artwork</label>
-                </div>
-                <div class="form-group">
-                    <button type="submit" class="btn">Save Artwork</button>
-                </div>
-            </form>
+      <div class="modal-content">
+        <div class="modal-header">
+          <h2 id="artwork-modal-title">Add New Artwork</h2>
+          <button class="close-modal">&times;</button>
         </div>
+        <form id="artwork-form">
+          <input type="hidden" id="artwork-id" />
+          <div class="form-group">
+            <label for="artwork-title">Title</label>
+            <input type="text" id="artwork-title" required />
+          </div>
+          <div class="form-row">
+            <div class="form-group">
+              <label for="artwork-category">Category</label>
+              <select id="artwork-category" required>
+                <!-- Categories will be loaded here -->
+              </select>
+            </div>
+            <div class="form-group">
+              <label for="artwork-subcategory">Subcategory (Optional)</label>
+              <select id="artwork-subcategory">
+                <option value="">None</option>
+                <!-- Subcategories will be loaded here based on selected category -->
+              </select>
+            </div>
+          </div>
+          <div class="form-row">
+            <div class="form-group">
+              <label for="artwork-dimensions">Dimensions</label>
+              <input type="text" id="artwork-dimensions" placeholder='e.g. 16" x 20"' />
+            </div>
+            <div class="form-group">
+              <label for="artwork-medium">Medium</label>
+              <input type="text" id="artwork-medium" placeholder="e.g. Acrylic on Canvas" />
+            </div>
+          </div>
+          <div class="form-group">
+            <label for="artwork-price">Price</label>
+            <input type="text" id="artwork-price" placeholder="e.g. $350" />
+          </div>
+          <div class="form-group">
+            <label for="artwork-description">Description</label>
+            <textarea
+              id="artwork-description"
+              placeholder="Enter a description of the artwork"
+            ></textarea>
+          </div>
+          <div class="form-group">
+            <label for="artwork-image">Image Path</label>
+            <input
+              type="text"
+              id="artwork-image"
+              placeholder="e.g. public/assets/images/artwork/floral/floral1.jpg"
+            />
+          </div>
+          <div class="checkbox-group">
+            <input type="checkbox" id="artwork-featured" />
+            <label for="artwork-featured">Featured Artwork</label>
+          </div>
+          <div class="form-group">
+            <button type="submit" class="btn">Save Artwork</button>
+          </div>
+        </form>
+      </div>
     </div>
 
     <!-- Add/Edit Category Modal -->
     <div class="modal" id="category-modal">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h2 id="category-modal-title">Add New Category</h2>
-                <button class="close-modal">&times;</button>
-            </div>
-            <form id="category-form">
-                <input type="hidden" id="category-id">
-                <div class="form-group">
-                    <label for="category-name">Category Name</label>
-                    <input type="text" id="category-name" required>
-                </div>
-                <div class="form-group">
-                    <label for="category-slug">Category Slug (for URLs)</label>
-                    <input type="text" id="category-slug" required>
-                </div>
-                <div class="form-group">
-                    <label for="category-description">Description</label>
-                    <textarea id="category-description"></textarea>
-                </div>
-                <div class="form-group">
-                    <label for="category-image">Image Path</label>
-                    <input type="text" id="category-image" placeholder="e.g. public/assets/images/hero/category.jpg">
-                </div>
-
-                <h3>Subcategories</h3>
-                <div id="subcategories-container">
-                    <!-- Subcategories will be displayed here -->
-                </div>
-                <button type="button" class="btn btn-secondary" id="add-subcategory-btn">Add Subcategory</button>
-
-                <div class="form-group" style="margin-top: 1.5rem;">
-                    <button type="submit" class="btn">Save Category</button>
-                </div>
-            </form>
+      <div class="modal-content">
+        <div class="modal-header">
+          <h2 id="category-modal-title">Add New Category</h2>
+          <button class="close-modal">&times;</button>
         </div>
+        <form id="category-form">
+          <input type="hidden" id="category-id" />
+          <div class="form-group">
+            <label for="category-name">Category Name</label>
+            <input type="text" id="category-name" required />
+          </div>
+          <div class="form-group">
+            <label for="category-slug">Category Slug (for URLs)</label>
+            <input type="text" id="category-slug" required />
+          </div>
+          <div class="form-group">
+            <label for="category-description">Description</label>
+            <textarea id="category-description"></textarea>
+          </div>
+          <div class="form-group">
+            <label for="category-image">Image Path</label>
+            <input
+              type="text"
+              id="category-image"
+              placeholder="e.g. public/assets/images/hero/category.jpg"
+            />
+          </div>
+
+          <h3>Subcategories</h3>
+          <div id="subcategories-container">
+            <!-- Subcategories will be displayed here -->
+          </div>
+          <button type="button" class="btn btn-secondary" id="add-subcategory-btn">
+            Add Subcategory
+          </button>
+
+          <div class="form-group" style="margin-top: 1.5rem">
+            <button type="submit" class="btn">Save Category</button>
+          </div>
+        </form>
+      </div>
     </div>
 
     <script src="/public/dist/js/admin.63f33606f2cc5757a450.min.js"></script>
     <script>
-        // Fetch and populate CSRF token for logout form
-        document.addEventListener('DOMContentLoaded', function() {
-            fetch('/api/csrf-token', {
-                method: 'GET',
-                credentials: 'same-origin'
-            })
-            .then(response => response.json())
-            .then(data => {
-                if (data.csrfToken) {
-                    document.getElementById('logout-csrf-token').value = data.csrfToken;
-                }
-            })
-            .catch(error => console.error('Error fetching CSRF token:', error));
-        });
+      // Fetch and populate CSRF token for logout form
+      document.addEventListener('DOMContentLoaded', function () {
+        fetch('/api/csrf-token', {
+          method: 'GET',
+          credentials: 'same-origin',
+        })
+          .then(response => response.json())
+          .then(data => {
+            if (data.csrfToken) {
+              document.getElementById('logout-csrf-token').value = data.csrfToken;
+            }
+          })
+          .catch(error => console.error('Error fetching CSRF token:', error));
+      });
     </script>
-</body>
+  </body>
 </html>

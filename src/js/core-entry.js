@@ -9,5 +9,5 @@ import './modules/image-utils.js';
 // Make core utilities available globally for backwards compatibility
 // These will be tree-shaken if not used
 window.addEventListener('load', () => {
-    console.log('📦 Core bundle loaded successfully');
+  console.log('📦 Core bundle loaded successfully');
 });

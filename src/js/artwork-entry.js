@@ -14,23 +14,23 @@ import './modules/ui.js';
 import './artwork-loader.js';
 
 // Initialize modules for artwork pages
-document.addEventListener('DOMContentLoaded', function() {
-    // Initialize essential modules for artwork pages
-    try {
-        // Initialize search manager if available
-        if (window.SearchManager && !window.searchManager) {
-            window.searchManager = new SearchManager();
-            window.searchManager.init();
-        }
-
-        // Initialize UI manager if available
-        if (window.UIManager && !window.uiManager) {
-            window.uiManager = new UIManager();
-            window.uiManager.init();
-        }
-
-        console.log('📦 Artwork bundle initialized successfully');
-    } catch (error) {
-        console.error('Error initializing artwork modules:', error);
+document.addEventListener('DOMContentLoaded', function () {
+  // Initialize essential modules for artwork pages
+  try {
+    // Initialize search manager if available
+    if (window.SearchManager && !window.searchManager) {
+      window.searchManager = new SearchManager();
+      window.searchManager.init();
     }
+
+    // Initialize UI manager if available
+    if (window.UIManager && !window.uiManager) {
+      window.uiManager = new UIManager();
+      window.uiManager.init();
+    }
+
+    console.log('📦 Artwork bundle initialized successfully');
+  } catch (error) {
+    console.error('Error initializing artwork modules:', error);
+  }
 });

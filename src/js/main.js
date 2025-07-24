@@ -24,11 +24,11 @@ import AppManager from './main-app.js';
 
 // Initialize the application when DOM is ready
 document.addEventListener('DOMContentLoaded', async () => {
-    // Create global app instance
-    window.app = new AppManager();
+  // Create global app instance
+  window.app = new AppManager();
 
-    // Initialize the app
-    await window.app.init();
+  // Initialize the app
+  await window.app.init();
 
-    console.log('📦 Main bundle initialized successfully');
+  console.log('📦 Main bundle initialized successfully');
 });

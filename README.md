@@ -24,6 +24,7 @@ The website features:
 ### Core Modules
 
 #### 🛒 **Cart Module** (`public/js/modules/cart.js`)
+
 - Complete shopping cart system with CartManager class
 - localStorage persistence for cart state
 - Currency management (USD/CAD/EUR) with conversion
@@ -32,6 +33,7 @@ The website features:
 - Error handling and recovery mechanisms
 
 #### 🎨 **UI Module** (`public/js/modules/ui.js`)
+
 - Mobile menu with accessibility features
 - FAQ toggles and accordion functionality
 - Smooth scroll effects and responsive handling
@@ -39,6 +41,7 @@ The website features:
 - Utility functions for DOM manipulation
 
 #### 🔍 **Lightbox Module** (`public/js/modules/lightbox.js`)
+
 - Image viewing with gallery navigation
 - Keyboard support (arrow keys, escape)
 - Image preloading and caching for performance
@@ -46,6 +49,7 @@ The website features:
 - Accessibility features and screen reader support
 
 #### 🔎 **Search Module** (`public/js/modules/search.js`)
+
 - Real-time artwork search with modal interface
 - Debounced input for performance (300ms delay)
 - Search history with localStorage persistence
@@ -53,6 +57,7 @@ The website features:
 - Advanced filtering by category, price, and keywords
 
 #### 📝 **Forms Module** (`public/js/modules/forms.js`)
+
 - Newsletter and contact form handling
 - Real-time validation with user feedback
 - Rate limiting to prevent spam
@@ -60,6 +65,7 @@ The website features:
 - Comprehensive error handling and user notifications
 
 #### ⚠️ **Error Handler Module** (`public/js/modules/error-handler.js`)
+
 - Global error management with event listeners
 - Component-level error boundaries
 - Automatic recovery strategies with graceful degradation
@@ -67,6 +73,7 @@ The website features:
 - Error categorization and logging system
 
 #### 🛠️ **Utils Module** (`public/js/modules/utils.js`)
+
 - Performance helpers (debounce, throttle)
 - Data manipulation and string formatting utilities
 - Storage helpers for localStorage management
@@ -74,6 +81,7 @@ The website features:
 - Animation and easing functions
 
 #### 🖼️ **Lazy Loader Module** (`public/js/modules/lazy-loader.js`)
+
 - Intersection Observer-based image loading
 - Concurrency control (max 3 simultaneous loads)
 - Retry logic with exponential backoff
@@ -81,7 +89,9 @@ The website features:
 - SVG placeholder generation for loading states
 
 ### 🎯 **App Manager** (`public/js/main.js`)
+
 The central coordinator that:
+
 - **Priority-based module loading**: Critical → Essential → Features
 - **Performance monitoring**: Track load times, memory usage, error rates
 - **Retry mechanisms**: Exponential backoff for failed module loads
@@ -91,31 +101,35 @@ The central coordinator that:
 ## 🚀 Performance Features
 
 ### Loading Strategy
+
 - **Async module loading** for non-blocking initialization
 - **Priority-based loading**: Critical modules load first, features load with delay
 - **Retry mechanisms**: Up to 3 attempts with exponential backoff
 - **Performance caching**: Intelligent cache expiration and memory management
 
 ### Error Recovery
+
 - **Component isolation**: Failed components don't crash the entire application
 - **Auto-recovery**: Components self-heal after 5 seconds
 - **Graceful degradation**: Fallback UI when components fail
 - **User feedback**: Friendly error messages with retry buttons
 
 ### Development Tools
+
 Access development tools in browser console:
+
 ```javascript
 // Performance dashboard
-window.app.dev.showDashboard()
+window.app.dev.showDashboard();
 
 // Detailed performance report
-window.app.dev.getFullReport()
+window.app.dev.getFullReport();
 
 // Run performance tests
-window.app.dev.testPerformance()
+window.app.dev.testPerformance();
 
 // Export performance data
-window.app.dev.exportData()
+window.app.dev.exportData();
 ```
 
 ## Project Structure
@@ -166,6 +180,7 @@ window.app.dev.exportData()
 The website includes a comprehensive shopping cart system:
 
 ### Features
+
 - **Add to Cart**: Direct integration from gallery and individual artwork pages
 - **Cart Management**: View, update quantities, remove items
 - **Currency Support**: USD, CAD, EUR with automatic conversion
@@ -174,6 +189,7 @@ The website includes a comprehensive shopping cart system:
 - **Error Handling**: Robust error recovery and user feedback
 
 ### Cart API
+
 ```javascript
 // Add item to cart
 await window.cart.addToCart(artworkId, quantity);
@@ -218,6 +234,7 @@ const total = window.cart.getTotal();
 ### Managing Content with Admin Panel
 
 Access the admin panel at `/admin/` to:
+
 - Add, edit, and delete artwork entries
 - Upload new images
 - Manage categories and pricing
@@ -229,11 +246,11 @@ To change the color scheme, edit the CSS variables in `public/css/style.css`:
 
 ```css
 :root {
-    /* Colors */
-    --primary-color: #40E0D0; /* Turquoise as primary accent color */
-    --primary-dark: #2fb3a8;
-    --primary-light: #6bece0;
-    /* ... other colors ... */
+  /* Colors */
+  --primary-color: #40e0d0; /* Turquoise as primary accent color */
+  --primary-dark: #2fb3a8;
+  --primary-light: #6bece0;
+  /* ... other colors ... */
 }
 ```
 
@@ -242,29 +259,34 @@ To change the color scheme, edit the CSS variables in `public/css/style.css`:
 The modular architecture makes it easy to extend functionality:
 
 #### Adding a New Module
+
 1. Create a new file in `/public/js/modules/your-module.js`
 2. Follow the module pattern:
+
    ```javascript
    class YourModule {
      constructor() {
        this.initialized = false;
      }
-     
+
      async init() {
        if (this.initialized) return;
        // Your initialization code
        this.initialized = true;
      }
-     
+
      // Your module methods
    }
-   
+
    window.YourModule = YourModule;
    ```
+
 3. Register the module in `main.js` module loading configuration
 
 #### Customizing Existing Modules
+
 Each module is self-contained and can be modified independently:
+
 - **Cart**: Modify pricing logic, add discount codes, integrate payment gateways
 - **Search**: Add new search filters, modify ranking algorithms
 - **Lightbox**: Add new gallery features, modify navigation
@@ -304,41 +326,48 @@ The server supports both HTTP and HTTPS for mobile device compatibility:
 The modular architecture includes several development tools:
 
 #### Performance Monitoring
+
 Monitor your website's performance in real-time:
+
 ```javascript
 // View live performance dashboard
-window.app.dev.showDashboard()
+window.app.dev.showDashboard();
 
 // Get detailed metrics
-const report = window.app.dev.getFullReport()
-console.log(report.performance.moduleLoadTimes)
-console.log(report.cart.performanceMetrics)
-console.log(report.errors.componentHealth)
+const report = window.app.dev.getFullReport();
+console.log(report.performance.moduleLoadTimes);
+console.log(report.cart.performanceMetrics);
+console.log(report.errors.componentHealth);
 ```
 
 #### Memory Management
+
 Track and optimize memory usage:
+
 ```javascript
 // Monitor memory usage
-window.app.dev.getMemoryReport()
+window.app.dev.getMemoryReport();
 
 // Force cleanup (normally automatic)
-window.app.cleanup()
+window.app.cleanup();
 ```
 
 #### Error Testing
+
 Test error boundaries and recovery:
+
 ```javascript
 // Test component error handling
-window.app.dev.testErrorBoundaries()
+window.app.dev.testErrorBoundaries();
 
 // Simulate component failures
-window.app.dev.simulateError('cart') // or 'search', 'lightbox', etc.
+window.app.dev.simulateError('cart'); // or 'search', 'lightbox', etc.
 ```
 
 ### Code Quality
 
 The codebase follows modern JavaScript best practices:
+
 - **ES6+ Features**: Classes, async/await, destructuring, template literals
 - **Error Handling**: Comprehensive try-catch blocks with user-friendly recovery
 - **Performance**: Debouncing, throttling, lazy loading, memory management
@@ -348,6 +377,7 @@ The codebase follows modern JavaScript best practices:
 ### File Organization
 
 The modular structure promotes:
+
 - **Separation of Concerns**: Each module handles a specific functionality
 - **Maintainability**: Easy to locate and modify specific features
 - **Testability**: Modules can be tested independently
@@ -361,6 +391,7 @@ The modular structure promotes:
 To deploy this website:
 
 1. **Build for production** (optional optimization):
+
    ```bash
    npm run build  # If you have a build script
    ```
@@ -396,6 +427,7 @@ For hosting providers that support Node.js:
 ### Static Hosting
 
 For static hosting (GitHub Pages, Netlify, etc.):
+
 - Upload all files except `server.js`
 - The website will work with basic functionality
 - Some features may require a backend (contact forms, admin panel)
@@ -403,6 +435,7 @@ For static hosting (GitHub Pages, Netlify, etc.):
 ## Accessing Your Site
 
 ### Local Network Access
+
 The server is configured to listen on all network interfaces with both HTTP and HTTPS support:
 
 1. Start the server:
@@ -418,9 +451,11 @@ The server is configured to listen on all network interfaces with both HTTP and 
 3. **For mobile devices**: Use HTTPS first if your mobile browser has connection issues with HTTP
 
 ### Remote Access with ngrok
+
 To make your locally running website accessible from anywhere on the internet:
 
 1. Install ngrok:
+
    ```
    npm install -g ngrok
    ```
@@ -428,23 +463,27 @@ To make your locally running website accessible from anywhere on the internet:
 2. Sign up for a free account at [ngrok.com](https://dashboard.ngrok.com/signup)
 
 3. Add your authtoken (you only need to do this once):
+
    ```
    ngrok authtoken YOUR_AUTH_TOKEN
    ```
 
 4. Start your website (in one terminal):
+
    ```
    npm start
    ```
 
 5. Start the ngrok tunnel (in a second terminal):
+
    ```
    ngrok http 3000
    ```
 
 6. Ngrok will display a public URL (like `https://abc123.ngrok.io`) that you can use to access your site from anywhere
 
-**Note:** 
+**Note:**
+
 - Both the server and ngrok need to be running simultaneously
 - Free ngrok URLs change each time you restart ngrok
 - Anyone with the ngrok URL can access your site
@@ -454,18 +493,21 @@ To make your locally running website accessible from anywhere on the internet:
 The website includes several performance optimizations:
 
 ### Image Loading
+
 - **Lazy Loading**: Images load only when entering the viewport
 - **Progressive Enhancement**: Placeholder images while loading
 - **Optimized Formats**: Support for WebP and other modern formats
 - **Responsive Images**: Different sizes for different screen sizes
 
 ### JavaScript Performance
+
 - **Module Splitting**: Code is split into focused, cacheable modules
 - **Async Loading**: Non-critical modules load asynchronously
 - **Memory Management**: Automatic cleanup prevents memory leaks
 - **Caching**: Intelligent caching reduces redundant operations
 
 ### User Experience
+
 - **Error Boundaries**: Failed components don't crash the entire site
 - **Graceful Degradation**: Site works even when JavaScript fails
 - **Accessibility**: Full keyboard navigation and screen reader support
@@ -474,6 +516,7 @@ The website includes several performance optimizations:
 ## Browser Support
 
 The website is compatible with:
+
 - **Modern Browsers**: Chrome, Firefox, Safari, Edge (last 2 versions)
 - **Mobile Browsers**: iOS Safari, Chrome Mobile, Samsung Internet
 - **Legacy Support**: Graceful degradation for older browsers
@@ -484,26 +527,34 @@ The website is compatible with:
 ### Common Issues
 
 #### Module Loading Errors
+
 If you see module loading errors in the console:
+
 1. Check that all module files exist in `/public/js/modules/`
 2. Verify the server is running (for absolute path resolution)
 3. Check browser console for specific error messages
 4. Use development tools: `window.app.dev.testPerformance()`
 
 #### Cart Not Working
+
 If the shopping cart isn't functioning:
+
 1. Check localStorage availability: `window.app.dev.getFullReport().cart`
 2. Verify artwork data format in `/public/data/artwork-data.json`
 3. Check for JavaScript errors in browser console
 
 #### Performance Issues
+
 If the site feels slow:
+
 1. Monitor performance: `window.app.dev.showDashboard()`
 2. Check memory usage: `window.app.dev.getMemoryReport()`
 3. Test error boundaries: `window.app.dev.testErrorBoundaries()`
 
 #### Images Not Loading
+
 If images aren't displaying properly:
+
 1. Verify image paths in artwork data
 2. Check lazy loading status: Look for "lazy-loader" in console
 3. Test on different network conditions
@@ -511,6 +562,7 @@ If images aren't displaying properly:
 ### Getting Help
 
 For technical issues:
+
 1. Check browser console for error messages
 2. Use built-in development tools (`window.app.dev`)
 3. Review module-specific documentation in code comments
@@ -519,7 +571,7 @@ For technical issues:
 ## File Structure
 
 - `index.html` - Main website home page
-- `gallery.html` - Artwork gallery page  
+- `gallery.html` - Artwork gallery page
 - `artwork.html` - Individual artwork detail pages
 - `public/` - Contains all assets (images, CSS, JS)
   - `public/data/artwork-data.json` - Central data file for all artwork
@@ -544,7 +596,7 @@ All artwork data is stored in a single JSON file at `public/data/artwork-data.js
 ## Recent Updates (2025)
 
 - ✅ **Complete JavaScript refactoring** from monolithic to modular architecture
-- ✅ **Performance optimization** with lazy loading and intelligent caching  
+- ✅ **Performance optimization** with lazy loading and intelligent caching
 - ✅ **Shopping cart system** with localStorage persistence
 - ✅ **Advanced error handling** with automatic recovery
 - ✅ **Real-time search** with debouncing and history
@@ -556,4 +608,4 @@ All artwork data is stored in a single JSON file at `public/data/artwork-data.js
 
 ## License
 
-All rights reserved. This website and its content belong to Evgenia Portnov. 
+All rights reserved. This website and its content belong to Evgenia Portnov.

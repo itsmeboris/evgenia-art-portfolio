@@ -78,4 +78,4 @@ The JSON file uses the following structure:
 
 If the admin panel can't load the data from the JSON file, it will fall back to using data from localStorage. If no data is available in either place, it will start with empty data.
 
-If you encounter any issues, check the browser console for error messages. 
+If you encounter any issues, check the browser console for error messages.

@@ -1,8 +1,9 @@
 # Website Improvement TODO List
 
-*Last updated: January 2025*
+_Last updated: January 2025_
 
 ## Progress Tracker
+
 - ✅ **Completed:** 23/47 items (48.9%)
 - 🔴 **Critical:** 0 items remaining
 - 🟠 **High:** 1 item remaining
@@ -279,12 +280,14 @@
 ## 📝 **Notes for Implementation**
 
 ### Getting Started
+
 1. Focus on completing all Critical items first (security vulnerabilities)
 2. Then tackle High priority items for core functionality
 3. Work through Medium priority items for architectural improvements
 4. Low priority items can be implemented as time permits
 
 ### Quick Wins (Easy to implement)
+
 - [x] Move credentials to .env file ✅ DONE
 - [x] Add compression middleware ✅ DONE
 - [ ] Set up ESLint/Prettier
@@ -292,12 +295,14 @@
 - [ ] Implement loading skeletons
 
 ### Major Projects (Require significant time)
+
 - [ ] Database migration
 - [ ] TypeScript conversion
 - [ ] Complete testing suite
 - [ ] CI/CD pipeline setup
 
 ### Resources Needed
+
 - [ ] Database hosting (for session storage and artwork data)
 - [ ] CDN for image optimization
 - [ ] Analytics service account
@@ -306,5 +311,5 @@
 
 ---
 
-*Last updated: January 2025*
-*Total items: 47 | Completed: 23 | Remaining: 24*
+_Last updated: January 2025_
+_Total items: 47 | Completed: 23 | Remaining: 24_

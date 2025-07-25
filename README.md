@@ -12,6 +12,12 @@ npm install
 cp .env.example .env
 # Edit .env with your configuration
 
+# Start database infrastructure
+npm run db:setup
+
+# Run database migration (first time only)
+npm run db:migrate
+
 # Build for production
 npm run build
 
@@ -33,10 +39,14 @@ The website features:
 - About page that tells Evgenia's artistic journey
 - Contact page with a form and FAQs
 - **Modern modular JavaScript architecture** with performance optimization
-- **Shopping cart system** with localStorage persistence
+- **PostgreSQL database infrastructure** with Redis caching for professional data management
+- **RESTful API endpoints** for artwork and category management
+- **Shopping cart system** with database persistence and session management
 - **Advanced image loading** with lazy loading and lightbox functionality
 - **Real-time search** with debouncing and search history
 - **Comprehensive error handling** with automatic recovery
+- **SEO optimization** with meta tags, structured data, and dynamic sitemaps
+- **Loading skeletons** for improved perceived performance
 
 ## 🏗️ JavaScript Architecture
 
@@ -118,6 +128,15 @@ The website features:
 - Automatic skeleton management with withSkeleton() utility
 - Accessibility features with proper ARIA labels
 
+#### 🗄️ **Database Infrastructure**
+
+- **PostgreSQL Database**: Professional-grade data management with proper relationships
+- **Redis Caching**: High-speed caching for artwork data, sessions, and analytics
+- **RESTful API**: `/api/v1/artworks`, `/api/v1/categories`, `/api/v1/health`
+- **Data Migration**: Automated JSON → PostgreSQL migration with backup/restore
+- **Docker Integration**: Containerized database setup with pgAdmin interface
+- **Connection Pooling**: Optimized database performance with proper resource management
+
 ### 🎯 **App Manager** (`public/js/main.js`)
 
 The central coordinator that:
@@ -173,29 +192,50 @@ window.app.dev.exportData();
 ├── artwork.html             # Individual artwork details
 ├── shop.html                # Shopping page
 ├── server.js                # Node.js server with HTTP/HTTPS support
-├── certs/                   # SSL certificates for HTTPS development
+├── docker-compose.yml       # Database infrastructure setup
+├── database/                # Database infrastructure
+│   ├── config.js            # PostgreSQL/Redis connection management
+│   ├── migrate.js           # Database migration scripts
+│   ├── models/              # Database models
+│   │   ├── Artwork.js       # Artwork model with CRUD operations
+│   │   └── Category.js      # Category model with relationships
+│   ├── init/                # Database initialization
+│   │   ├── 01-create-schema.sql # Database schema creation
+│   │   └── 02-seed-data.sql # Initial data seeding
+│   └── backup/              # Migration backups and logs
+├── routes/                  # API routes
+│   └── api.js               # RESTful API endpoints
 ├── public/                  # Public assets
 │   ├── css/                 # CSS files
 │   │   ├── style.css        # Main stylesheet
 │   │   ├── additional-styles.css # Additional styles
-│   │   └── search-modal.css # Search modal styles
-│   ├── js/                  # JavaScript files
-│   │   ├── main.js          # App Manager (modular coordinator)
-│   │   ├── main-old.js      # Original monolithic file (backup)
-│   │   ├── artwork-loader.js # Artwork loading functionality
-│   │   └── modules/         # Modular JavaScript architecture
-│   │       ├── cart.js      # Shopping cart system
-│   │       ├── ui.js        # User interface components
-│   │       ├── lightbox.js  # Image lightbox functionality
-│   │       ├── search.js    # Search functionality
-│   │       ├── forms.js     # Form handling and validation
-│   │       ├── error-handler.js # Error management
-│   │       ├── utils.js     # Utility functions
-│   │       └── lazy-loader.js # Image lazy loading
-│   ├── data/                # Data files
-│   │   └── artwork-data.json # Central artwork database
+│   │   ├── search-modal.css # Search modal styles
+│   │   └── skeleton.css     # Loading skeleton styles
+│   ├── js/                  # JavaScript files (legacy)
+│   ├── dist/                # Built and minified assets
+│   │   └── js/              # Webpack-bundled JavaScript
+│   ├── data/                # Data files (legacy)
+│   │   └── artwork-data.json # Artwork database (migrated to PostgreSQL)
+│   ├── sitemap.xml          # Dynamic SEO sitemap
+│   ├── robots.txt           # Search engine instructions
 │   └── assets/              # Static assets
 │       └── images/          # Image files
+├── src/                     # Modern JavaScript source
+│   └── js/                  # Modular ES6+ architecture
+│       ├── main.js          # App Manager (modular coordinator)
+│       ├── artwork-loader.js # Artwork loading functionality
+│       └── modules/         # Modular JavaScript architecture
+│           ├── cart.js      # Shopping cart system
+│           ├── ui.js        # User interface components
+│           ├── lightbox.js  # Image lightbox functionality
+│           ├── search.js    # Search functionality
+│           ├── forms.js     # Form handling and validation
+│           ├── error-handler.js # Error management
+│           ├── utils.js     # Utility functions
+│           ├── lazy-loader.js # Image lazy loading
+│           ├── skeleton-loader.js # Loading skeletons
+│           ├── meta-tags.js # Dynamic SEO meta tags
+│           └── sitemap-service.js # Dynamic sitemap generation
 ├── admin/                   # Admin interface
 │   ├── index.html           # Admin panel
 │   ├── login.html           # Admin login
@@ -244,31 +284,39 @@ const total = window.cart.getTotal();
 
 ### Adding New Artwork
 
+**Modern Database-Driven Approach:**
+
 1. Add the artwork image to `/public/assets/images/`
-2. Update the central data file at `/public/data/artwork-data.json`:
-   ```json
-   {
-     "id": "unique-artwork-id",
-     "title": "Artwork Title",
-     "category": "floral", // or "towns", "birds"
-     "price": 150,
-     "currency": "USD",
-     "image": "path/to/image.jpg",
-     "description": "Artwork description",
-     "dimensions": "16x20 inches",
-     "medium": "Watercolor on paper"
-   }
+2. Use the API endpoint or admin interface:
+   ```bash
+   # Via API
+   curl -X POST http://localhost:3000/api/v1/artworks \
+     -H "Content-Type: application/json" \
+     -d '{
+       "title": "Artwork Title",
+       "category": "floral",
+       "price": 150,
+       "currency": "₪",
+       "image": "path/to/image.jpg",
+       "description": "Artwork description",
+       "dimensions": "16x20 inches",
+       "medium": "Watercolor on paper"
+     }'
    ```
-3. The artwork will automatically appear in the gallery and be searchable
+3. The artwork will automatically appear in the gallery with proper database indexing
+
+**Legacy Method (for reference):**
+- Update `/public/data/artwork-data.json` (now migrated to PostgreSQL)
 
 ### Managing Content with Admin Panel
 
 Access the admin panel at `/admin/` to:
 
-- Add, edit, and delete artwork entries
-- Upload new images
-- Manage categories and pricing
-- View analytics and performance data
+- Add, edit, and delete artwork entries via database interface
+- Upload new images with automatic optimization
+- Manage categories and pricing with real-time updates
+- View analytics and performance data from Redis metrics
+- Monitor database health and API performance
 
 ### Changing Colors
 
@@ -627,7 +675,7 @@ All artwork data is stored in a single JSON file at `public/data/artwork-data.js
 
 - ✅ **Complete JavaScript refactoring** from monolithic to modular architecture
 - ✅ **Performance optimization** with lazy loading and intelligent caching
-- ✅ **Shopping cart system** with localStorage persistence
+- ✅ **Shopping cart system** with database persistence and session management
 - ✅ **Advanced error handling** with automatic recovery
 - ✅ **Real-time search** with debouncing and history
 - ✅ **Comprehensive testing** and development tools
@@ -637,6 +685,12 @@ All artwork data is stored in a single JSON file at `public/data/artwork-data.js
 - ✅ **Dual HTTP/HTTPS servers** for comprehensive development testing
 - ✅ **Skeleton loading system** with animated placeholders for improved UX
 - ✅ **Enhanced 404 page** with search functionality and featured artworks
+- ✅ **PostgreSQL database infrastructure** with professional data management
+- ✅ **Redis caching system** for high-performance data access
+- ✅ **RESTful API architecture** with comprehensive endpoints
+- ✅ **SEO optimization** with meta tags, structured data, and dynamic sitemaps
+- ✅ **Database migration tools** with backup and restore capabilities
+- ✅ **Docker containerization** for easy development setup
 
 ## License
 

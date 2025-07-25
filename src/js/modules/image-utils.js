@@ -165,6 +165,11 @@ class ImageUtils {
     return originalPath.replace(/\.(jpg|jpeg|png)$/i, '.webp');
   }
 
+  // Convert WebP path back to JPG fallback
+  getJPGFallback(webpPath) {
+    return webpPath.replace(/\.webp$/i, '.jpg');
+  }
+
   // Check if WebP version exists (simplified check)
   async checkWebPExists(webpPath) {
     try {
@@ -206,25 +211,35 @@ class ImageUtils {
   // Lazy load image with WebP support
   lazyLoadWithWebP(img) {
     return new Promise((resolve, reject) => {
-      if (!img.dataset.src) {
-        reject(new Error('No data-src attribute'));
+      const srcToLoad = img.dataset.src || img.src;
+      if (!srcToLoad) {
+        reject(new Error('No data-src or src attribute'));
         return;
       }
 
-      const sources = this.generateResponsiveSources(img.dataset.src);
-
-      // Try WebP first if supported
+      // Generate fallback options
       const imagesToTry = [];
-      if (this.supportsWebP && sources.webp) {
-        imagesToTry.push(sources.webp);
+      
+      // If the source is already WebP, add JPG fallback
+      if (srcToLoad.endsWith('.webp')) {
+        if (this.supportsWebP) {
+          imagesToTry.push(srcToLoad); // Try WebP first
+        }
+        imagesToTry.push(this.getJPGFallback(srcToLoad)); // Add JPG fallback
+      } else {
+        // If source is JPG, add WebP option
+        if (this.supportsWebP) {
+          imagesToTry.push(this.getWebPPath(srcToLoad)); // Try WebP first
+        }
+        imagesToTry.push(srcToLoad); // Original as fallback
       }
-      imagesToTry.push(sources.original);
 
       this.tryLoadImages(imagesToTry)
         .then(loadedSrc => {
           img.src = loadedSrc;
           img.classList.remove('loading');
           img.classList.add('loaded');
+          console.log(`📸 Successfully loaded: ${loadedSrc}`);
           resolve(img);
         })
         .catch(reject);
@@ -238,6 +253,7 @@ class ImageUtils {
         await this.loadImage(path);
         return path;
       } catch {
+        console.log(`📸 Failed to load ${path}, trying next format...`);
         continue; // Try next image
       }
     }

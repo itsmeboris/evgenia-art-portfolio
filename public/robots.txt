@@ -1,0 +1,18 @@
+User-agent: *
+Allow: /
+
+# Sitemap
+Sitemap: https://evgeniaart.com/sitemap.xml
+
+# Crawl delay
+Crawl-delay: 1
+
+# Disallow admin areas
+Disallow: /admin/
+Disallow: /scripts/
+Disallow: /node_modules/
+Disallow: /src/
+
+# Allow images
+Allow: /public/assets/images/
+Allow: /public/assets/favicon/

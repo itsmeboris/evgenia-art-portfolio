@@ -17,6 +17,7 @@ import './modules/search.js';
 import './modules/lightbox.js';
 import './modules/skeleton-loader.js';
 import './modules/meta-tags.js';
+import './modules/sitemap-service.js';
 
 // Import artwork loader
 import './artwork-loader.js';

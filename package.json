@@ -9,7 +9,7 @@
     "dev": "NODE_ENV=development nodemon server.js",
     "test": "echo \"Error: no test specified\" && exit 1",
     "convert-webp": "node webp-converter.js",
-    "build": "npm run build:clean && webpack --mode production",
+    "build": "npm run build:clean && webpack --mode production && npm run sitemap:generate",
     "build:dev": "webpack --mode development",
     "build:watch": "webpack --mode development --watch",
     "build:analyze": "webpack --mode production --env analyze",
@@ -25,7 +25,11 @@
     "pm2:stop": "pm2 stop evgenia-art",
     "pm2:restart": "pm2 restart evgenia-art",
     "pm2:logs": "pm2 logs evgenia-art",
-    "setup:dirs": "mkdir -p logs pids sessions"
+    "setup:dirs": "mkdir -p logs pids sessions",
+    "sitemap:generate": "node scripts/generate-sitemap.js",
+    "sitemap:validate": "node scripts/generate-sitemap.js --validate",
+    "sitemap:stats": "node scripts/generate-sitemap.js --stats",
+    "sitemap:robots": "node scripts/generate-sitemap.js --robots"
   },
   "dependencies": {
     "bcrypt": "^6.0.0",

@@ -7,7 +7,47 @@ const express = require('express');
 const router = express.Router();
 const Artwork = require('../database/models/Artwork');
 const Category = require('../database/models/Category');
-const { pool } = require('../database/config');
+const { pool, redisClient } = require('../database/config');
+
+// Redis caching utility functions
+const cache = {
+  async get(key) {
+    try {
+      const value = await redisClient.get(key);
+      return value ? JSON.parse(value) : null;
+    } catch (error) {
+      console.warn('Redis GET error:', error.message);
+      return null;
+    }
+  },
+
+  async set(key, value, ttl = 3600) {
+    try {
+      await redisClient.setEx(key, ttl, JSON.stringify(value));
+    } catch (error) {
+      console.warn('Redis SET error:', error.message);
+    }
+  },
+
+  async del(key) {
+    try {
+      await redisClient.del(key);
+    } catch (error) {
+      console.warn('Redis DEL error:', error.message);
+    }
+  },
+
+  async invalidatePattern(pattern) {
+    try {
+      const keys = await redisClient.keys(pattern);
+      if (keys.length > 0) {
+        await redisClient.del(keys);
+      }
+    } catch (error) {
+      console.warn('Redis pattern invalidation error:', error.message);
+    }
+  }
+};
 
 // Middleware for API response formatting
 const apiResponse = (req, res, next) => {
@@ -73,6 +113,17 @@ router.get('/artworks', pagination, async (req, res) => {
       offset: req.pagination.offset,
     };
 
+    // Create cache key based on filters and pagination
+    const cacheKey = `artworks:${JSON.stringify(filters)}`;
+    
+    // Try to get from Redis cache first
+    const cachedResult = await cache.get(cacheKey);
+    if (cachedResult) {
+      console.log(`✅ Cache HIT for artworks: ${cacheKey.substring(0, 50)}...`);
+      return res.apiSuccess(cachedResult, 'Artworks fetched successfully (cached)');
+    }
+
+    console.log(`⚡ Cache MISS for artworks: ${cacheKey.substring(0, 50)}...`);
     const artworks = await Artwork.getAll(filters);
 
     // Get total count for pagination
@@ -101,6 +152,10 @@ router.get('/artworks', pagination, async (req, res) => {
         hasPrev: req.pagination.page > 1,
       },
     };
+
+    // Cache the response for 10 minutes (600 seconds)
+    await cache.set(cacheKey, response, 600);
+    console.log(`💾 Cached artworks result: ${cacheKey.substring(0, 50)}...`);
 
     res.apiSuccess(response, 'Artworks fetched successfully');
   } catch (error) {
@@ -226,6 +281,12 @@ router.post('/artworks', async (req, res) => {
     }
 
     const artwork = await Artwork.create(artworkData);
+    
+    // Invalidate artwork caches when new artwork is created
+    await cache.invalidatePattern('artworks:*');
+    await cache.del('categories:all');
+    console.log('🗑️  Cache invalidated after artwork creation');
+    
     res.apiSuccess(artwork.toJSON(), 'Artwork created successfully', 201);
   } catch (error) {
     console.error('Error creating artwork:', error);
@@ -247,6 +308,11 @@ router.put('/artworks/:id', async (req, res) => {
     if (!artwork) {
       return res.apiError('Artwork not found', 404);
     }
+
+    // Invalidate artwork caches when artwork is updated
+    await cache.invalidatePattern('artworks:*');
+    await cache.del('categories:all');
+    console.log('🗑️  Cache invalidated after artwork update');
 
     res.apiSuccess(artwork.toJSON(), 'Artwork updated successfully');
   } catch (error) {
@@ -285,11 +351,24 @@ router.delete('/artworks/:id', async (req, res) => {
  */
 router.get('/categories', async (req, res) => {
   try {
+    const cacheKey = 'categories:all';
+    
+    // Try Redis cache first
+    const cachedResult = await cache.get(cacheKey);
+    if (cachedResult) {
+      console.log('✅ Cache HIT for categories');
+      return res.apiSuccess(cachedResult, 'Categories fetched successfully (cached)');
+    }
+
+    console.log('⚡ Cache MISS for categories');
     const categories = await Category.getAll();
-    res.apiSuccess(
-      categories.map(category => category.toJSON()),
-      'Categories fetched successfully'
-    );
+    const response = categories.map(category => category.toJSON());
+    
+    // Cache for 30 minutes (1800 seconds)
+    await cache.set(cacheKey, response, 1800);
+    console.log('💾 Cached categories result');
+    
+    res.apiSuccess(response, 'Categories fetched successfully');
   } catch (error) {
     console.error('Error fetching categories:', error);
     res.apiError('Failed to fetch categories', 500, error.message);
@@ -503,9 +582,19 @@ router.get('/health', async (req, res) => {
     const artworkCount = await pool.query('SELECT COUNT(*) FROM artworks');
     const categoryCount = await pool.query('SELECT COUNT(*) FROM categories');
 
+    // Test Redis connection
+    let redisStatus = 'disconnected';
+    try {
+      await redisClient.ping();
+      redisStatus = 'connected';
+    } catch (redisError) {
+      console.warn('Redis health check failed:', redisError.message);
+    }
+
     const healthData = {
       status: 'healthy',
       database: 'connected',
+      redis: redisStatus,
       timestamp: dbResult.rows[0].now,
       counts: {
         artworks: parseInt(artworkCount.rows[0].count),
@@ -517,6 +606,72 @@ router.get('/health', async (req, res) => {
   } catch (error) {
     console.error('Health check failed:', error);
     res.apiError('API is unhealthy', 500, error.message);
+  }
+});
+
+/**
+ * GET /api/v1/cache/stats
+ * Redis cache statistics and monitoring
+ */
+router.get('/cache/stats', async (req, res) => {
+  try {
+    let cacheStats = {
+      status: 'disconnected',
+      keys: 0,
+      memory: 'unknown',
+      hits: 'unknown',
+      misses: 'unknown'
+    };
+
+    try {
+      // Get Redis info
+      const info = await redisClient.info();
+      const keys = await redisClient.keys('*');
+      
+      // Parse Redis info for useful stats
+      const infoLines = info.split('\r\n');
+      const stats = {};
+      infoLines.forEach(line => {
+        if (line.includes(':')) {
+          const [key, value] = line.split(':');
+          stats[key] = value;
+        }
+      });
+
+      cacheStats = {
+        status: 'connected',
+        keys: keys.length,
+        keysList: keys.slice(0, 20), // Show first 20 keys
+        memory: stats.used_memory_human || 'unknown',
+        hits: stats.keyspace_hits || 'unknown',
+        misses: stats.keyspace_misses || 'unknown',
+        totalConnections: stats.total_connections_received || 'unknown',
+        connectedClients: stats.connected_clients || 'unknown',
+        uptime: stats.uptime_in_seconds || 'unknown'
+      };
+    } catch (redisError) {
+      console.warn('Redis stats error:', redisError.message);
+    }
+
+    res.apiSuccess(cacheStats, 'Cache statistics retrieved');
+  } catch (error) {
+    console.error('Error getting cache stats:', error);
+    res.apiError('Failed to get cache statistics', 500, error.message);
+  }
+});
+
+/**
+ * DELETE /api/v1/cache/clear
+ * Clear all Redis cache
+ */
+router.delete('/cache/clear', async (req, res) => {
+  try {
+    await redisClient.flushAll();
+    console.log('🗑️  All Redis cache cleared manually');
+    res.apiSuccess({ cleared: true }, 'Cache cleared successfully');
+  } catch (error) {
+    console.error('Error clearing cache:', error);
+    res.apiError('Failed to clear cache', 500, error.message);
   }
 });
 

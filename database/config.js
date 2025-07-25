@@ -65,9 +65,7 @@ const pool = new Pool({
 
 // Create Redis connection
 const redisClient = Redis.createClient({
-  host: currentRedisConfig.host,
-  port: currentRedisConfig.port,
-  password: currentRedisConfig.password,
+  url: `redis://${currentRedisConfig.password ? currentRedisConfig.password + '@' : ''}${currentRedisConfig.host}:${currentRedisConfig.port}`,
 });
 
 // Handle database connection events
@@ -84,13 +82,23 @@ pool.on('remove', client => {
   console.log('🔌 PostgreSQL client removed');
 });
 
+// Initialize Redis connection
+(async () => {
+  try {
+    await redisClient.connect();
+    console.log('🔗 Redis connected successfully');
+  } catch (error) {
+    console.warn('⚠️  Redis connection failed:', error.message);
+  }
+})();
+
 // Handle Redis connection events
 redisClient.on('connect', () => {
-  console.log('🔗 Redis connected');
+  console.log('🔗 Redis reconnected');
 });
 
 redisClient.on('error', err => {
-  console.error('❌ Redis error:', err);
+  console.warn('⚠️  Redis error:', err.message);
 });
 
 // Test database connection
@@ -110,11 +118,14 @@ async function testConnection() {
 // Test Redis connection
 async function testRedisConnection() {
   try {
+    if (!redisClient.isOpen) {
+      await redisClient.connect();
+    }
     await redisClient.ping();
     console.log('✅ Redis connection successful');
     return true;
   } catch (error) {
-    console.error('❌ Redis connection failed:', error);
+    console.warn('⚠️  Redis connection failed:', error.message);
     return false;
   }
 }
@@ -145,7 +156,9 @@ async function closeConnections() {
   try {
     await pool.end();
     try {
-      await redisClient.quit();
+      if (redisClient.isOpen) {
+        await redisClient.quit();
+      }
     } catch (redisError) {
       console.warn('⚠️  Redis close failed:', redisError.message);
     }

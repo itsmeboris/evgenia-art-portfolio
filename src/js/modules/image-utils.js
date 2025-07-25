@@ -219,7 +219,7 @@ class ImageUtils {
 
       // Generate fallback options
       const imagesToTry = [];
-      
+
       // If the source is already WebP, add JPG fallback
       if (srcToLoad.endsWith('.webp')) {
         if (this.supportsWebP) {

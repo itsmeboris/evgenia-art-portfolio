@@ -1,6 +1,27 @@
 # Evgenia Portnov | Artist Portfolio & E-commerce Website
 
-This is a modern, responsive portfolio and e-commerce website for artist Evgenia Portnov. The site showcases her artwork while providing a seamless shopping experience through an integrated shopping cart system.
+A modern, responsive portfolio and e-commerce website for artist Evgenia Portnov. The site showcases her artwork while providing a seamless shopping experience through an integrated shopping cart system.
+
+## 🚀 Quick Start
+
+```bash
+# Install dependencies
+npm install
+
+# Set up environment
+cp .env.example .env
+# Edit .env with your configuration
+
+# Build for production
+npm run build
+
+# Start the application
+npm start
+```
+
+## 📦 Production Deployment
+
+See [DEPLOYMENT.md](DEPLOYMENT.md) for detailed deployment instructions.
 
 ## Project Overview
 

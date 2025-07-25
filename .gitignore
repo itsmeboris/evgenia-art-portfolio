@@ -109,6 +109,14 @@ temp/
 # SSL certificates (development certs are included for mobile testing)
 certs/
 
+# Session files
+sessions/
+
+# PM2 logs and process files
+logs/
+pids/
+*.pid
+
 # Webpack build outputs
 public/dist/
 src/js/main.js.map

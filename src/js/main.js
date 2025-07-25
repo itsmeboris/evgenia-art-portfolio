@@ -15,6 +15,7 @@ import './modules/ui.js';
 import './modules/cart.js';
 import './modules/search.js';
 import './modules/lightbox.js';
+import './modules/skeleton-loader.js';
 
 // Import artwork loader
 import './artwork-loader.js';

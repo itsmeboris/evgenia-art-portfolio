@@ -109,32 +109,39 @@ function initGalleryGrid(data) {
   const galleryGrid = document.querySelector('.gallery-grid');
   if (!galleryGrid) return;
 
-  // Clear any existing content
-  galleryGrid.innerHTML = '';
+  // Show skeleton loading first
+  if (window.skeletonLoader) {
+    window.skeletonLoader.showSkeleton(galleryGrid, 'gallery', 6);
+  }
 
-  // Get the active filter if any
-  const urlParams = new URLSearchParams(window.location.search);
-  const activeCollection = urlParams.get('collection') || 'all';
+  // Simulate loading delay for better UX
+  setTimeout(() => {
+    // Clear any existing content (including skeleton)
+    galleryGrid.innerHTML = '';
 
-  // Use the currency from settings
-  const currency = data.settings.currency || '₪';
+    // Get the active filter if any
+    const urlParams = new URLSearchParams(window.location.search);
+    const activeCollection = urlParams.get('collection') || 'all';
 
-  // Add the artwork items
-  data.artworks.forEach(artwork => {
-    // Only add if matches the active filter or no filter is active
-    if (activeCollection === 'all' || artwork.category === activeCollection) {
-      const artworkItem = document.createElement('div');
-      artworkItem.className = 'artwork-item';
-      artworkItem.setAttribute('data-category', artwork.category);
-      artworkItem.setAttribute('data-id', artwork.id);
+    // Use the currency from settings
+    const currency = data.settings.currency || '₪';
 
-      // Format the price with the correct currency
-      let formattedPrice =
-        artwork.price !== null && artwork.price !== undefined
-          ? `${currency}${artwork.price}`
-          : 'Price on request';
+    // Add the artwork items
+    data.artworks.forEach(artwork => {
+      // Only add if matches the active filter or no filter is active
+      if (activeCollection === 'all' || artwork.category === activeCollection) {
+        const artworkItem = document.createElement('div');
+        artworkItem.className = 'artwork-item';
+        artworkItem.setAttribute('data-category', artwork.category);
+        artworkItem.setAttribute('data-id', artwork.id);
 
-      artworkItem.innerHTML = `
+        // Format the price with the correct currency
+        let formattedPrice =
+          artwork.price !== null && artwork.price !== undefined
+            ? `${currency}${artwork.price}`
+            : 'Price on request';
+
+        artworkItem.innerHTML = `
                 <div class="artwork-image">
                     <a href="/artwork/${artwork.id}">
                         <img src="${window.utils ? window.utils.ensureAbsolutePath(artwork.image) : artwork.image.startsWith('/') ? artwork.image : '/' + artwork.image}" 
@@ -151,13 +158,13 @@ function initGalleryGrid(data) {
                 </div>
             `;
 
-      galleryGrid.appendChild(artworkItem);
-    }
-  });
+        galleryGrid.appendChild(artworkItem);
+      }
+    });
 
-  // Add style for the title links
-  const styleEl = document.createElement('style');
-  styleEl.textContent = `
+    // Add style for the title links
+    const styleEl = document.createElement('style');
+    styleEl.textContent = `
         .artwork-info h3 a {
             color: inherit;
             text-decoration: none;
@@ -177,23 +184,24 @@ function initGalleryGrid(data) {
             transform: scale(1.05);
         }
     `;
-  document.head.appendChild(styleEl);
+    document.head.appendChild(styleEl);
 
-  // Initialize "Add to Cart" buttons
-  initAddToCartButtons(data);
+    // Initialize "Add to Cart" buttons
+    initAddToCartButtons(data);
 
-  // Notify modules about new elements (if available)
-  if (window.app) {
-    const cartModule = window.app.getModule('cart');
-    if (cartModule && cartModule.refreshButtons) {
-      cartModule.refreshButtons();
+    // Notify modules about new elements (if available)
+    if (window.app) {
+      const cartModule = window.app.getModule('cart');
+      if (cartModule && cartModule.refreshButtons) {
+        cartModule.refreshButtons();
+      }
+
+      const lightboxModule = window.app.getModule('lightbox');
+      if (lightboxModule && lightboxModule.refreshGallery) {
+        lightboxModule.refreshGallery();
+      }
     }
-
-    const lightboxModule = window.app.getModule('lightbox');
-    if (lightboxModule && lightboxModule.refreshGallery) {
-      lightboxModule.refreshGallery();
-    }
-  }
+  }, 800); // Close setTimeout for skeleton loading
 }
 
 // Initialize "Add to Cart" buttons
@@ -333,15 +341,22 @@ function initFeaturedCollections(data) {
   const collectionGrid = document.querySelector('.collection-grid');
   if (!collectionGrid) return;
 
-  // Clear any existing content
-  collectionGrid.innerHTML = '';
+  // Show skeleton loading first
+  if (window.skeletonLoader) {
+    window.skeletonLoader.showSkeleton(collectionGrid, 'collections', 3);
+  }
 
-  // Add the collection items
-  data.collections.forEach(collection => {
-    const collectionItem = document.createElement('div');
-    collectionItem.className = 'collection-item';
+  // Simulate loading delay for better UX
+  setTimeout(() => {
+    // Clear any existing content (including skeleton)
+    collectionGrid.innerHTML = '';
 
-    collectionItem.innerHTML = `
+    // Add the collection items
+    data.collections.forEach(collection => {
+      const collectionItem = document.createElement('div');
+      collectionItem.className = 'collection-item';
+
+      collectionItem.innerHTML = `
             <div class="collection-image">
                 <img src="${window.utils ? window.utils.ensureAbsolutePath(collection.image) : collection.image.startsWith('/') ? collection.image : '/' + collection.image}" alt="${collection.title} Collection" onerror="this.onerror=null;this.src='${placeholderImageURI}';">
             </div>
@@ -352,8 +367,9 @@ function initFeaturedCollections(data) {
             </div>
         `;
 
-    collectionGrid.appendChild(collectionItem);
-  });
+      collectionGrid.appendChild(collectionItem);
+    });
+  }, 600); // Close setTimeout for skeleton loading
 }
 
 // Generate and populate the gallery filters

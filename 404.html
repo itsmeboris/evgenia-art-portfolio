@@ -6,16 +6,22 @@
     <title>Page Not Found - Evgenia Portnov</title>
     <link rel="stylesheet" href="public/css/style.css" />
     <link rel="stylesheet" href="public/css/additional-styles.css" />
+    <link rel="stylesheet" href="public/css/search-modal.css" />
     <link rel="icon" href="public/assets/favicon/favicon.ico" type="image/x-icon" />
+    <link rel="apple-touch-icon" href="public/assets/favicon/apple-touch-icon.png" />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link
       href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@300;400;500;600;700&family=Montserrat:wght@300;400;500;600&display=swap"
       rel="stylesheet"
     />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css"
+    />
     <style>
       .error-container {
-        min-height: 80vh;
+        min-height: 70vh;
         display: flex;
         flex-direction: column;
         align-items: center;
@@ -25,18 +31,146 @@
       }
 
       .error-title {
-        font-size: 3rem;
+        font-family: 'Cormorant Garamond', serif;
+        font-size: 3.5rem;
         margin-bottom: 1rem;
+        color: #9e7e5c;
+        font-weight: 300;
+      }
+
+      .error-subtitle {
+        font-size: 1.5rem;
+        color: #666;
+        margin-bottom: 1.5rem;
+        font-weight: 300;
       }
 
       .error-message {
-        font-size: 1.2rem;
+        font-size: 1.1rem;
         margin-bottom: 2rem;
         max-width: 600px;
+        color: #555;
+        line-height: 1.6;
       }
 
-      .error-btn {
-        margin-top: 1rem;
+      .error-actions {
+        display: flex;
+        gap: 1rem;
+        margin-bottom: 3rem;
+        flex-wrap: wrap;
+        justify-content: center;
+      }
+
+      .search-suggestion {
+        background: #f9f9f9;
+        padding: 2rem;
+        border-radius: 8px;
+        margin: 2rem 0;
+        max-width: 500px;
+        width: 100%;
+      }
+
+      .search-suggestion h3 {
+        font-family: 'Cormorant Garamond', serif;
+        font-size: 1.5rem;
+        margin-bottom: 1rem;
+        color: #333;
+      }
+
+      .quick-search {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        margin-bottom: 1rem;
+      }
+
+      .quick-search input {
+        flex: 1;
+        padding: 0.75rem;
+        border: 2px solid #ddd;
+        border-radius: 4px;
+        font-size: 1rem;
+      }
+
+      .quick-search button {
+        padding: 0.75rem 1.5rem;
+        background: #9e7e5c;
+        color: white;
+        border: none;
+        border-radius: 4px;
+        cursor: pointer;
+        font-size: 1rem;
+        transition: background 0.3s ease;
+      }
+
+      .quick-search button:hover {
+        background: #8b6d4f;
+      }
+
+      .featured-artworks {
+        margin-top: 3rem;
+        width: 100%;
+        max-width: 1200px;
+      }
+
+      .featured-artworks h3 {
+        font-family: 'Cormorant Garamond', serif;
+        font-size: 2rem;
+        margin-bottom: 2rem;
+        color: #333;
+      }
+
+      .featured-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+        gap: 2rem;
+        margin-top: 2rem;
+      }
+
+      .featured-item {
+        text-align: center;
+        transition: transform 0.3s ease;
+      }
+
+      .featured-item:hover {
+        transform: translateY(-5px);
+      }
+
+      .featured-item img {
+        width: 100%;
+        height: 200px;
+        object-fit: cover;
+        border-radius: 4px;
+        margin-bottom: 1rem;
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+      }
+
+      .featured-item h4 {
+        font-family: 'Cormorant Garamond', serif;
+        font-size: 1.2rem;
+        margin-bottom: 0.5rem;
+        color: #333;
+      }
+
+      .featured-item p {
+        color: #666;
+        font-size: 0.9rem;
+      }
+
+      @media (max-width: 768px) {
+        .error-title {
+          font-size: 2.5rem;
+        }
+
+        .error-actions {
+          flex-direction: column;
+          align-items: center;
+        }
+
+        .featured-grid {
+          grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+          gap: 1rem;
+        }
       }
     </style>
   </head>
@@ -60,6 +194,7 @@
             </ul>
           </div>
           <div class="shop-icons">
+            <a href="#" class="search-icon"><i class="fas fa-search"></i></a>
             <a href="#" class="cart-icon"
               ><i class="fas fa-shopping-cart"></i><span class="cart-count">0</span></a
             >
@@ -73,13 +208,44 @@
 
     <!-- 404 Error Content -->
     <section class="error-container">
-      <h1 class="error-title">Page Not Found</h1>
+      <h1 class="error-title">404</h1>
+      <h2 class="error-subtitle">Artwork Not Found</h2>
       <p class="error-message">
-        Sorry, the page you're looking for doesn't exist or has been moved.
+        The page you're looking for seems to have wandered off like a free-spirited bird in one of
+        Evgenia's paintings. But don't worry – there's still plenty of beautiful art to discover!
       </p>
-      <div class="error-buttons">
-        <a href="/" class="btn primary-btn error-btn">Go to Homepage</a>
-        <a href="/gallery" class="btn secondary-btn error-btn">View Gallery</a>
+
+      <div class="error-actions">
+        <a href="/" class="btn primary-btn">Return Home</a>
+        <a href="/gallery" class="btn outline-btn">Browse Gallery</a>
+        <a href="/about" class="btn outline-btn">About the Artist</a>
+      </div>
+
+      <!-- Quick Search -->
+      <div class="search-suggestion">
+        <h3>Looking for something specific?</h3>
+        <div class="quick-search">
+          <input
+            type="text"
+            id="quick-search-input"
+            placeholder="Search for artworks, birds, flowers, towns..."
+          />
+          <button type="button" onclick="performQuickSearch()">
+            <i class="fas fa-search"></i> Search
+          </button>
+        </div>
+        <p>
+          Try searching for: <em>birds</em>, <em>floral</em>, <em>towns</em>, <em>featured</em>, or
+          any artwork title
+        </p>
+      </div>
+
+      <!-- Featured Artworks -->
+      <div class="featured-artworks">
+        <h3>Discover Featured Artworks</h3>
+        <div class="featured-grid" id="featured-grid">
+          <!-- Featured artworks will be loaded here -->
+        </div>
       </div>
     </section>
 
@@ -123,8 +289,91 @@
       </div>
     </footer>
 
-    <script src="public/js/main.js"></script>
-    <!-- Artwork Loader Script -->
-    <script src="public/js/artwork-loader.js"></script>
+    <!-- Cart Modal Overlay -->
+    <div class="cart-modal-overlay">
+      <div class="cart-modal">
+        <div class="cart-header">
+          <h2>Your Cart</h2>
+          <button class="cart-close"><i class="fas fa-times"></i></button>
+        </div>
+        <div class="cart-items-container">
+          <!-- Cart items will be populated here -->
+        </div>
+        <div class="cart-footer">
+          <div class="cart-total">
+            <span>Total:</span>
+            <span class="cart-total-amount">₪0.00</span>
+          </div>
+          <div class="cart-actions">
+            <button class="btn outline-btn cart-empty">Empty Cart</button>
+            <button class="btn primary-btn cart-checkout">Checkout</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <script>
+      // 404 Page JavaScript Functionality
+      function performQuickSearch() {
+        const searchInput = document.getElementById('quick-search-input');
+        const query = searchInput.value.trim();
+
+        if (query) {
+          // Redirect to gallery with search query
+          window.location.href = `/gallery?search=${encodeURIComponent(query)}`;
+        }
+      }
+
+      // Allow Enter key to trigger search
+      document.addEventListener('DOMContentLoaded', function () {
+        const searchInput = document.getElementById('quick-search-input');
+        if (searchInput) {
+          searchInput.addEventListener('keypress', function (e) {
+            if (e.key === 'Enter') {
+              performQuickSearch();
+            }
+          });
+        }
+
+        // Load featured artworks
+        loadFeaturedArtworks();
+      });
+
+      // Load featured artworks for the 404 page
+      function loadFeaturedArtworks() {
+        fetch('/public/data/artwork-data.json')
+          .then(response => response.json())
+          .then(data => {
+            const featuredArtworks = data.artworks.filter(artwork => artwork.featured).slice(0, 3);
+
+            const featuredGrid = document.getElementById('featured-grid');
+            featuredGrid.innerHTML = '';
+
+            featuredArtworks.forEach(artwork => {
+              const artworkElement = document.createElement('div');
+              artworkElement.className = 'featured-item';
+              artworkElement.innerHTML = `
+                <a href="/artwork/${artwork.id}">
+                  <img src="${artwork.image}" alt="${artwork.title}" loading="lazy">
+                </a>
+                <h4><a href="/artwork/${artwork.id}">${artwork.title}</a></h4>
+                <p>${artwork.category}</p>
+              `;
+              featuredGrid.appendChild(artworkElement);
+            });
+          })
+          .catch(error => {
+            console.error('Error loading featured artworks:', error);
+            // Hide featured section on error
+            document.querySelector('.featured-artworks').style.display = 'none';
+          });
+      }
+    </script>
+
+    <!-- Webpack Bundles - Optimized and minified -->
+    <script src="/public/dist/js/common.e9420e83b8630a353d5e.min.js"></script>
+    <script src="/public/dist/js/lightbox.bf4274a9974dfb151230.min.js"></script>
+    <script src="/public/dist/js/search.c7a336f5491da5aae2e0.min.js"></script>
+    <script src="/public/dist/js/main.321559792caea2b73f06.min.js"></script>
   </body>
 </html>

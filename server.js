@@ -1,4 +1,4 @@
-// Simple Express server to serve the website locally
+// Express server for Evgenia Art Portfolio with Database Support
 require('dotenv').config();
 const express = require('express');
 const https = require('https');
@@ -14,6 +14,11 @@ const FileStore = require('session-file-store')(session);
 const { v4: uuidv4 } = require('uuid');
 const compression = require('compression');
 const csrf = require('csrf');
+
+// Database imports
+const { initializeDatabase, closeConnections } = require('./database/config');
+const apiRoutes = require('./routes/api');
+
 const app = express();
 const port = process.env.PORT || 3000;
 const httpsPort = process.env.HTTPS_PORT || 3443;
@@ -207,6 +212,9 @@ app.use(session(sessionConfig));
 // Middleware to parse JSON and URL-encoded data
 app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ extended: true, limit: '10mb' }));
+
+// API Routes
+app.use('/api/v1', apiRoutes);
 
 // Mobile connection debugging middleware
 app.use((req, res, next) => {
@@ -606,14 +614,48 @@ try {
   console.warn('   HTTPS server will not be available');
 }
 
-// Configure server timeout settings for mobile devices
-const server = app.listen(port, '0.0.0.0', () => {
-  console.log(`🌐 Evgenia's art website running:`);
-  console.log(`   HTTP:  http://localhost:${port}`);
-  console.log(`   Main site: http://localhost:${port}/`);
-  console.log(`   Gallery: http://localhost:${port}/gallery`);
-  console.log(`   Admin panel: http://localhost:${port}/admin/`);
-});
+// Initialize database connection
+async function startServer() {
+  try {
+    console.log('🔌 Initializing database connections...');
+    const dbInitialized = await initializeDatabase();
+
+    if (!dbInitialized) {
+      console.warn('⚠️  Database connection failed - continuing without database features');
+    }
+
+    // Configure server timeout settings for mobile devices
+    const server = app.listen(port, '0.0.0.0', () => {
+      console.log(`🌐 Evgenia's art website running:`);
+      console.log(`   HTTP:  http://localhost:${port}`);
+      console.log(`   Main site: http://localhost:${port}/`);
+      console.log(`   Gallery: http://localhost:${port}/gallery`);
+      console.log(`   Admin panel: http://localhost:${port}/admin/`);
+      console.log(`   API: http://localhost:${port}/api/v1/health`);
+    });
+    
+    // Configure timeouts and debugging
+    configureServerTimeouts(server);
+    addConnectionDebugging(server, 'HTTP');
+    addServerErrorHandling(server, 'HTTP', port);
+    addClientErrorHandling(server, 'HTTP');
+
+    return server;
+  } catch (error) {
+    console.error('❌ Failed to start server:', error);
+    process.exit(1);
+  }
+}
+
+// Start the server
+startServer()
+  .then(server => {
+    global.httpServer = server;
+  })
+  .catch(error => {
+    console.error('❌ Server startup failed:', error);
+    process.exit(1);
+  });
 
 // Create HTTPS server if certificates are available
 let httpsServer = null;
@@ -626,6 +668,12 @@ if (httpsOptions) {
     console.log(`   Gallery: https://localhost:${httpsPort}/gallery`);
     console.log(`   Admin panel: https://localhost:${httpsPort}/admin/`);
   });
+  
+  // Configure timeouts and debugging for HTTPS server
+  configureServerTimeouts(httpsServer);
+  addConnectionDebugging(httpsServer, 'HTTPS');
+  addServerErrorHandling(httpsServer, 'HTTPS', httpsPort);
+  addClientErrorHandling(httpsServer, 'HTTPS');
 }
 
 console.log(`✅ Compression middleware enabled (gzip/deflate)`);
@@ -672,10 +720,7 @@ function configureServerTimeouts(srv) {
   srv.keepAliveTimeout = 65000; // 65 seconds
 }
 
-configureServerTimeouts(server);
-if (httpsServer) {
-  configureServerTimeouts(httpsServer);
-}
+// Server timeout configuration will be done after server creation
 
 // Add connection debugging with better mobile error handling
 function addConnectionDebugging(srv, serverType = 'HTTP') {
@@ -774,10 +819,7 @@ function addConnectionDebugging(srv, serverType = 'HTTP') {
   });
 }
 
-addConnectionDebugging(server, 'HTTP');
-if (httpsServer) {
-  addConnectionDebugging(httpsServer, 'HTTPS');
-}
+// Connection debugging is now configured in the server initialization
 
 // Handle server errors
 function addServerErrorHandling(srv, serverType, serverPort) {
@@ -791,10 +833,7 @@ function addServerErrorHandling(srv, serverType, serverPort) {
   });
 }
 
-addServerErrorHandling(server, 'HTTP', port);
-if (httpsServer) {
-  addServerErrorHandling(httpsServer, 'HTTPS', httpsPort);
-}
+// Server error handling is now configured in the server initialization
 
 // Handle server-level parsing errors for mobile browsers
 function addClientErrorHandling(srv, serverType) {
@@ -833,16 +872,21 @@ function addClientErrorHandling(srv, serverType) {
   });
 }
 
-addClientErrorHandling(server, 'HTTP');
-if (httpsServer) {
-  addClientErrorHandling(httpsServer, 'HTTPS');
-}
+// Client error handling is now configured in the server initialization
 
 // Graceful shutdown
-function gracefulShutdown(signal) {
+async function gracefulShutdown(signal) {
   console.log(`\nReceived ${signal}, shutting down gracefully...`);
 
-  const servers = [server];
+  // Close database connections first
+  try {
+    await closeConnections();
+    console.log('Database connections closed.');
+  } catch (error) {
+    console.error('Error closing database connections:', error);
+  }
+
+  const servers = [global.httpServer];
   if (httpsServer) {
     servers.push(httpsServer);
   }
@@ -851,15 +895,23 @@ function gracefulShutdown(signal) {
   const totalServers = servers.length;
 
   servers.forEach((srv, index) => {
-    srv.close(() => {
-      closedCount++;
-      console.log(`${index === 0 ? 'HTTP' : 'HTTPS'} server closed.`);
+    if (srv) {
+      srv.close(() => {
+        closedCount++;
+        console.log(`${index === 0 ? 'HTTP' : 'HTTPS'} server closed.`);
 
+        if (closedCount === totalServers) {
+          console.log('All servers closed.');
+          process.exit(0);
+        }
+      });
+    } else {
+      closedCount++;
       if (closedCount === totalServers) {
         console.log('All servers closed.');
         process.exit(0);
       }
-    });
+    }
   });
 }
 

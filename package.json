@@ -14,7 +14,7 @@
     "build:watch": "webpack --mode development --watch",
     "build:analyze": "webpack --mode production --env analyze",
     "build:clean": "node scripts/pre-build-quality.js",
-    "build:quick": "webpack --mode production",
+    "build:quick": "webpack --mode production && npm run sitemap:generate",
     "update-bundles": "node scripts/update-html-bundles.js",
     "build:full": "npm run build && npm run update-bundles",
     "lint": "eslint .",
@@ -29,7 +29,11 @@
     "sitemap:generate": "node scripts/generate-sitemap.js",
     "sitemap:validate": "node scripts/generate-sitemap.js --validate",
     "sitemap:stats": "node scripts/generate-sitemap.js --stats",
-    "sitemap:robots": "node scripts/generate-sitemap.js --robots"
+    "sitemap:robots": "node scripts/generate-sitemap.js --robots",
+    "db:migrate": "node database/migrate.js",
+    "db:setup": "docker compose up -d",
+    "db:down": "docker compose down",
+    "db:reset": "docker compose down && docker compose up -d"
   },
   "dependencies": {
     "bcrypt": "^6.0.0",
@@ -46,6 +50,8 @@
     "fs": "^0.0.1-security",
     "helmet": "^8.1.0",
     "multer": "^2.0.1",
+    "pg": "^8.16.3",
+    "redis": "^4.7.1",
     "session-file-store": "^1.5.0",
     "uuid": "^11.1.0"
   },

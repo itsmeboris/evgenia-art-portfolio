@@ -11,6 +11,7 @@ class Artwork {
     this.slug = data.slug;
     this.title = data.title;
     this.category_id = data.category_id;
+    this.category_name = data.category_name; // Add this line for category name from JOIN
     this.subcategory = data.subcategory;
     this.dimensions = data.dimensions;
     this.medium = data.medium;
@@ -37,6 +38,8 @@ class Artwork {
         LEFT JOIN categories c ON a.category_id = c.id
         WHERE 1=1
       `;
+
+      console.log('🔍 SQL Query:', query);
       const params = [];
       let paramIndex = 1;
 
@@ -84,6 +87,10 @@ class Artwork {
       }
 
       const result = await pool.query(query, params);
+
+      console.log('🔍 First row data:', result.rows[0]);
+      console.log('🔍 First row category_name:', result.rows[0]?.category_name);
+
       return result.rows.map(row => new Artwork(row));
     } catch (error) {
       console.error('Error fetching artworks:', error);
@@ -333,11 +340,35 @@ class Artwork {
   /**
    * Generate unique slug from title
    */
-  static generateSlug(title) {
-    return title
+  static async generateSlug(title) {
+    let baseSlug = title
       .toLowerCase()
       .replace(/[^a-z0-9]+/g, '-')
       .replace(/^-+|-+$/g, '');
+
+    // Ensure uniqueness by checking database and adding counter if needed
+    let slug = baseSlug;
+    let counter = 1;
+
+    while (await this.slugExists(slug)) {
+      slug = `${baseSlug}-${counter}`;
+      counter++;
+    }
+
+    return slug;
+  }
+
+  /**
+   * Check if slug already exists in database
+   */
+  static async slugExists(slug) {
+    try {
+      const result = await pool.query('SELECT 1 FROM artworks WHERE slug = $1', [slug]);
+      return result.rows.length > 0;
+    } catch (error) {
+      console.error('Error checking slug existence:', error);
+      return false;
+    }
   }
 
   /**

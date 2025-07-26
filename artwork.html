@@ -161,8 +161,74 @@
         // If artwork data is already loaded, initialize right away
         if (window.artworkData) {
           initArtworkDetail();
+        } else {
+          // If no data loaded yet, try to load it now
+          loadArtworkDataForPage();
         }
       });
+
+      // Function to load artwork data for individual pages
+      function loadArtworkDataForPage() {
+        // First try localStorage
+        try {
+          const savedData = localStorage.getItem('evgenia-artwork-data');
+          if (savedData) {
+            window.artworkData = JSON.parse(savedData);
+            initArtworkDetail();
+            return;
+          }
+        } catch (e) {
+          console.error('Error loading from localStorage:', e);
+        }
+
+        // If localStorage is empty, load from API
+        Promise.all([fetch('/api/v1/artworks?limit=1000'), fetch('/api/v1/categories')])
+          .then(responses => {
+            responses.forEach(response => {
+              if (!response.ok) {
+                throw new Error(`HTTP error! Status: ${response.status}`);
+              }
+            });
+            return Promise.all(responses.map(response => response.json()));
+          })
+          .then(([artworksResponse, categoriesResponse]) => {
+            const artworks = artworksResponse.data.artworks || [];
+            const categories = categoriesResponse.data || [];
+
+            // Transform the data structure to match what the frontend expects
+            window.artworkData = {
+              artworks: artworks.map(artwork => ({
+                id: artwork.id,
+                title: artwork.title,
+                category: artwork.category || artwork.category_name,
+                subcategory: artwork.subcategory || '',
+                dimensions: artwork.dimensions,
+                medium: artwork.medium,
+                price: artwork.price,
+                description: artwork.description || '',
+                image: artwork.image || artwork.image_path,
+                featured: artwork.featured || false,
+              })),
+              collections: categories.map(category => ({
+                id: category.name,
+                title: category.title || category.name,
+                description: category.description || '',
+                image: category.image_path || category.image || '',
+              })),
+              settings: { currency: '₪', imagePath: 'public/assets/images/artwork/' },
+            };
+
+            // Store in localStorage for future use
+            localStorage.setItem('evgenia-artwork-data', JSON.stringify(window.artworkData));
+
+            // Initialize the artwork detail page
+            initArtworkDetail();
+          })
+          .catch(error => {
+            console.error('Error loading artwork data:', error);
+            showArtworkNotFound();
+          });
+      }
 
       function initializeModules() {
         try {
@@ -204,8 +270,10 @@
         }
 
         if (artworksData && artworksData.artworks) {
-          // Find by ID first
-          artwork = artworksData.artworks.find(a => a.id === artworkId);
+          // Find by ID first - handle both string and numeric IDs
+          artwork = artworksData.artworks.find(
+            a => a.id == artworkId || a.id === parseInt(artworkId)
+          );
 
           // If not found by ID, try with generated ID
           if (!artwork) {
@@ -543,9 +611,9 @@
       }
     </style>
     <!-- Webpack Bundles - Artwork specific bundle -->
-    <script src="/public/dist/js/common.e9a8b61e3af49a19dc3b.min.js"></script>
-    <script src="/public/dist/js/lightbox.bf4274a9974dfb151230.min.js"></script>
-    <script src="/public/dist/js/search.c7a336f5491da5aae2e0.min.js"></script>
-    <script src="/public/dist/js/artwork.17208fc604edf2f06045.min.js"></script>
+    <script src="/public/dist/js/common.js"></script>
+    <script src="/public/dist/js/lightbox.js"></script>
+    <script src="/public/dist/js/search.js"></script>
+    <script src="/public/dist/js/artwork.js"></script>
 </body>
 </html>

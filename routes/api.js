@@ -46,7 +46,7 @@ const cache = {
     } catch (error) {
       console.warn('Redis pattern invalidation error:', error.message);
     }
-  }
+  },
 };
 
 // Middleware for API response formatting
@@ -115,7 +115,7 @@ router.get('/artworks', pagination, async (req, res) => {
 
     // Create cache key based on filters and pagination
     const cacheKey = `artworks:${JSON.stringify(filters)}`;
-    
+
     // Try to get from Redis cache first
     const cachedResult = await cache.get(cacheKey);
     if (cachedResult) {
@@ -277,16 +277,16 @@ router.post('/artworks', async (req, res) => {
 
     // Generate slug if not provided
     if (!artworkData.slug && artworkData.title) {
-      artworkData.slug = Artwork.generateSlug(artworkData.title);
+      artworkData.slug = await Artwork.generateSlug(artworkData.title);
     }
 
     const artwork = await Artwork.create(artworkData);
-    
+
     // Invalidate artwork caches when new artwork is created
     await cache.invalidatePattern('artworks:*');
     await cache.del('categories:all');
     console.log('🗑️  Cache invalidated after artwork creation');
-    
+
     res.apiSuccess(artwork.toJSON(), 'Artwork created successfully', 201);
   } catch (error) {
     console.error('Error creating artwork:', error);
@@ -352,7 +352,7 @@ router.delete('/artworks/:id', async (req, res) => {
 router.get('/categories', async (req, res) => {
   try {
     const cacheKey = 'categories:all';
-    
+
     // Try Redis cache first
     const cachedResult = await cache.get(cacheKey);
     if (cachedResult) {
@@ -363,11 +363,11 @@ router.get('/categories', async (req, res) => {
     console.log('⚡ Cache MISS for categories');
     const categories = await Category.getAll();
     const response = categories.map(category => category.toJSON());
-    
+
     // Cache for 30 minutes (1800 seconds)
     await cache.set(cacheKey, response, 1800);
     console.log('💾 Cached categories result');
-    
+
     res.apiSuccess(response, 'Categories fetched successfully');
   } catch (error) {
     console.error('Error fetching categories:', error);
@@ -620,14 +620,14 @@ router.get('/cache/stats', async (req, res) => {
       keys: 0,
       memory: 'unknown',
       hits: 'unknown',
-      misses: 'unknown'
+      misses: 'unknown',
     };
 
     try {
       // Get Redis info
       const info = await redisClient.info();
       const keys = await redisClient.keys('*');
-      
+
       // Parse Redis info for useful stats
       const infoLines = info.split('\r\n');
       const stats = {};
@@ -647,7 +647,7 @@ router.get('/cache/stats', async (req, res) => {
         misses: stats.keyspace_misses || 'unknown',
         totalConnections: stats.total_connections_received || 'unknown',
         connectedClients: stats.connected_clients || 'unknown',
-        uptime: stats.uptime_in_seconds || 'unknown'
+        uptime: stats.uptime_in_seconds || 'unknown',
       };
     } catch (redisError) {
       console.warn('Redis stats error:', redisError.message);
@@ -672,6 +672,43 @@ router.delete('/cache/clear', async (req, res) => {
   } catch (error) {
     console.error('Error clearing cache:', error);
     res.apiError('Failed to clear cache', 500, error.message);
+  }
+});
+
+// Health check endpoint
+router.get('/health', async (req, res) => {
+  try {
+    // Check database connection
+    const dbCheck = await pool.query('SELECT 1 as ok');
+    const dbStatus = dbCheck.rows[0]?.ok === 1 ? 'healthy' : 'error';
+
+    // Check Redis connection
+    let redisStatus = 'healthy';
+    try {
+      await redisClient.ping();
+    } catch (error) {
+      redisStatus = 'error';
+    }
+
+    // Get counts
+    const [artworksCount, categoriesCount] = await Promise.all([
+      pool.query('SELECT COUNT(*) as count FROM artworks'),
+      pool.query('SELECT COUNT(*) as count FROM categories'),
+    ]);
+
+    res.apiSuccess({
+      status: 'healthy',
+      database: dbStatus,
+      redis: redisStatus,
+      counts: {
+        artworks: parseInt(artworksCount.rows[0].count),
+        categories: parseInt(categoriesCount.rows[0].count),
+      },
+      timestamp: new Date().toISOString(),
+    });
+  } catch (error) {
+    console.error('Health check failed:', error);
+    res.apiError('Health check failed', 500, error.message);
   }
 });
 

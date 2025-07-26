@@ -633,7 +633,7 @@ async function startServer() {
       console.log(`   Admin panel: http://localhost:${port}/admin/`);
       console.log(`   API: http://localhost:${port}/api/v1/health`);
     });
-    
+
     // Configure timeouts and debugging
     configureServerTimeouts(server);
     addConnectionDebugging(server, 'HTTP');
@@ -668,7 +668,7 @@ if (httpsOptions) {
     console.log(`   Gallery: https://localhost:${httpsPort}/gallery`);
     console.log(`   Admin panel: https://localhost:${httpsPort}/admin/`);
   });
-  
+
   // Configure timeouts and debugging for HTTPS server
   configureServerTimeouts(httpsServer);
   addConnectionDebugging(httpsServer, 'HTTPS');

@@ -1,6 +1,6 @@
-// Admin Interface for Artwork Management
+// Admin Interface for Database-Powered Artwork Management
 
-// Core Data Management
+// Core Data Management (now fetched from PostgreSQL via API)
 let artworkData = {
   categories: [],
   artworks: [],
@@ -10,116 +10,205 @@ let artworkData = {
   },
 };
 
+// API Client for Database Operations
+class AdminAPI {
+  constructor() {
+    this.baseURL = '/api/v1';
+  }
+
+  async request(endpoint, options = {}) {
+    const url = `${this.baseURL}${endpoint}`;
+    const config = {
+      headers: {
+        'Content-Type': 'application/json',
+        ...options.headers,
+      },
+      ...options,
+    };
+
+    try {
+      const response = await fetch(url, config);
+      const data = await response.json();
+
+      if (!data.success) {
+        throw new Error(data.message || 'API request failed');
+      }
+
+      return data.data;
+    } catch (error) {
+      console.error(`API Error (${endpoint}):`, error);
+      this.showError(`API Error: ${error.message}`);
+      throw error;
+    }
+  }
+
+  // Artwork API methods
+  async getArtworks(params = {}) {
+    const query = new URLSearchParams(params).toString();
+    return await this.request(`/artworks?${query}`);
+  }
+
+  async createArtwork(artworkData) {
+    return await this.request('/artworks', {
+      method: 'POST',
+      body: JSON.stringify(artworkData),
+    });
+  }
+
+  async updateArtwork(id, artworkData) {
+    return await this.request(`/artworks/${id}`, {
+      method: 'PUT',
+      body: JSON.stringify(artworkData),
+    });
+  }
+
+  async deleteArtwork(id) {
+    return await this.request(`/artworks/${id}`, {
+      method: 'DELETE',
+    });
+  }
+
+  // Category API methods
+  async getCategories() {
+    return await this.request('/categories');
+  }
+
+  async getCategoriesWithCounts() {
+    return await this.request('/categories/with-counts');
+  }
+
+  // Cache management
+  async getCacheStats() {
+    return await this.request('/cache/stats');
+  }
+
+  async clearCache() {
+    return await this.request('/cache/clear', { method: 'DELETE' });
+  }
+
+  // Health check
+  async getHealth() {
+    return await this.request('/health');
+  }
+
+  showError(message) {
+    showMessage(message, 'error');
+  }
+
+  showSuccess(message) {
+    showMessage(message, 'success');
+  }
+}
+
+// Initialize API client
+const api = new AdminAPI();
+
 // Data Management Functions
 function saveData() {
-  // Create JSON content with proper formatting
-  const dataStr = JSON.stringify(artworkData, null, 2);
+  // In the database-powered version, saveData is handled automatically
+  // by individual artwork/category create/update operations
+  // This function now serves as a backup/export utility
 
-  // Create a Blob with the JSON data
-  const blob = new Blob([dataStr], { type: 'application/json' });
+  console.log('Database-powered admin: Data is automatically saved via API calls');
 
-  // Create a temporary download link
-  const a = document.createElement('a');
-  a.download = 'artwork-data.json';
-  a.href = URL.createObjectURL(blob);
-  a.textContent = 'Download artwork-data.json';
-  a.style.display = 'none';
-
-  // Display instructions for manually saving the file
-  const instructionsDiv = document.createElement('div');
-  instructionsDiv.className = 'save-instructions';
-  instructionsDiv.innerHTML = `
-        <div class="modal-like">
-            <h3>Save Changes</h3>
-            <p>Since this is a static website, please download the updated JSON file and replace the existing one at:</p>
-            <code>public/data/artwork-data.json</code>
-            <p>After replacing the file, refresh the page to see your changes.</p>
-            <div class="button-container">
-                <button class="btn" id="close-instructions">OK</button>
-            </div>
-        </div>
-    `;
-
-  document.body.appendChild(instructionsDiv);
-  document.body.appendChild(a);
-
-  // Add click event to close instructions
-  document.getElementById('close-instructions').addEventListener('click', function () {
-    instructionsDiv.remove();
-  });
-
-  // Trigger click on the download link
-  a.click();
-
-  // Cleanup
-  setTimeout(() => {
-    a.remove();
-  }, 1000);
-
-  // Also save to localStorage as a backup
+  // Still save to localStorage as a backup
   localStorage.setItem('evgenia-artwork-data', JSON.stringify(artworkData));
 
+  api.showSuccess('Data synchronized with database and cached locally');
   return Promise.resolve(true);
 }
 
-function loadData() {
-  console.log('Loading data from:', '/public/data/artwork-data.json');
+async function loadData() {
+  console.log('Loading data from database API...');
 
-  // Try to fetch from the JSON file
-  return fetch('/public/data/artwork-data.json')
-    .then(response => {
-      console.log('Response status:', response.status);
-      if (!response.ok) {
-        throw new Error(`HTTP error! Status: ${response.status}`);
+  try {
+    // Load data from database API
+    const [artworksResult, categoriesResult] = await Promise.all([
+      api.getArtworks({ limit: 1000 }), // Get all artworks
+      api.getCategories(),
+    ]);
+
+    console.log('API calls completed successfully');
+
+    // Transform API data to match the legacy format
+    console.log('Raw API responses:', { artworksResult, categoriesResult });
+
+    const artworks = artworksResult.artworks || artworksResult || [];
+    const categories = categoriesResult || [];
+
+    console.log('Processed data:', { artworks: artworks.length, categories: categories.length });
+
+    // Store data globally and in window object for accessibility
+    window.artworkData = artworkData = {
+      categories: categories.map(category => ({
+        id: category.name, // Use name as ID for compatibility (birds, floral, towns)
+        name: category.name,
+        slug: category.name, // Use name as slug since there's no separate slug field
+        description: category.description || '',
+        image: category.image_path || category.image || '',
+        subcategories: category.subcategories || {},
+        db_id: category.id, // Store original DB ID for API calls
+      })),
+      artworks: artworks.map(artwork => ({
+        id: artwork.id,
+        title: artwork.title,
+        category: artwork.category, // Use category name from API response
+        subcategory: artwork.subcategory || '',
+        dimensions: artwork.dimensions,
+        medium: artwork.medium,
+        price: artwork.price,
+        description: artwork.description || '', // Ensure description is never null
+        image: artwork.image_path || artwork.image || '',
+        featured: artwork.featured,
+        available: artwork.available,
+        db_category_id: artwork.category_id, // Store original DB category ID
+      })),
+      settings: {
+        imagePath: 'public/assets/images/artwork/',
+        currency: '₪',
+      },
+    };
+
+    console.log('Data loaded from database API');
+    console.log('Categories:', artworkData.categories.length);
+    console.log('Artworks:', artworkData.artworks.length);
+
+    // Save to localStorage as backup
+    localStorage.setItem('evgenia-artwork-data', JSON.stringify(artworkData));
+
+    // Initialize the UI components with the loaded data
+    renderArtworks();
+    renderCategories();
+    initDashboard();
+
+    api.showSuccess('Data loaded successfully from database');
+    return true;
+  } catch (error) {
+    console.error('Error loading from database API:', error);
+
+    // Fallback to localStorage if API loading fails
+    const savedData = localStorage.getItem('evgenia-artwork-data');
+    if (savedData) {
+      try {
+        artworkData = JSON.parse(savedData);
+        console.log('Data loaded from local storage (fallback)');
+
+        // Initialize the UI components with the loaded data
+        renderArtworks();
+        renderCategories();
+        initDashboard();
+
+        api.showError('Database unavailable, using cached data');
+        return true;
+      } catch (e) {
+        console.error('Error parsing data from local storage:', e);
       }
-      return response.json();
-    })
-    .then(data => {
-      console.log('Loaded data:', data);
+    }
 
-      if (!data || !data.categories || !data.artworks) {
-        throw new Error('Invalid data structure in artwork-data.json');
-      }
-
-      artworkData = data;
-      console.log('Data loaded from JSON file');
-      console.log('Categories:', artworkData.categories.length);
-      console.log('Artworks:', artworkData.artworks.length);
-
-      // Also save to localStorage as a backup
-      localStorage.setItem('evgenia-artwork-data', JSON.stringify(artworkData));
-
-      // Initialize the UI components with the loaded data
-      renderArtworks();
-      renderCategories();
-      initDashboard();
-
-      return true;
-    })
-    .catch(error => {
-      console.error('Error loading from JSON file:', error);
-
-      // Fallback to localStorage if JSON file loading fails
-      const savedData = localStorage.getItem('evgenia-artwork-data');
-      if (savedData) {
-        try {
-          artworkData = JSON.parse(savedData);
-          console.log('Data loaded from local storage (fallback)');
-
-          // Initialize the UI components with the loaded data
-          renderArtworks();
-          renderCategories();
-          initDashboard();
-
-          return true;
-        } catch (e) {
-          console.error('Error parsing data from local storage:', e);
-        }
-      }
-
-      console.log('Using default data');
-      return false;
-    });
+    console.log('Using default empty data');
+    api.showError('Failed to load data from database and no cached data available');
+    return false;
+  }
 }
 
 // UI Initialization Functions
@@ -148,11 +237,12 @@ function initTabs() {
 // Dashboard
 function initDashboard() {
   // Update stats
-  document.getElementById('total-artworks').textContent = artworkData.artworks.length;
-  document.getElementById('total-categories').textContent = artworkData.categories.length;
+  document.getElementById('total-artworks').textContent = window.artworkData?.artworks?.length || 0;
+  document.getElementById('total-categories').textContent =
+    window.artworkData?.categories?.length || 0;
 
   // Display featured artworks
-  const featuredArtworks = artworkData.artworks.filter(artwork => artwork.featured);
+  const featuredArtworks = window.artworkData?.artworks?.filter(artwork => artwork.featured) || [];
   const featuredContainer = document.getElementById('featured-artworks');
   featuredContainer.innerHTML = '';
 
@@ -168,11 +258,15 @@ function createArtworkCard(artwork) {
   card.className = 'artwork-card';
   card.dataset.id = artwork.id;
 
-  const category = artworkData.categories.find(cat => cat.id === artwork.category);
+  const category = window.artworkData?.categories?.find(cat => cat.id === artwork.category);
   const categoryName = category ? category.name : artwork.category;
 
-  // Fix image path - remove "../" prefix if it exists
-  const imagePath = artwork.image.startsWith('../') ? artwork.image.substring(3) : artwork.image;
+  // Fix image path - handle undefined images and remove "../" prefix if it exists
+  const imagePath = artwork.image
+    ? artwork.image.startsWith('../')
+      ? artwork.image.substring(3)
+      : artwork.image
+    : 'public/assets/images/placeholder.jpg';
 
   card.innerHTML = `
         <div class="artwork-image">
@@ -181,7 +275,7 @@ function createArtworkCard(artwork) {
         <div class="artwork-info">
             <h3>${artwork.title}</h3>
             <p>${artwork.dimensions} | ${artwork.medium}</p>
-            <p>${artwork.price !== null && artwork.price !== undefined ? `${artworkData.settings.currency || '₪'}${artwork.price}` : 'Price on request'}</p>
+            <p>${artwork.price !== null && artwork.price !== undefined ? `${window.artworkData?.settings?.currency || '₪'}${artwork.price}` : 'Price on request'}</p>
             <div class="category-tag">${categoryName}</div>
             <div class="artwork-actions">
                 <button class="btn btn-secondary edit-artwork" data-id="${artwork.id}">Edit</button>
@@ -199,25 +293,31 @@ function initArtworkManager() {
 
   // Add event listeners
   document.getElementById('add-artwork-btn').addEventListener('click', openAddArtworkModal);
-  document.getElementById('export-json-btn').addEventListener('click', exportData);
-  document.getElementById('export-js-btn').addEventListener('click', exportJavaScriptFile);
-  document.getElementById('import-json-btn').addEventListener('click', () => {
-    const input = document.createElement('input');
-    input.type = 'file';
-    input.accept = '.json';
-    input.onchange = e => {
-      const file = e.target.files[0];
-      if (file) {
-        importData(file)
-          .then(() => {
-            renderArtworks();
-            initDashboard();
-            showMessage('Data imported successfully!', 'success');
-          })
-          .catch(error => showMessage(error, 'error'));
+
+  document.getElementById('cache-stats-btn').addEventListener('click', async () => {
+    try {
+      const stats = await api.getCacheStats();
+      api.showSuccess(
+        `Cache Status: ${stats.status}, Keys: ${stats.keys}, Memory: ${stats.memory}`
+      );
+    } catch (error) {
+      api.showError(`Failed to get cache stats: ${error.message}`);
+    }
+  });
+
+  document.getElementById('clear-cache-btn').addEventListener('click', async () => {
+    if (
+      confirm(
+        'Are you sure you want to clear all cache? This may temporarily slow down the website.'
+      )
+    ) {
+      try {
+        await api.clearCache();
+        api.showSuccess('Cache cleared successfully!');
+      } catch (error) {
+        api.showError(`Failed to clear cache: ${error.message}`);
       }
-    };
-    input.click();
+    }
   });
 
   // Initialize artwork filter
@@ -245,31 +345,45 @@ function renderArtworks(filteredArtworks = null) {
 
   // Add edit and delete event listeners
   document.querySelectorAll('.edit-artwork').forEach(btn => {
-    btn.addEventListener('click', function () {
+    btn.addEventListener('click', function (e) {
+      e.preventDefault();
+      e.stopPropagation();
       const artworkId = this.getAttribute('data-id');
+      console.log('Edit button clicked for artwork:', artworkId);
       openEditArtworkModal(artworkId);
     });
   });
 
   document.querySelectorAll('.delete-artwork').forEach(btn => {
-    btn.addEventListener('click', function () {
+    btn.addEventListener('click', async function (e) {
+      e.preventDefault();
+      e.stopPropagation();
       const artworkId = this.getAttribute('data-id');
-      const artwork = artworkData.artworks.find(a => a.id === artworkId);
+      const artwork = artworkData.artworks.find(a => a.id == artworkId); // Use == for type coercion
 
-      if (confirm(`Are you sure you want to delete "${artwork.title}"?`)) {
-        deleteArtwork(artworkId);
+      if (artwork && confirm(`Are you sure you want to delete "${artwork.title}"?`)) {
+        await deleteArtwork(artworkId);
       }
     });
   });
 }
 
 // Delete artwork
-function deleteArtwork(artworkId) {
-  artworkData.artworks = artworkData.artworks.filter(a => a.id !== artworkId);
-  saveData();
-  renderArtworks();
-  initDashboard();
-  showMessage('Artwork deleted successfully!', 'success');
+async function deleteArtwork(artworkId) {
+  try {
+    console.log('Attempting to delete artwork with ID:', artworkId, typeof artworkId);
+    await api.deleteArtwork(String(artworkId)); // Ensure it's a string for API
+
+    // Reload data from database to ensure consistency
+    await loadData();
+
+    renderArtworks();
+    initDashboard();
+    api.showSuccess('Artwork deleted successfully from database!');
+  } catch (error) {
+    console.error('Error deleting artwork:', error);
+    api.showError(`Failed to delete artwork: ${error.message}`);
+  }
 }
 
 // Initialize artwork filter
@@ -279,7 +393,7 @@ function initArtworkFilter() {
 
   // Populate category filter
   categoryFilter.innerHTML = '<option value="all">All Categories</option>';
-  artworkData.categories.forEach(category => {
+  window.artworkData?.categories?.forEach(category => {
     const option = document.createElement('option');
     option.value = category.id;
     option.textContent = category.name;
@@ -294,7 +408,7 @@ function initArtworkFilter() {
     const category = categoryFilter.value;
     const searchTerm = searchInput.value.toLowerCase();
 
-    let filteredArtworks = artworkData.artworks;
+    let filteredArtworks = window.artworkData?.artworks || [];
 
     // Apply category filter
     if (category !== 'all') {
@@ -306,7 +420,7 @@ function initArtworkFilter() {
       filteredArtworks = filteredArtworks.filter(
         artwork =>
           artwork.title.toLowerCase().includes(searchTerm) ||
-          artwork.description.toLowerCase().includes(searchTerm)
+          (artwork.description && artwork.description.toLowerCase().includes(searchTerm))
       );
     }
 
@@ -323,12 +437,16 @@ function initArtworkForm() {
 
   // Populate category dropdown
   categorySelect.innerHTML = '';
-  artworkData.categories.forEach(category => {
-    const option = document.createElement('option');
-    option.value = category.id;
-    option.textContent = category.name;
-    categorySelect.appendChild(option);
-  });
+  if (window.artworkData && window.artworkData.categories) {
+    window.artworkData.categories.forEach(category => {
+      const option = document.createElement('option');
+      option.value = category.id;
+      option.textContent = category.name;
+      categorySelect.appendChild(option);
+    });
+  } else {
+    console.error('Categories not loaded in artworkData');
+  }
 
   // Update subcategories when category changes
   categorySelect.addEventListener('change', function () {
@@ -344,16 +462,19 @@ function initArtworkForm() {
   });
 
   // Form submission
-  form.addEventListener('submit', function (e) {
+  form.addEventListener('submit', async function (e) {
     e.preventDefault();
 
     const artworkId = document.getElementById('artwork-id').value;
     const isEditing = !!artworkId;
 
-    const artwork = {
-      id: artworkId || generateId(document.getElementById('artwork-title').value),
+    // Prepare artwork data for API
+    const selectedCategoryName = document.getElementById('artwork-category').value;
+    const categoryData = window.artworkData.categories.find(c => c.id === selectedCategoryName);
+
+    const artworkData = {
       title: document.getElementById('artwork-title').value,
-      category: document.getElementById('artwork-category').value,
+      category_id: categoryData ? categoryData.db_id : selectedCategoryName, // Use DB ID for API
       subcategory: document.getElementById('artwork-subcategory').value,
       dimensions: document.getElementById('artwork-dimensions').value,
       medium: document.getElementById('artwork-medium').value,
@@ -361,30 +482,67 @@ function initArtworkForm() {
         const priceValue = document.getElementById('artwork-price').value.trim();
         return priceValue === '' ? null : parseFloat(priceValue) || null;
       })(),
-      description: document.getElementById('artwork-description').value,
-      image: document.getElementById('artwork-image').value,
+      description: document.getElementById('artwork-description').value || '',
+      image_path: document.getElementById('artwork-image').value,
       featured: document.getElementById('artwork-featured').checked,
+      available: true, // Default to available
     };
 
-    if (isEditing) {
-      // Update existing artwork
-      const index = artworkData.artworks.findIndex(a => a.id === artworkId);
-      if (index !== -1) {
-        artworkData.artworks[index] = artwork;
+    console.log('Submitting artwork data:', artworkData);
+
+    try {
+      let result;
+      if (isEditing) {
+        // Update existing artwork
+        result = await api.updateArtwork(artworkId, artworkData);
+
+        // Update local data cache
+        const index = window.artworkData.artworks.findIndex(a => a.id === artworkId);
+        if (index !== -1) {
+          window.artworkData.artworks[index] = {
+            ...window.artworkData.artworks[index],
+            ...artworkData,
+            id: artworkId,
+            category: artworkData.category_id,
+            image: artworkData.image_path,
+          };
+        }
+      } else {
+        // Add new artwork
+        result = await api.createArtwork(artworkData);
+
+        // Add to local data cache
+        const newArtwork = {
+          id: result.id,
+          title: result.title,
+          category: result.category_id,
+          subcategory: result.subcategory || '',
+          dimensions: result.dimensions,
+          medium: result.medium,
+          price: result.price,
+          description: result.description,
+          image: result.image_path,
+          featured: result.featured,
+          available: result.available,
+        };
+        window.artworkData.artworks.push(newArtwork);
       }
-    } else {
-      // Add new artwork
-      artworkData.artworks.push(artwork);
+
+      // Reload data from database to ensure consistency
+      await loadData();
+
+      // Update UI
+      renderArtworks();
+      initDashboard();
+
+      // Close modal
+      document.getElementById('artwork-modal').classList.remove('active');
+
+      api.showSuccess(`Artwork ${isEditing ? 'updated' : 'created'} successfully in database!`);
+    } catch (error) {
+      console.error('Error saving artwork:', error);
+      api.showError(`Failed to ${isEditing ? 'update' : 'create'} artwork: ${error.message}`);
     }
-
-    saveData();
-    renderArtworks();
-    initDashboard();
-
-    // Close modal
-    document.getElementById('artwork-modal').classList.remove('active');
-
-    showMessage(`Artwork ${isEditing ? 'updated' : 'added'} successfully!`, 'success');
   });
 
   // Update image path to use hyphens instead of spaces in the image title
@@ -436,8 +594,23 @@ function openAddArtworkModal() {
 }
 
 function openEditArtworkModal(artworkId) {
-  const artwork = artworkData.artworks.find(a => a.id === artworkId);
-  if (!artwork) return;
+  console.log('Looking for artwork with ID:', artworkId);
+  console.log('Available artworks:', window.artworkData?.artworks?.length || 0);
+
+  if (!window.artworkData || !window.artworkData.artworks) {
+    console.error('Artwork data not loaded yet');
+    api.showError('Artwork data not loaded. Please refresh the page.');
+    return;
+  }
+
+  const artwork = window.artworkData.artworks.find(a => a.id == artworkId); // Use == for type coercion
+  if (!artwork) {
+    console.error('Artwork not found with ID:', artworkId);
+    api.showError(`Artwork with ID ${artworkId} not found.`);
+    return;
+  }
+
+  console.log('Found artwork:', artwork);
 
   const modal = document.getElementById('artwork-modal');
 
@@ -611,20 +784,20 @@ function renderCategories() {
   const container = document.getElementById('category-list');
   container.innerHTML = '';
 
-  console.log('Rendering categories:', artworkData.categories);
+  console.log('Rendering categories:', window.artworkData?.categories);
 
-  if (!artworkData.categories || artworkData.categories.length === 0) {
+  if (!window.artworkData?.categories || window.artworkData.categories.length === 0) {
     container.innerHTML =
       '<p class="no-results">No categories found. Add your first category using the "Add Category" button above.</p>';
     return;
   }
 
-  artworkData.categories.forEach(category => {
+  window.artworkData.categories.forEach(category => {
     const categoryItem = document.createElement('li');
     categoryItem.className = 'category-item';
 
     // Count artworks in this category
-    const artworkCount = artworkData.artworks.filter(a => a.category === category.id).length;
+    const artworkCount = window.artworkData.artworks.filter(a => a.category === category.id).length;
 
     categoryItem.innerHTML = `
             <div>
@@ -672,13 +845,24 @@ function renderCategories() {
 }
 
 // Delete category
-function deleteCategory(categoryId) {
-  artworkData.categories = artworkData.categories.filter(c => c.id !== categoryId);
-  saveData();
-  renderCategories();
-  initArtworkForm(); // Update artwork form dropdowns
-  initDashboard(); // Update statistics
-  showMessage('Category deleted successfully!', 'success');
+async function deleteCategory(categoryId) {
+  try {
+    await api.deleteCategory(categoryId);
+
+    // Remove from local data cache
+    artworkData.categories = artworkData.categories.filter(c => c.id !== categoryId);
+
+    // Update localStorage cache
+    localStorage.setItem('evgenia-artwork-data', JSON.stringify(artworkData));
+
+    renderCategories();
+    initArtworkForm(); // Update artwork form dropdowns
+    initDashboard(); // Update statistics
+    api.showSuccess('Category deleted successfully from database!');
+  } catch (error) {
+    console.error('Error deleting category:', error);
+    api.showError(`Failed to delete category: ${error.message}`);
+  }
 }
 
 // Initialize category form
@@ -698,7 +882,7 @@ function initCategoryForm() {
   });
 
   // Form submission
-  form.addEventListener('submit', function (e) {
+  form.addEventListener('submit', async function (e) {
     e.preventDefault();
 
     const categoryId = document.getElementById('category-id').value;
@@ -717,35 +901,65 @@ function initCategoryForm() {
       }
     });
 
-    const category = {
-      id: categoryId || generateId(document.getElementById('category-name').value),
+    // Prepare category data for API
+    const categoryData = {
       name: document.getElementById('category-name').value,
       slug: document.getElementById('category-slug').value,
       description: document.getElementById('category-description').value,
-      image: document.getElementById('category-image').value,
+      image_path: document.getElementById('category-image').value,
       subcategories: subcategories,
     };
 
-    if (isEditing) {
-      // Update existing category
-      const index = artworkData.categories.findIndex(c => c.id === categoryId);
-      if (index !== -1) {
-        artworkData.categories[index] = category;
+    try {
+      let result;
+      if (isEditing) {
+        // Update existing category
+        result = await api.updateCategory(categoryId, categoryData);
+
+        // Update local data cache
+        const index = artworkData.categories.findIndex(c => c.id === categoryId);
+        if (index !== -1) {
+          artworkData.categories[index] = {
+            id: categoryId,
+            name: categoryData.name,
+            slug: categoryData.slug,
+            description: categoryData.description,
+            image: categoryData.image_path,
+            subcategories: categoryData.subcategories,
+          };
+        }
+      } else {
+        // Add new category
+        result = await api.createCategory(categoryData);
+
+        // Add to local data cache
+        const newCategory = {
+          id: result.id,
+          name: result.name,
+          slug: result.slug,
+          description: result.description || '',
+          image: result.image_path || '',
+          subcategories: result.subcategories || {},
+        };
+        artworkData.categories.push(newCategory);
       }
-    } else {
-      // Add new category
-      artworkData.categories.push(category);
+
+      // Update localStorage cache
+      localStorage.setItem('evgenia-artwork-data', JSON.stringify(artworkData));
+
+      // Update UI
+      renderCategories();
+      initArtworkForm(); // Update artwork form dropdowns
+      initDashboard(); // Update statistics
+
+      // Close modal
+      document.getElementById('category-modal').classList.remove('active');
+
+      api.showSuccess(`Category ${isEditing ? 'updated' : 'created'} successfully in database!`);
+    } catch (error) {
+      console.error('Error saving category:', error);
+      api.showError(`Failed to ${isEditing ? 'update' : 'create'} category: ${error.message}`);
     }
-
-    saveData();
-    renderCategories();
-    initArtworkForm(); // Update artwork form dropdowns
-    initDashboard(); // Update statistics
-
-    // Close modal
-    document.getElementById('category-modal').classList.remove('active');
-
-    showMessage(`Category ${isEditing ? 'updated' : 'added'} successfully!`, 'success');
   });
 }
 
@@ -984,11 +1198,13 @@ function initBatchUpload() {
   }
 
   // Process the batch upload
-  function processBatchUpload() {
+  async function processBatchUpload() {
     const previewItems = document.querySelectorAll('.upload-preview-item');
-    let newArtworks = [];
+    let successCount = 0;
+    let errorCount = 0;
 
-    previewItems.forEach((item, index) => {
+    // Process each artwork one by one to handle errors individually
+    for (const [index, item] of previewItems.entries()) {
       const title = item.querySelector('.batch-title').value;
       const category = item.querySelector('.batch-item-category').value;
       const subcategory = item.querySelector('.batch-item-subcategory').value;
@@ -999,10 +1215,9 @@ function initBatchUpload() {
 
       // Only process items with at least a title
       if (title) {
-        const artwork = {
-          id: generateId(title),
+        const artworkData = {
           title: title,
-          category: category,
+          category_id: category,
           subcategory: subcategory || '',
           dimensions: dimensions || '',
           medium: medium || 'Acrylic on Canvas',
@@ -1011,18 +1226,40 @@ function initBatchUpload() {
             return priceValue === '' ? null : parseFloat(priceValue) || null;
           })(),
           description: '',
-          image: image,
+          image_path: image,
           featured: false,
+          available: true,
         };
 
-        newArtworks.push(artwork);
-      }
-    });
+        try {
+          const result = await api.createArtwork(artworkData);
 
-    if (newArtworks.length > 0) {
-      // Add the new artworks to the collection
-      artworkData.artworks = [...artworkData.artworks, ...newArtworks];
-      saveData();
+          // Add to local data cache
+          const newArtwork = {
+            id: result.id,
+            title: result.title,
+            category: result.category_id,
+            subcategory: result.subcategory || '',
+            dimensions: result.dimensions,
+            medium: result.medium,
+            price: result.price,
+            description: result.description,
+            image: result.image_path,
+            featured: result.featured,
+            available: result.available,
+          };
+          window.artworkData.artworks.push(newArtwork);
+          successCount++;
+        } catch (error) {
+          console.error(`Error creating artwork "${title}":`, error);
+          errorCount++;
+        }
+      }
+    }
+
+    if (successCount > 0) {
+      // Update localStorage cache
+      localStorage.setItem('evgenia-artwork-data', JSON.stringify(window.artworkData));
 
       // Clear preview
       previewContainer.innerHTML = '';
@@ -1031,9 +1268,11 @@ function initBatchUpload() {
       renderArtworks();
       initDashboard();
 
-      showMessage(`${newArtworks.length} artworks added successfully!`, 'success');
+      api.showSuccess(
+        `${successCount} artworks added successfully to database!${errorCount > 0 ? ` (${errorCount} failed)` : ''}`
+      );
     } else {
-      showMessage('No valid artworks to add.', 'error');
+      api.showError('No artworks were successfully added.');
     }
   }
 }
@@ -1058,12 +1297,19 @@ function initSettings() {
     showMessage('Settings saved successfully!', 'success');
   });
 
-  // Backup data
-  if (backupBtn) {
-    backupBtn.addEventListener('click', function (e) {
+  // API Health Check
+  const apiHealthBtn = document.getElementById('api-health-btn');
+  if (apiHealthBtn) {
+    apiHealthBtn.addEventListener('click', async function (e) {
       e.preventDefault();
-      exportData();
-      showMessage('Backup file has been downloaded.', 'success');
+      try {
+        const health = await api.getHealth();
+        api.showSuccess(
+          `API Status: ${health.status}, Database: ${health.database}, Redis: ${health.redis}, Artworks: ${health.counts.artworks}, Categories: ${health.counts.categories}`
+        );
+      } catch (error) {
+        api.showError(`API Health Check Failed: ${error.message}`);
+      }
     });
   }
 }

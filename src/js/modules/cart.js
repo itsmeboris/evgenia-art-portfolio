@@ -518,8 +518,16 @@ class CartManager {
     setTimeout(() => {
       notification.style.transform = 'translateX(100%)';
       setTimeout(() => {
-        if (notification.parentNode) {
-          notification.parentNode.removeChild(notification);
+        try {
+          if (
+            notification &&
+            notification.parentNode &&
+            notification.parentNode.contains(notification)
+          ) {
+            notification.parentNode.removeChild(notification);
+          }
+        } catch (e) {
+          console.warn('Error removing notification:', e);
         }
       }, 300);
     }, 3000);
@@ -561,9 +569,12 @@ class CartManager {
       // Open cart modal
       cartIcon.addEventListener('click', e => {
         e.preventDefault();
-        this.renderCartItems();
-        this.cartModal.classList.add('active');
-        document.body.style.overflow = 'hidden';
+        e.stopPropagation();
+        if (!this.cartModal.classList.contains('active')) {
+          this.renderCartItems();
+          this.cartModal.classList.add('active');
+          document.body.style.overflow = 'hidden';
+        }
       });
 
       // Close cart modal
@@ -584,7 +595,9 @@ class CartManager {
 
       // Empty cart
       if (cartEmptyBtn) {
-        cartEmptyBtn.addEventListener('click', () => {
+        cartEmptyBtn.addEventListener('click', e => {
+          e.preventDefault();
+          e.stopPropagation();
           this.showEmptyCartConfirmation();
         });
       }
@@ -650,7 +663,13 @@ class CartManager {
     const closeModal = () => {
       overlay.classList.remove('active');
       setTimeout(() => {
-        document.body.removeChild(overlay);
+        try {
+          if (overlay && overlay.parentNode && overlay.parentNode.contains(overlay)) {
+            overlay.parentNode.removeChild(overlay);
+          }
+        } catch (e) {
+          console.warn('Error removing modal overlay:', e);
+        }
       }, 300);
     };
 

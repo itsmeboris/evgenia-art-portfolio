@@ -22,18 +22,27 @@ document.addEventListener('DOMContentLoaded', function () {
   }, 100); // Small delay to allow stylesheets to load
 });
 
-// Fetch artwork data from the JSON file
+// Fetch artwork data from the API
 function fetchArtworkData() {
-  return fetch('/public/data/artwork-data.json')
-    .then(response => {
-      if (!response.ok) {
-        throw new Error(`HTTP error! Status: ${response.status}`);
-      }
-      return response.json();
+  return Promise.all([fetch('/api/v1/artworks?limit=1000'), fetch('/api/v1/categories')])
+    .then(responses => {
+      // Check if both requests were successful
+      responses.forEach(response => {
+        if (!response.ok) {
+          throw new Error(`HTTP error! Status: ${response.status}`);
+        }
+      });
+
+      // Parse JSON from both responses
+      return Promise.all(responses.map(response => response.json()));
     })
-    .then(data => {
+    .then(([artworksResponse, categoriesResponse]) => {
+      // Extract data from API responses
+      const artworks = artworksResponse.data.artworks || [];
+      const categories = categoriesResponse.data || [];
+
       // Ensure each artwork has a unique ID
-      data.artworks.forEach(artwork => {
+      artworks.forEach(artwork => {
         // If no ID exists, create one from the title
         if (!artwork.id) {
           artwork.id = artwork.title
@@ -43,24 +52,35 @@ function fetchArtworkData() {
         }
       });
 
+      // Transform the data structure to match what the frontend expects
+      const transformedData = {
+        artworks: artworks.map(artwork => ({
+          id: artwork.id,
+          title: artwork.title,
+          category: artwork.category || artwork.category_name,
+          subcategory: artwork.subcategory || '',
+          dimensions: artwork.dimensions,
+          medium: artwork.medium,
+          price: artwork.price,
+          description: artwork.description || '',
+          image: artwork.image || artwork.image_path,
+          featured: artwork.featured || false,
+        })),
+        collections: categories.map(category => ({
+          id: category.name,
+          title: category.title || category.name,
+          description: category.description || '',
+          image: category.image_path || category.image || '',
+        })),
+        settings: { currency: '₪', imagePath: 'public/assets/images/artwork/' },
+      };
+
       // Store in localStorage for access on individual artwork pages
       try {
-        localStorage.setItem('evgenia-artwork-data', JSON.stringify(data));
+        localStorage.setItem('evgenia-artwork-data', JSON.stringify(transformedData));
       } catch (e) {
         console.warn('Unable to store artwork data in localStorage:', e);
       }
-
-      // Transform the data structure to match what the frontend expects
-      const transformedData = {
-        artworks: data.artworks,
-        collections: data.categories.map(category => ({
-          id: category.id,
-          title: category.name,
-          description: category.description,
-          image: category.image,
-        })),
-        settings: data.settings || { currency: '₪', imagePath: 'public/assets/images/artwork/' },
-      };
 
       // Dispatch event so other scripts can access the data
       window.dispatchEvent(
@@ -211,11 +231,27 @@ function initAddToCartButtons(data) {
     button.addEventListener('click', function (e) {
       e.preventDefault();
       const artworkId = this.getAttribute('data-id');
-      const artwork = data.artworks.find(item => item.id === artworkId);
+      
+      // Always load fresh data from localStorage to ensure we have the latest data
+      let artworksData;
+      try {
+        const savedData = localStorage.getItem('evgenia-artwork-data');
+        if (savedData) {
+          artworksData = JSON.parse(savedData);
+        } else {
+          console.error('No artwork data found in localStorage');
+          return;
+        }
+      } catch (e) {
+        console.error('Error parsing artwork data from localStorage:', e);
+        return;
+      }
+      
+      const artwork = artworksData.artworks.find(item => item.id == artworkId || item.id === parseInt(artworkId));
 
       if (artwork) {
         // Get the currency from settings
-        const currency = data.settings.currency || '₪';
+        const currency = artworksData.settings.currency || '₪';
 
         // Format the price with the correct currency - now artwork.price should be numeric only
         const formattedPrice =

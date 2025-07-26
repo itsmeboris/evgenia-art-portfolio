@@ -221,6 +221,12 @@ class DatabaseMigrator {
         categoryMap[cat.name] = cat.id;
       });
 
+      console.log('📋 Category mapping:', categoryMap);
+      console.log(
+        '📋 Available categories:',
+        categories.map(c => ({ name: c.name, id: c.id }))
+      );
+
       let artworksProcessed = 0;
       let artworksSkipped = 0;
 
@@ -237,6 +243,9 @@ class DatabaseMigrator {
 
           // Find category ID
           const categoryId = categoryMap[artwork.category] || categoryMap['birds'] || 1;
+          console.log(
+            `🎨 Artwork "${artwork.title}": category="${artwork.category}" -> categoryId=${categoryId}`
+          );
 
           // Generate slug from title or use existing ID
           const slug = artwork.id || Artwork.generateSlug(artwork.title);

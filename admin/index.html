@@ -15,7 +15,7 @@
       rel="stylesheet"
       href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css"
     />
-    <link rel="stylesheet" href="css/admin.css" />
+    <link rel="stylesheet" href="/admin/css/admin.css" />
   </head>
   <body>
     <header>
@@ -23,7 +23,7 @@
         <div style="display: flex; justify-content: space-between; align-items: center">
           <div>
             <h1>Evgenia Portnov - Artwork Admin</h1>
-            <p style="color: #888; font-size: 0.8rem">Version 2.0 - JSON Based</p>
+            <p style="color: #888; font-size: 0.8rem">Version 3.0 - Database Powered</p>
           </div>
           <div>
             <form method="POST" action="/admin/logout" style="display: inline" id="logout-form">
@@ -111,14 +111,11 @@
                 <button class="btn" id="add-artwork-btn">
                   <i class="fas fa-plus"></i> Add Artwork
                 </button>
-                <button class="btn btn-secondary" id="export-json-btn">
-                  <i class="fas fa-download"></i> Export
+                <button class="btn btn-secondary" id="cache-stats-btn">
+                  <i class="fas fa-chart-line"></i> Cache Stats
                 </button>
-                <button class="btn btn-secondary" id="export-js-btn">
-                  <i class="fas fa-code"></i> Export JS
-                </button>
-                <button class="btn btn-secondary" id="import-json-btn">
-                  <i class="fas fa-upload"></i> Import
+                <button class="btn btn-secondary" id="clear-cache-btn">
+                  <i class="fas fa-trash"></i> Clear Cache
                 </button>
               </div>
             </div>
@@ -187,37 +184,23 @@
             </div>
             <button class="btn" id="save-settings-btn">Save Settings</button>
 
-            <h3 style="margin-top: 2rem">Data Management</h3>
-            <p>This admin panel uses a central JSON file for all artwork data:</p>
-            <code
-              style="
-                display: block;
-                background: #f5f5f5;
-                padding: 0.5rem;
-                margin: 1rem 0;
-                font-family: monospace;
-              "
-            >
-              public/data/artwork-data.json
-            </code>
+            <h3 style="margin-top: 2rem">Database Management</h3>
+            <p>
+              This admin panel uses PostgreSQL database with Redis caching for all artwork data.
+            </p>
 
             <div class="data-management-info" style="margin-top: 1rem">
               <h4>How It Works:</h4>
               <ol style="margin-left: 1.5rem; margin-bottom: 1rem">
-                <li>
-                  When you make changes in the admin panel, you'll be prompted to download the
-                  updated JSON file
-                </li>
-                <li>Replace the existing file with your downloaded version</li>
-                <li>
-                  Both the admin panel and the main site will use this file as the data source
-                </li>
+                <li>All changes are saved directly to the PostgreSQL database</li>
+                <li>Redis cache is automatically updated for optimal performance</li>
+                <li>Changes appear immediately on both admin panel and main website</li>
               </ol>
 
               <div class="action-buttons" style="margin-top: 1rem">
-                <a href="#" class="btn btn-secondary" id="backup-json-btn">
-                  <i class="fas fa-download"></i> Download Backup Copy
-                </a>
+                <button class="btn btn-secondary" id="api-health-btn">
+                  <i class="fas fa-heartbeat"></i> Check API Health
+                </button>
                 <a href="README.md" class="btn btn-secondary" target="_blank">
                   <i class="fas fa-book"></i> View Documentation
                 </a>
@@ -357,7 +340,25 @@
           .catch(error => console.error('Error fetching CSRF token:', error));
       });
     </script>
+    <script>
+      // Development vs Production loading
+      if (
+        location.hostname === 'localhost' ||
+        location.hostname === '127.0.0.1' ||
+        location.hostname === ''
+      ) {
+        // Development: Load raw file for faster iteration
+        document.write('<script src="/admin/js/admin.js"><\/script>');
+        console.log('🔧 Development mode: Loading raw admin.js file');
+      } else {
+        // Production: Load bundled/minified version
+        document.write(
+          '<script src="/public/dist/js/admin.588f32ab9abf06d05110.min.js"><\/script>'
+        );
+        console.log('🚀 Production mode: Loading bundled admin.js file');
+      }
+    </script>
     <!-- Admin Bundle -->
-    <script src="/public/dist/js/admin.63f33606f2cc5757a450.min.js"></script>
+    <script src="/public/dist/js/admin.js"></script>
 </body>
 </html>

@@ -306,6 +306,7 @@ const total = window.cart.getTotal();
 3. The artwork will automatically appear in the gallery with proper database indexing
 
 **Legacy Method (for reference):**
+
 - Update `/public/data/artwork-data.json` (now migrated to PostgreSQL)
 
 ### Managing Content with Admin Panel

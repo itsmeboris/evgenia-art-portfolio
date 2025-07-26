@@ -8,32 +8,27 @@
     "dev": "NODE_ENV=development nodemon server.js",
     "start": "node server.js",
     "quick": "webpack --mode production",
-
     "// 📂 DATABASE - Set up once, use when needed": "",
     "db:setup": "docker compose up -d",
     "db:migrate": "node database/migrate.js",
     "db:down": "docker compose down",
     "db:reset": "docker compose down && docker compose up -d",
-
     "// 🏗️ BUILDING - Only when deploying or major changes": "",
     "build": "npm run build:clean && webpack --mode production && npm run sitemap:generate",
     "build:dev": "webpack --mode development",
     "build:watch": "webpack --mode development --watch",
     "build:quick": "webpack --mode production && npm run sitemap:generate",
-
     "// 🔧 MAINTENANCE - Use occasionally": "",
     "lint:fix": "eslint . --fix",
     "format": "prettier --write .",
     "convert-webp": "node webp-converter.js",
     "sitemap:generate": "node scripts/generate-sitemap.js",
-
     "// 🚀 PRODUCTION - Use for deployment only": "",
     "start:prod": "NODE_ENV=production node server.js",
     "pm2:start": "pm2 start ecosystem.config.js --env production",
     "pm2:stop": "pm2 stop evgenia-art",
     "pm2:restart": "pm2 restart evgenia-art",
     "pm2:logs": "pm2 logs evgenia-art",
-
     "// 📊 ANALYSIS & TESTING - Use when investigating issues": "",
     "build:analyze": "webpack --mode production --env analyze",
     "build:clean": "node scripts/pre-build-quality.js",
@@ -43,7 +38,6 @@
     "sitemap:validate": "node scripts/generate-sitemap.js --validate",
     "sitemap:stats": "node scripts/generate-sitemap.js --stats",
     "sitemap:robots": "node scripts/generate-sitemap.js --robots",
-
     "// 🗂️ LEGACY - Rarely used": "",
     "build:full": "npm run build && npm run update-bundles",
     "update-bundles": "node scripts/update-html-bundles.js",

@@ -47,6 +47,14 @@
 
     <!-- Canonical URL -->
     <link rel="canonical" href="/" />
+    <style>
+      body {
+        visibility: hidden;
+      }
+      .loaded {
+        visibility: visible;
+      }
+    </style>
     <link rel="stylesheet" href="public/css/style.css" />
     <link rel="stylesheet" href="public/css/additional-styles.css" />
     <link rel="stylesheet" href="public/css/skeleton.css" />
@@ -235,6 +243,11 @@
         </div>
       </div>
     </div>
+    <script>
+      window.addEventListener('load', function () {
+        document.body.classList.add('loaded');
+      });
+    </script>
     <!-- Webpack Bundles - Optimized and minified -->
     <script src="/public/dist/js/common.js"></script>
     <script src="/public/dist/js/lightbox.js"></script>

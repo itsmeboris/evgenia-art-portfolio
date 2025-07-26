@@ -24,7 +24,7 @@ class FormsManager {
   // Initialize the forms system
   init() {
     if (this.isInitialized) {
-      console.warn('Forms manager already initialized');
+      logger.warn('Forms manager already initialized', { module: 'forms', function: 'init' });
       return;
     }
 
@@ -34,9 +34,13 @@ class FormsManager {
       this.setupGlobalValidation();
       this.isInitialized = true;
 
-      console.log('Forms manager initialized successfully');
+      logger.info('Forms manager initialized successfully', { module: 'forms', function: 'init' });
     } catch (error) {
-      console.error('Error initializing forms manager:', error);
+      logger.error(
+        'Error initializing forms manager',
+        { module: 'forms', function: 'init' },
+        { error: error.message }
+      );
     }
   }
 
@@ -56,7 +60,10 @@ class FormsManager {
     const submitButton = form.querySelector('button[type="submit"]');
 
     if (!emailInput || !submitButton) {
-      console.warn('Newsletter form missing required elements');
+      logger.warn('Newsletter form missing required elements', {
+        module: 'forms',
+        function: 'setupNewsletterForm',
+      });
       return;
     }
 
@@ -141,7 +148,11 @@ class FormsManager {
         );
       }
     } catch (error) {
-      console.error('Newsletter subscription error:', error);
+      logger.error(
+        'Newsletter subscription error',
+        { module: 'forms', function: 'handleNewsletterSubmission' },
+        { error: error.message, formId: form.getAttribute('data-form-id') }
+      );
 
       if (error.name === 'TimeoutError') {
         this.showFormMessage(form, 'Request timed out. Please try again.', 'error');
@@ -180,7 +191,10 @@ class FormsManager {
     const submitButton = form.querySelector('button[type="submit"]');
 
     if (!submitButton) {
-      console.warn('Contact form missing submit button');
+      logger.warn('Contact form missing submit button', {
+        module: 'forms',
+        function: 'setupContactForm',
+      });
       return;
     }
 
@@ -274,7 +288,11 @@ class FormsManager {
         );
       }
     } catch (error) {
-      console.error('Contact form error:', error);
+      logger.error(
+        'Contact form error',
+        { module: 'forms', function: 'handleContactSubmission' },
+        { error: error.message, formId: form.getAttribute('data-form-id') }
+      );
 
       if (error.name === 'TimeoutError') {
         this.showFormMessage(form, 'Request timed out. Please try again.', 'error');
@@ -815,7 +833,11 @@ class FormsManager {
       const data = await response.json();
       return data.csrfToken;
     } catch (error) {
-      console.error('Error fetching CSRF token:', error);
+      logger.error(
+        'Error fetching CSRF token',
+        { module: 'forms', function: 'getCSRFToken' },
+        { error: error.message }
+      );
       throw error;
     }
   }

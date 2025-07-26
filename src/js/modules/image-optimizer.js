@@ -67,11 +67,20 @@ class ImageOptimizer {
       this.setupPerformanceMonitoring();
 
       this.isInitialized = true;
-      console.log('🖼️ Image Optimizer initialized successfully');
-      console.log(`   WebP Support: ${this.supportsWebP ? '✅' : '❌'}`);
-      console.log(`   Images found: ${this.performanceMetrics.totalImages}`);
+      logger.info(
+        'Image Optimizer initialized successfully',
+        { module: 'image-optimizer', function: 'init' },
+        {
+          webpSupported: this.supportsWebP,
+          totalImages: this.performanceMetrics.totalImages,
+        }
+      );
     } catch (error) {
-      console.error('Failed to initialize Image Optimizer:', error);
+      logger.error(
+        'Failed to initialize Image Optimizer',
+        { module: 'image-optimizer', function: 'init' },
+        { error: error.message }
+      );
       this.fallbackToBasicLoading();
     }
   }
@@ -92,7 +101,10 @@ class ImageOptimizer {
   // Setup Intersection Observer for lazy loading
   setupIntersectionObserver() {
     if (!('IntersectionObserver' in window)) {
-      console.warn('IntersectionObserver not supported, using fallback');
+      logger.warn('IntersectionObserver not supported, using fallback', {
+        module: 'image-optimizer',
+        function: 'createObserver',
+      });
       this.fallbackToBasicLoading();
       return;
     }
@@ -114,7 +126,11 @@ class ImageOptimizer {
       this.prepareImage(img);
     });
 
-    console.log(`📸 Prepared ${images.length} images for optimization`);
+    logger.debug(
+      `Prepared ${images.length} images for optimization`,
+      { module: 'image-optimizer', function: 'prepareImages' },
+      { imageCount: images.length }
+    );
   }
 
   // Prepare individual image for optimization
@@ -253,7 +269,11 @@ class ImageOptimizer {
         try {
           await Promise.race(activeLoads);
         } catch (error) {
-          console.warn('Image load error in queue:', error);
+          logger.warn(
+            'Image load error in queue',
+            { module: 'image-optimizer', function: 'processLoadQueue' },
+            { error: error.message, src: element.dataset.src }
+          );
         }
 
         // Remove completed loads
@@ -292,7 +312,11 @@ class ImageOptimizer {
           }
         }, delay);
       } else {
-        console.error('Failed to load after retries:', element, error);
+        logger.error(
+          'Failed to load after retries',
+          { module: 'image-optimizer', function: 'loadOptimizedImage' },
+          { src: element.dataset.src, error: error.message, retryCount: element.retryCount || 0 }
+        );
         this.handleImageError(element);
       }
     }
@@ -452,7 +476,11 @@ class ImageOptimizer {
     img.classList.remove('loading');
     img.classList.add('error');
 
-    console.warn('Failed to load image:', img.dataset.src || img.src);
+    logger.warn(
+      'Failed to load image',
+      { module: 'image-optimizer', function: 'handleImageError' },
+      { src: img.dataset.src || img.src }
+    );
   }
 
   // Generate error placeholder
@@ -505,7 +533,11 @@ class ImageOptimizer {
         : 0,
     };
 
-    console.log('📊 Image Optimization Metrics:', metrics);
+    logger.info(
+      'Image Optimization Metrics',
+      { module: 'image-optimizer', function: 'getPerformanceMetrics' },
+      { metrics: metrics }
+    );
 
     // Send to analytics if available
     if (typeof gtag !== 'undefined') {
@@ -517,7 +549,10 @@ class ImageOptimizer {
 
   // Fallback to basic loading if optimization fails
   fallbackToBasicLoading() {
-    console.warn('🔄 Falling back to basic image loading');
+    logger.warn('Falling back to basic image loading', {
+      module: 'image-optimizer',
+      function: 'fallbackImageLoading',
+    });
 
     const images = document.querySelectorAll('img[data-src]');
     images.forEach(img => {
@@ -537,7 +572,11 @@ class ImageOptimizer {
       }
     });
 
-    console.log(`📷 Loaded ${images.length} images immediately (emergency fallback)`);
+    logger.info(
+      'Loaded images immediately (emergency fallback)',
+      { module: 'image-optimizer', function: 'emergencyFallback' },
+      { imageCount: images.length }
+    );
   }
 
   // Public API for manually optimizing images
@@ -575,7 +614,7 @@ class ImageOptimizer {
     this.failedImages.clear();
     this.isInitialized = false;
 
-    console.log('🗑️ Image Optimizer destroyed');
+    logger.debug('Image Optimizer destroyed', { module: 'image-optimizer', function: 'destroy' });
   }
 }
 

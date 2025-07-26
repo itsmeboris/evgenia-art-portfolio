@@ -140,7 +140,7 @@ class CartManager {
   // Initialize the cart system
   init() {
     if (this.isInitialized) {
-      console.warn('Cart manager already initialized');
+      logger.warn('Cart manager already initialized', { module: 'cart', function: 'init' });
       return;
     }
 
@@ -158,7 +158,11 @@ class CartManager {
       window.addToCart = this.addToCart;
       window.renderCartItems = this.renderCartItems;
 
-      console.log('Cart manager initialized successfully');
+      logger.info(
+        'Cart manager initialized successfully',
+        { module: 'cart', function: 'init' },
+        { itemCount: this.cart?.length || 0, currency: this.defaultCurrency }
+      );
     } catch (error) {
       this.handleError('Failed to initialize cart', error);
     }
@@ -175,7 +179,11 @@ class CartManager {
 
   // Improved error handling with user feedback
   handleError(message, error) {
-    console.error(`Cart Error: ${message}`, error);
+    logger.error(
+      `Cart Error: ${message}`,
+      { module: 'cart', function: 'handleError' },
+      { error: error?.message || error }
+    );
 
     // Show user-friendly error message
     this.showNotification(
@@ -286,7 +294,7 @@ class CartManager {
     this.cartModal = document.querySelector('.cart-modal-overlay');
 
     if (!this.cartModal) {
-      console.warn('Cart modal not found in DOM');
+      logger.warn('Cart modal not found in DOM', { module: 'cart', function: 'initCartModal' });
     }
   }
 
@@ -540,7 +548,7 @@ class CartManager {
     // This method is called by the external artwork loader
     // The actual button handling is done in the artwork-loader.js file
     // We just ensure the global addToCart function is available
-    console.log('Cart buttons initialized');
+    logger.debug('Cart buttons initialized', { module: 'cart', function: 'initAddToCartButtons' });
   }
 
   // Initialize cart modal functionality
@@ -554,7 +562,7 @@ class CartManager {
       const cartCheckoutBtn = document.querySelector('.cart-checkout');
 
       if (!cartIcon) {
-        console.warn('Cart icon not found');
+        logger.warn('Cart icon not found', { module: 'cart', function: 'updateCartCount' });
         return;
       }
 
@@ -844,7 +852,7 @@ if (document.readyState === 'loading') {
 
 // Add cleanup and performance reporting methods
 cartManager.cleanup = function () {
-  console.log('🧹 Cleaning up cart manager...');
+  logger.debug('Cleaning up cart manager', { module: 'cart', function: 'cleanup' });
 
   // Clear cache
   this.clearCache();

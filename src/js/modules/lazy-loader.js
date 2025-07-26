@@ -37,13 +37,16 @@ class LazyLoader {
   // Initialize lazy loading system
   init() {
     if (this.isInitialized) {
-      console.warn('Lazy loader already initialized');
+      logger.warn('Lazy loader already initialized', { module: 'lazy-loader', function: 'init' });
       return;
     }
 
     try {
       if (!('IntersectionObserver' in window)) {
-        console.warn('IntersectionObserver not supported, falling back to immediate loading');
+        logger.warn('IntersectionObserver not supported, falling back to immediate loading', {
+          module: 'lazy-loader',
+          function: 'init',
+        });
         this.loadAllImagesImmediately();
         return;
       }
@@ -53,9 +56,17 @@ class LazyLoader {
       this.setupContentLazyLoading();
       this.isInitialized = true;
 
-      console.log('Lazy loader initialized successfully');
+      logger.info(
+        'Lazy loader initialized successfully',
+        { module: 'lazy-loader', function: 'init' },
+        { totalImages: this.performanceMetrics.totalImages }
+      );
     } catch (error) {
-      console.error('Failed to initialize lazy loader:', error);
+      logger.error(
+        'Failed to initialize lazy loader',
+        { module: 'lazy-loader', function: 'init' },
+        { error: error.message }
+      );
     }
   }
 
@@ -77,7 +88,11 @@ class LazyLoader {
       this.performanceMetrics.totalImages++;
     });
 
-    console.log(`📷 Setup lazy loading for ${images.length} images`);
+    logger.debug(
+      `Setup lazy loading for ${images.length} images`,
+      { module: 'lazy-loader', function: 'setupImages' },
+      { imageCount: images.length }
+    );
   }
 
   // Prepare image for lazy loading
@@ -184,7 +199,11 @@ class LazyLoader {
           }
         }, delay);
       } else {
-        console.error('Failed to load after retries:', element, error);
+        logger.error(
+          'Failed to load after retries',
+          { module: 'lazy-loader', function: 'loadImage' },
+          { src: element.dataset.src, error: error.message, retries: element.retryCount || 0 }
+        );
         this.handleImageError(element);
       }
     }
@@ -251,7 +270,11 @@ class LazyLoader {
     img.classList.remove('lazy-loading');
     img.classList.add('lazy-error');
 
-    console.warn('Failed to load image:', img.dataset.src || img.src);
+    logger.warn(
+      'Failed to load image',
+      { module: 'lazy-loader', function: 'handleImageError' },
+      { src: img.dataset.src || img.src }
+    );
   }
 
   // Track image load performance
@@ -316,7 +339,11 @@ class LazyLoader {
       this.observer.observe(element);
     });
 
-    console.log(`📄 Setup lazy loading for ${lazyContent.length} content elements`);
+    logger.debug(
+      `Setup lazy loading for ${lazyContent.length} content elements`,
+      { module: 'lazy-loader', function: 'setupContentLazyLoading' },
+      { contentCount: lazyContent.length }
+    );
   }
 
   // Load lazy content
@@ -342,7 +369,11 @@ class LazyLoader {
         });
       })
       .catch(error => {
-        console.error('Failed to load content:', contentUrl, error);
+        logger.error(
+          'Failed to load content',
+          { module: 'lazy-loader', function: 'loadContent' },
+          { contentUrl: contentUrl, error: error.message }
+        );
         element.classList.remove('lazy-loading');
         element.classList.add('lazy-error');
         element.innerHTML = '<p>Failed to load content</p>';
@@ -359,7 +390,11 @@ class LazyLoader {
       }
     });
 
-    console.log(`📷 Loaded ${images.length} images immediately (fallback mode)`);
+    logger.info(
+      `Loaded ${images.length} images immediately (fallback mode)`,
+      { module: 'lazy-loader', function: 'loadAllImagesImmediately' },
+      { imageCount: images.length }
+    );
   }
 
   // Refresh lazy loading for new content
@@ -385,8 +420,10 @@ class LazyLoader {
     });
 
     if (newImages.length > 0 || newContent.length > 0) {
-      console.log(
-        `🔄 Refreshed lazy loading: ${newImages.length} images, ${newContent.length} content elements`
+      logger.debug(
+        'Refreshed lazy loading',
+        { module: 'lazy-loader', function: 'refresh' },
+        { newImages: newImages.length, newContent: newContent.length }
       );
     }
   }
@@ -416,7 +453,7 @@ class LazyLoader {
     this.loadQueue = [];
     this.isProcessingQueue = false;
 
-    console.log('🧹 Lazy loader cleaned up');
+    logger.debug('Lazy loader cleaned up', { module: 'lazy-loader', function: 'destroy' });
   }
 }
 

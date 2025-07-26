@@ -101,6 +101,15 @@ The website features:
 - Device detection and responsive utilities
 - Animation and easing functions
 
+#### 📊 **Logging System** (`src/js/modules/browser-logger.js` + Winston server-side)
+
+- **Structured logging** with JSON format and contextual metadata
+- **Browser-compatible logger** that sends logs to server endpoint `/api/logs`
+- **Server-side Winston integration** with daily log rotation and archival
+- **Development/production modes** with appropriate log levels and console output
+- **Performance tracking** with session IDs and user interaction logging
+- **Automatic log transmission** with offline buffering and retry mechanisms
+
 #### 🖼️ **Lazy Loader Module** (`public/js/modules/lazy-loader.js`)
 
 - Intersection Observer-based image loading
@@ -637,6 +646,9 @@ All artwork data is stored in a single JSON file at `public/data/artwork-data.js
 - ✅ **Dual HTTP/HTTPS servers** for comprehensive development testing
 - ✅ **Skeleton loading system** with animated placeholders for improved UX
 - ✅ **Enhanced 404 page** with search functionality and featured artworks
+- ✅ **Structured logging system** with Winston server-side and browser-compatible frontend logging
+- ✅ **Centralized log management** with JSON format, contextual metadata, and automatic rotation
+- ✅ **Webpack build optimization** with core.js bundle for essential modules and logger availability
 
 ## License
 

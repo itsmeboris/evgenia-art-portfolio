@@ -9,15 +9,15 @@ const { execSync } = require('child_process');
 
 const rl = readline.createInterface({
   input: process.stdin,
-  output: process.stdout
+  output: process.stdout,
 });
 
 console.log('🎨 Evgenia Art Portfolio - Interactive Setup');
 console.log('==========================================\n');
 
 async function question(prompt) {
-  return new Promise((resolve) => {
-    rl.question(prompt, (answer) => {
+  return new Promise(resolve => {
+    rl.question(prompt, answer => {
       resolve(answer);
     });
   });
@@ -28,13 +28,13 @@ async function setup() {
     console.log('This script will help you set up the development environment.\n');
 
     // Get server configuration
-    const serverIP = await question('Enter server IP (default: localhost): ') || 'localhost';
-    const serverPort = await question('Enter server port (default: 3000): ') || '3000';
-    
+    const serverIP = (await question('Enter server IP (default: localhost): ')) || 'localhost';
+    const serverPort = (await question('Enter server port (default: 3000): ')) || '3000';
+
     // Get admin credentials
-    const adminUsername = await question('Enter admin username (default: admin): ') || 'admin';
-    const adminPassword = await question('Enter admin password (default: admin): ') || 'admin';
-    
+    const adminUsername = (await question('Enter admin username (default: admin): ')) || 'admin';
+    const adminPassword = (await question('Enter admin password (default: admin): ')) || 'admin';
+
     // No need to ask about PM2 - it's now a local dependency
 
     console.log('\n🔧 Setting up project...\n');
@@ -55,7 +55,10 @@ async function setup() {
     console.log('\n2. Generating SSL certificates...');
     if (!fs.existsSync('certs/key.pem') || !fs.existsSync('certs/cert.pem')) {
       try {
-        execSync(`openssl req -x509 -newkey rsa:4096 -keyout certs/key.pem -out certs/cert.pem -days 365 -nodes -subj "/C=US/ST=State/L=City/O=Organization/CN=${serverIP}"`, { stdio: 'inherit' });
+        execSync(
+          `openssl req -x509 -newkey rsa:4096 -keyout certs/key.pem -out certs/cert.pem -days 365 -nodes -subj "/C=US/ST=State/L=City/O=Organization/CN=${serverIP}"`,
+          { stdio: 'inherit' }
+        );
         console.log('   ✅ SSL certificates generated');
       } catch (error) {
         console.log('   ⚠️  SSL certificate generation failed, HTTPS may not work');
@@ -149,7 +152,6 @@ STATIC_CACHE_MAX_AGE=86400000
     console.log('   npm run start:prod    - Start production server');
     console.log('   npm run pm2:start     - Deploy with PM2 (local dependency)');
     console.log('   npm run pm2:status    - Check PM2 status');
-
   } catch (error) {
     console.error('\n❌ Setup failed:', error.message);
     process.exit(1);

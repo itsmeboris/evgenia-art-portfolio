@@ -166,7 +166,11 @@ class MetaTags {
 
       this.setMetaTags(metaData);
     } catch (error) {
-      console.error('Error loading artwork meta tags:', error);
+      logger.error(
+        'Error loading artwork meta tags',
+        { module: 'meta-tags', function: 'loadArtworkMetaTags' },
+        { artworkId: artworkId, error: error.message }
+      );
       this.set404MetaTags();
     }
   }
@@ -392,7 +396,11 @@ class MetaTags {
 
       this.addJSONLD(structuredData);
     } catch (error) {
-      console.error('Error adding artwork structured data:', error);
+      logger.error(
+        'Error adding artwork structured data',
+        { module: 'meta-tags', function: 'addArtworkStructuredData' },
+        { artworkData: artworkData.title, error: error.message }
+      );
     }
   }
 
@@ -423,7 +431,11 @@ class MetaTags {
       const data = await response.json();
       return data.artworks.find(artwork => artwork.id === artworkId);
     } catch (error) {
-      console.error('Error fetching artwork data:', error);
+      logger.error(
+        'Error fetching artwork data',
+        { module: 'meta-tags', function: 'fetchArtworkData' },
+        { artworkId: artworkId, error: error.message }
+      );
       return null;
     }
   }

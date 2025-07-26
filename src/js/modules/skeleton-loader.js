@@ -260,7 +260,11 @@ class SkeletonLoader {
     const targetElement = typeof target === 'string' ? document.querySelector(target) : target;
 
     if (!targetElement) {
-      console.warn('Skeleton target element not found:', target);
+      logger.warn(
+        'Skeleton target element not found',
+        { module: 'skeleton-loader', function: 'show' },
+        { target: target }
+      );
       return;
     }
 
@@ -294,7 +298,11 @@ class SkeletonLoader {
     const targetElement = typeof target === 'string' ? document.querySelector(target) : target;
 
     if (!targetElement) {
-      console.warn('Skeleton target element not found:', target);
+      logger.warn(
+        'Skeleton target element not found',
+        { module: 'skeleton-loader', function: 'hideSkeleton' },
+        { target: target }
+      );
       return;
     }
 

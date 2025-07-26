@@ -55,7 +55,7 @@ class LightboxManager {
   // Initialize the lightbox system
   init() {
     if (this.isInitialized) {
-      console.warn('Lightbox manager already initialized');
+      logger.warn('Lightbox manager already initialized', { module: 'lightbox', function: 'init' });
       return;
     }
 
@@ -65,9 +65,16 @@ class LightboxManager {
       this.initializeImageObserver();
       this.isInitialized = true;
 
-      console.log('Lightbox manager initialized successfully');
+      logger.info('Lightbox manager initialized successfully', {
+        module: 'lightbox',
+        function: 'init',
+      });
     } catch (error) {
-      console.error('Error initializing lightbox manager:', error);
+      logger.error(
+        'Error initializing lightbox manager',
+        { module: 'lightbox', function: 'init' },
+        { error: error.message }
+      );
     }
   }
 
@@ -704,7 +711,11 @@ class LightboxManager {
         this.imageCache.set(src, img);
       })
       .catch(error => {
-        console.error('Error loading lightbox image:', error);
+        logger.error(
+          'Error loading lightbox image',
+          { module: 'lightbox', function: 'loadImage' },
+          { src: src, error: error.message }
+        );
         this.hideLoading();
         this.showError();
       });

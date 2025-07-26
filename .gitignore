@@ -143,5 +143,6 @@ webpack-stats.json
 .#*
 
 # Claude Code temporary files
+CLAUDE.md
 CLAUDE.*.md
 *.claude.md

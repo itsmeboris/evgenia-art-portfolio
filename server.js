@@ -14,6 +14,8 @@ const FileStore = require('session-file-store')(session);
 const { v4: uuidv4 } = require('uuid');
 const compression = require('compression');
 const csrf = require('csrf');
+const expressWinston = require('express-winston');
+const logger = require('./src/js/modules/logger');
 const app = express();
 const port = process.env.PORT || 3000;
 const httpsPort = process.env.HTTPS_PORT || 3443;
@@ -21,20 +23,28 @@ const httpsPort = process.env.HTTPS_PORT || 3443;
 // Enhanced error handling for socket errors
 process.on('uncaughtException', err => {
   if (err.code === 'ECONNRESET' || err.message.includes('Parse Error')) {
-    console.log('⚠️  Connection error (likely mobile browser issue):', err.message);
+    logger.warn(
+      'Connection error (likely mobile browser issue)',
+      { module: 'server', function: 'uncaughtException' },
+      { errorCode: err.code, errorMessage: err.message }
+    );
     return; // Don't crash the server
   }
-  console.error('Uncaught Exception:', err);
+  logger.error('Uncaught Exception', err, { module: 'server', function: 'uncaughtException' });
   process.exit(1);
 });
 
 // Enhanced server error handling
 app.on('error', err => {
   if (err.code === 'ECONNRESET' || err.message.includes('Parse Error')) {
-    console.log('⚠️  Server connection error (likely mobile browser issue)');
+    logger.warn(
+      'Server connection error (likely mobile browser issue)',
+      { module: 'server', function: 'app.error' },
+      { errorCode: err.code }
+    );
     return;
   }
-  console.error('Server error:', err);
+  logger.error('Server error', err, { module: 'server', function: 'app.error' });
 });
 
 // Trust proxy (helps with mobile connections)
@@ -62,14 +72,24 @@ const SESSION_SECRET = process.env.SESSION_SECRET || uuidv4();
 
 // Validate that required environment variables are set
 if (!ADMIN_USERNAME || !ADMIN_PASSWORD_HASH) {
-  console.error('❌ ERROR: ADMIN_USERNAME and ADMIN_PASSWORD_HASH must be set in .env file');
+  logger.error(
+    'Missing required environment variables',
+    new Error('ADMIN_USERNAME and ADMIN_PASSWORD_HASH must be set in .env file'),
+    {
+      module: 'server',
+      function: 'envValidation',
+      missingVars: ['ADMIN_USERNAME', 'ADMIN_PASSWORD_HASH'],
+    }
+  );
   process.exit(1);
 }
 
 // Warn if using generated session secret (not recommended for production)
 if (!process.env.SESSION_SECRET) {
-  console.warn(
-    '⚠️  WARNING: SESSION_SECRET not set in .env file. Using generated secret (not recommended for production).'
+  logger.warn(
+    'SESSION_SECRET not set in .env file. Using generated secret (not recommended for production)',
+    { module: 'server', function: 'sessionConfig' },
+    { environment: process.env.NODE_ENV, generatedSecret: true }
   );
 }
 
@@ -192,17 +212,51 @@ if (process.env.NODE_ENV === 'production') {
   });
 
   sessionStore.on('error', error => {
-    console.error('Session store error:', error.message);
+    logger.error('Session store error', error, { module: 'server', function: 'sessionStore' });
   });
 
   sessionConfig.store = sessionStore;
-  console.log('✅ Using file-based session storage (production)');
+  logger.info(
+    'Using file-based session storage (production)',
+    { module: 'server', function: 'sessionConfig' },
+    { storageType: 'file', environment: 'production' }
+  );
 } else {
-  console.log('⚠️  Using memory-based session storage (development)');
-  console.log('   Note: Sessions will be lost when server restarts');
+  logger.warn(
+    'Using memory-based session storage (development)',
+    { module: 'server', function: 'sessionConfig' },
+    {
+      storageType: 'memory',
+      environment: 'development',
+      note: 'Sessions will be lost when server restarts',
+    }
+  );
 }
 
 app.use(session(sessionConfig));
+
+// Request logging middleware
+app.use(
+  expressWinston.logger({
+    winstonInstance: logger.logger,
+    meta: true,
+    msg: 'HTTP {{req.method}} {{req.url}}',
+    expressFormat: true,
+    colorize: isDevelopment,
+    ignoreRoute: function (req, res) {
+      // Skip logging for static assets in production
+      return (
+        !isDevelopment &&
+        (req.url.startsWith('/public/') ||
+          req.url.endsWith('.css') ||
+          req.url.endsWith('.js') ||
+          req.url.endsWith('.png') ||
+          req.url.endsWith('.jpg') ||
+          req.url.endsWith('.webp'))
+      );
+    },
+  })
+);
 
 // Middleware to parse JSON and URL-encoded data
 app.use(express.json({ limit: '10mb' }));
@@ -214,8 +268,16 @@ app.use((req, res, next) => {
   const isMobile = /Mobile|Android|iPhone|iPad|BlackBerry|Windows Phone/i.test(userAgent);
 
   if (isMobile) {
-    console.log(`📱 Mobile request from ${req.ip}: ${req.method} ${req.originalUrl}`);
-    console.log(`   User-Agent: ${userAgent}`);
+    logger.debug(
+      'Mobile request received',
+      { module: 'server', function: 'mobileMiddleware' },
+      {
+        ip: req.ip,
+        method: req.method,
+        url: req.originalUrl,
+        userAgent: userAgent,
+      }
+    );
 
     // Add mobile-friendly headers
     res.setHeader('Connection', 'close'); // Force connection close for mobile
@@ -235,7 +297,11 @@ app.use((req, res, next) => {
 
   // Log all requests in development
   if (isDevelopment) {
-    console.log(`${req.method} ${req.originalUrl} - ${req.ip}`);
+    logger.debug(
+      'Request received',
+      { module: 'server', function: 'requestMiddleware' },
+      { method: req.method, url: req.originalUrl, ip: req.ip }
+    );
   }
 
   next();
@@ -282,7 +348,7 @@ function validateCSRF(req, res, next) {
     }
     next();
   } catch (error) {
-    console.error('CSRF validation error:', error);
+    logger.error('CSRF validation error', error, { module: 'server', function: 'validateCSRF' });
     return res.status(403).json({
       success: false,
       message: 'CSRF validation failed. Please refresh the page and try again.',
@@ -300,7 +366,7 @@ app.post('/admin/login', loginLimiter, validateCSRF, async (req, res) => {
       // Regenerate session ID to prevent session fixation
       req.session.regenerate(err => {
         if (err) {
-          console.error('Session regeneration error:', err);
+          logger.error('Session regeneration error', err, { module: 'server', function: 'login' });
           return res.redirect('/admin/login?error=server');
         }
 
@@ -314,18 +380,22 @@ app.post('/admin/login', loginLimiter, validateCSRF, async (req, res) => {
         // Save session
         req.session.save(err => {
           if (err) {
-            console.error('Session save error:', err);
+            logger.error('Session save error', err, { module: 'server', function: 'login' });
             return res.redirect('/admin/login?error=server');
           }
           res.redirect('/admin/');
         });
       });
     } else {
-      console.log(`Failed login attempt for username: ${username}`);
+      logger.warn(
+        'Failed login attempt',
+        { module: 'server', function: 'login' },
+        { username: username, ip: req.ip, userAgent: req.get('User-Agent') }
+      );
       res.redirect('/admin/login?error=invalid');
     }
   } catch (error) {
-    console.error('Login error:', error);
+    logger.error('Login error', error, { module: 'server', function: 'login' });
     res.redirect('/admin/login?error=server');
   }
 });
@@ -334,7 +404,7 @@ app.post('/admin/login', loginLimiter, validateCSRF, async (req, res) => {
 app.post('/admin/logout', validateCSRF, (req, res) => {
   req.session.destroy(err => {
     if (err) {
-      console.error('Session destruction error:', err);
+      logger.error('Session destruction error', err, { module: 'server', function: 'logout' });
     }
     res.clearCookie('evgenia.sid');
     res.redirect('/admin/login');
@@ -521,6 +591,51 @@ app.post(
   }
 );
 
+// Browser logs endpoint
+app.post('/api/logs', (req, res) => {
+  try {
+    const { logs, source } = req.body;
+
+    if (!logs || !Array.isArray(logs)) {
+      return res.status(400).json({ success: false, message: 'Invalid logs format' });
+    }
+
+    // Process each log entry
+    logs.forEach(logEntry => {
+      if (logEntry.level && logEntry.message) {
+        // Add server-side context
+        const enhancedContext = {
+          ...logEntry.context,
+          serverTimestamp: new Date().toISOString(),
+          source: source || 'browser',
+          ip: req.ip,
+          serverUserAgent: req.get('User-Agent'),
+        };
+
+        // Log using server logger with appropriate level
+        const logLevel =
+          logEntry.level === 'debug'
+            ? 'debug'
+            : logEntry.level === 'info'
+              ? 'info'
+              : logEntry.level === 'warn'
+                ? 'warn'
+                : 'error';
+
+        logger[logLevel](`[BROWSER] ${logEntry.message}`, enhancedContext, logEntry.meta);
+      }
+    });
+
+    res.json({ success: true, processed: logs.length });
+  } catch (error) {
+    logger.error('Error processing browser logs', error, {
+      module: 'server',
+      function: 'browserLogsEndpoint',
+    });
+    res.status(500).json({ success: false, message: 'Error processing logs' });
+  }
+});
+
 // Contact form endpoint
 app.post(
   '/contact/submit',
@@ -573,12 +688,20 @@ app.post(
     // 3. Send confirmation email to user
     // 4. Integrate with email service
 
-    console.log(`Contact form submission:
-      Name: ${sanitizedName}
-      Email: ${sanitizedEmail}
-      Subject: ${sanitizedSubject}
-      Message: ${sanitizedMessage}
-    `);
+    logger.info(
+      'Contact form submission',
+      { module: 'server', function: 'contact' },
+      {
+        name: sanitizedName,
+        email: sanitizedEmail,
+        subject: sanitizedSubject,
+        messagePreview:
+          sanitizedMessage.substring(0, 100) + (sanitizedMessage.length > 100 ? '...' : ''),
+        ip: req.ip,
+        userAgent: req.get('User-Agent'),
+        timestamp: new Date().toISOString(),
+      }
+    );
 
     // For now, just return success
     res.json({
@@ -600,19 +723,30 @@ try {
     key: fs.readFileSync(path.join(__dirname, 'certs', 'key.pem')),
     cert: fs.readFileSync(path.join(__dirname, 'certs', 'cert.pem')),
   };
-  console.log('✅ SSL certificates loaded successfully');
+  logger.info('SSL certificates loaded successfully', { module: 'server', function: 'httpsSetup' });
 } catch (err) {
-  console.warn('⚠️  Could not load SSL certificates:', err.message);
-  console.warn('   HTTPS server will not be available');
+  logger.warn(
+    'Could not load SSL certificates',
+    { module: 'server', function: 'httpsSetup' },
+    { error: err.message, httpsAvailable: false }
+  );
 }
 
 // Configure server timeout settings for mobile devices
 const server = app.listen(port, '0.0.0.0', () => {
-  console.log(`🌐 Evgenia's art website running:`);
-  console.log(`   HTTP:  http://localhost:${port}`);
-  console.log(`   Main site: http://localhost:${port}/`);
-  console.log(`   Gallery: http://localhost:${port}/gallery`);
-  console.log(`   Admin panel: http://localhost:${port}/admin/`);
+  logger.info(
+    'Server started',
+    { module: 'server', function: 'startup' },
+    {
+      name: "Evgenia's art website",
+      httpPort: port,
+      urls: {
+        main: `http://localhost:${port}/`,
+        gallery: `http://localhost:${port}/gallery`,
+        admin: `http://localhost:${port}/admin/`,
+      },
+    }
+  );
 });
 
 // Create HTTPS server if certificates are available
@@ -628,12 +762,14 @@ if (httpsOptions) {
   });
 }
 
-console.log(`✅ Compression middleware enabled (gzip/deflate)`);
-console.log(
-  `✅ Security headers configured for ${isDevelopment ? 'development' : 'production'} environment`
-);
-console.log(
-  `✅ HSTS ${isDevelopment ? 'disabled' : 'enabled'} (development mode: ${isDevelopment})`
+logger.info(
+  'Middleware configured',
+  { module: 'server', function: 'middlewareSetup' },
+  {
+    compression: 'gzip/deflate enabled',
+    security: `headers configured for ${isDevelopment ? 'development' : 'production'} environment`,
+    hsts: `${isDevelopment ? 'disabled' : 'enabled'} (development mode: ${isDevelopment})`,
+  }
 );
 
 // Show local network access information
@@ -651,18 +787,21 @@ Object.keys(interfaces).forEach(interfaceName => {
 });
 
 if (localIPs.length > 0) {
-  console.log('\n📱 Mobile device access:');
-  localIPs.forEach(ip => {
-    console.log(`   HTTP:  http://${ip}:${port}`);
-    if (httpsOptions) {
-      console.log(`   HTTPS: https://${ip}:${httpsPort} (self-signed certificate)`);
+  logger.info(
+    'Mobile device access information',
+    { module: 'server', function: 'networkSetup' },
+    {
+      localIPs: localIPs,
+      httpUrls: localIPs.map(ip => `http://${ip}:${port}`),
+      httpsUrls: httpsOptions ? localIPs.map(ip => `https://${ip}:${httpsPort}`) : [],
+      troubleshooting: [
+        'Try HTTPS first (accept security warning)',
+        'If still issues, check firewall settings',
+        'Both devices must be on same WiFi network',
+        'Some mobile browsers auto-upgrade to HTTPS',
+      ],
     }
-  });
-  console.log('\n💡 For mobile browsers having issues:');
-  console.log('   1. Try HTTPS first (accept security warning)');
-  console.log('   2. If still issues, check firewall settings');
-  console.log('   3. Both devices must be on same WiFi network');
-  console.log('   4. Some mobile browsers auto-upgrade to HTTPS');
+  );
 }
 
 // Configure server timeouts for better mobile support
@@ -736,17 +875,22 @@ function addConnectionDebugging(srv, serverType = 'HTTP') {
         err.code === 'HPE_INVALID_METHOD' ||
         err.code === 'ECONNRESET'
       ) {
-        console.log(
-          `⚠️  Mobile browser error on ${serverType} from ${socket.remoteAddress}: ${err.message}`
+        logger.warn(
+          'Mobile browser parsing error',
+          { module: 'server', function: 'socketErrorHandler' },
+          {
+            serverType: serverType,
+            remoteAddress: socket.remoteAddress,
+            error: err.message,
+            errorCode: err.code,
+            receivedData:
+              rawRequestData.length > 0
+                ? rawRequestData
+                    .toString('ascii', 0, Math.min(100, rawRequestData.length))
+                    .replace(/[^\x20-\x7E]/g, '?')
+                : null,
+          }
         );
-
-        // Show what data was received if available
-        if (rawRequestData.length > 0) {
-          const preview = rawRequestData
-            .toString('ascii', 0, Math.min(100, rawRequestData.length))
-            .replace(/[^\x20-\x7E]/g, '?');
-          console.log(`   Received data: "${preview}"`);
-        }
 
         // Safely destroy the socket
         if (!socket.destroyed) {
@@ -754,12 +898,22 @@ function addConnectionDebugging(srv, serverType = 'HTTP') {
         }
         return;
       }
-      console.error(`${serverType} socket error from ${socket.remoteAddress}:`, err.message);
+      logger.error(
+        'Socket error',
+        { module: 'server', function: 'socketHandler' },
+        { serverType: serverType, remoteAddress: socket.remoteAddress, error: err.message }
+      );
     });
 
     socket.on('timeout', () => {
-      console.warn(
-        `${serverType} socket timeout from ${socket.remoteAddress}:${socket.remotePort}`
+      logger.warn(
+        'Socket timeout',
+        { module: 'server', function: 'socketHandler' },
+        {
+          serverType: serverType,
+          remoteAddress: socket.remoteAddress,
+          remotePort: socket.remotePort,
+        }
       );
       if (!socket.destroyed) {
         socket.destroy();
@@ -768,7 +922,11 @@ function addConnectionDebugging(srv, serverType = 'HTTP') {
 
     socket.on('close', hadError => {
       if (hadError) {
-        console.log(`⚠️  ${serverType} socket closed with error from ${socket.remoteAddress}`);
+        logger.warn(
+          'Socket closed with error',
+          { module: 'server', function: 'socketHandler' },
+          { serverType: serverType, remoteAddress: socket.remoteAddress }
+        );
       }
     });
   });
@@ -782,12 +940,20 @@ if (httpsServer) {
 // Handle server errors
 function addServerErrorHandling(srv, serverType, serverPort) {
   srv.on('error', err => {
-    console.error(`${serverType} server error:`, err);
-    if (err.code === 'EADDRINUSE') {
-      console.error(
-        `Port ${serverPort} is already in use. Please stop other servers or use a different port.`
-      );
-    }
+    logger.error(
+      'Server error',
+      { module: 'server', function: 'serverErrorHandler' },
+      {
+        serverType: serverType,
+        serverPort: serverPort,
+        error: err.message,
+        errorCode: err.code,
+        additionalInfo:
+          err.code === 'EADDRINUSE'
+            ? `Port ${serverPort} is already in use. Please stop other servers or use a different port.`
+            : null,
+      }
+    );
   });
 }
 
@@ -807,12 +973,20 @@ function addClientErrorHandling(srv, serverType) {
       err.code === 'HPE_INVALID_HEADER_TOKEN';
 
     if (isParsingError) {
-      console.log(`⚠️  Mobile browser ${serverType} parsing error (${err.code}): ${err.message}`);
-      if (serverType === 'HTTP') {
-        console.log(
-          `💡 Tip: Mobile browser likely trying HTTPS - use https://your-ip:${httpsPort} instead`
-        );
-      }
+      logger.warn(
+        'Mobile browser parsing error',
+        { module: 'server', function: 'clientErrorHandler' },
+        {
+          serverType: serverType,
+          errorCode: err.code,
+          errorMessage: err.message,
+          tip:
+            serverType === 'HTTP'
+              ? `Mobile browser likely trying HTTPS - use https://your-ip:${httpsPort} instead`
+              : null,
+          httpsPort: httpsPort,
+        }
+      );
 
       // For TLS handshake attempts on HTTP or parsing errors on HTTPS, just close the connection
       if (socket.writable && !socket.destroyed) {
@@ -822,7 +996,11 @@ function addClientErrorHandling(srv, serverType) {
     }
 
     // Handle other client errors
-    console.error(`${serverType} client error:`, err.message);
+    logger.error(
+      'Client error',
+      { module: 'server', function: 'clientErrorHandler' },
+      { serverType: serverType, error: err.message }
+    );
     if (socket.writable && !socket.destroyed) {
       try {
         socket.end('HTTP/1.1 400 Bad Request\r\nConnection: close\r\nContent-Length: 0\r\n\r\n');
@@ -840,7 +1018,11 @@ if (httpsServer) {
 
 // Graceful shutdown
 function gracefulShutdown(signal) {
-  console.log(`\nReceived ${signal}, shutting down gracefully...`);
+  logger.info(
+    'Graceful shutdown initiated',
+    { module: 'server', function: 'gracefulShutdown' },
+    { signal: signal }
+  );
 
   const servers = [server];
   if (httpsServer) {
@@ -853,10 +1035,19 @@ function gracefulShutdown(signal) {
   servers.forEach((srv, index) => {
     srv.close(() => {
       closedCount++;
-      console.log(`${index === 0 ? 'HTTP' : 'HTTPS'} server closed.`);
+      const serverType = index === 0 ? 'HTTP' : 'HTTPS';
+      logger.info(
+        'Server closed',
+        { module: 'server', function: 'gracefulShutdown' },
+        { serverType: serverType, closedCount: closedCount, totalServers: totalServers }
+      );
 
       if (closedCount === totalServers) {
-        console.log('All servers closed.');
+        logger.info(
+          'All servers closed - shutdown complete',
+          { module: 'server', function: 'gracefulShutdown' },
+          { totalServers: totalServers }
+        );
         process.exit(0);
       }
     });

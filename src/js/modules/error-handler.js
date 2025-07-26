@@ -112,7 +112,11 @@ class ErrorHandler {
     this.errorBoundaries.set(componentName, boundary);
     this.setupComponentErrorBoundary(boundary);
 
-    console.log(`🛡️  Error boundary created for ${componentName}`);
+    logger.debug(
+      `Error boundary created for ${componentName}`,
+      { module: 'error-handler', function: 'createErrorBoundary' },
+      { componentName: componentName, maxErrors: boundary.options.maxErrors }
+    );
     return boundary;
   }
 
@@ -156,7 +160,11 @@ class ErrorHandler {
       timestamp: Date.now(),
     };
 
-    console.error(`💥 Error in component ${componentName}:`, error);
+    logger.error(
+      `Error in component ${componentName}`,
+      { module: 'error-handler', function: 'handleComponentError' },
+      { componentName: componentName, error: error.message, errorCount: boundary.errorCount }
+    );
 
     // Track error metrics
     this.errorMetrics.total++;
@@ -189,7 +197,11 @@ class ErrorHandler {
 
     boundary.isIsolated = true;
 
-    console.warn(`🚫 Isolating component ${componentName} due to repeated errors`);
+    logger.warn(
+      `Isolating component ${componentName} due to repeated errors`,
+      { module: 'error-handler', function: 'isolateComponent' },
+      { componentName: componentName, errorCount: boundary.errorCount }
+    );
 
     if (element && options.showFallback) {
       const fallback = this.createErrorFallback(componentName, boundary.lastError.error);
@@ -218,7 +230,11 @@ class ErrorHandler {
 
     if (!strategy && !forceRecover) return false;
 
-    console.log(`🔄 Attempting recovery for ${componentName}...`);
+    logger.info(
+      `Attempting recovery for ${componentName}`,
+      { module: 'error-handler', function: 'attemptComponentRecovery' },
+      { componentName: componentName, strategy: strategy?.fallback || 'component_reset' }
+    );
 
     try {
       let recovered = false;
@@ -244,7 +260,11 @@ class ErrorHandler {
         boundary.isIsolated = false;
         this.errorMetrics.recovered++;
 
-        console.log(`✅ Component ${componentName} recovered successfully`);
+        logger.info(
+          `Component ${componentName} recovered successfully`,
+          { module: 'error-handler', function: 'attemptComponentRecovery' },
+          { componentName: componentName, recoveryMethod: strategy?.fallback || 'component_reset' }
+        );
 
         // Dispatch recovery event
         window.dispatchEvent(
@@ -256,7 +276,11 @@ class ErrorHandler {
 
       return recovered;
     } catch (recoveryError) {
-      console.error(`Failed to recover component ${componentName}:`, recoveryError);
+      logger.error(
+        `Failed to recover component ${componentName}`,
+        { module: 'error-handler', function: 'attemptComponentRecovery' },
+        { componentName: componentName, recoveryError: recoveryError.message }
+      );
       return false;
     }
   }
@@ -286,7 +310,11 @@ class ErrorHandler {
 
       return true;
     } catch (error) {
-      console.error(`Failed to reset component ${componentName}:`, error);
+      logger.error(
+        `Failed to reset component ${componentName}`,
+        { module: 'error-handler', function: 'resetComponent' },
+        { componentName: componentName, error: error.message }
+      );
       return false;
     }
   }
@@ -295,7 +323,11 @@ class ErrorHandler {
   enableGracefulDegradation(boundary) {
     const { element, componentName } = boundary;
 
-    console.log(`⬇️  Enabling graceful degradation for ${componentName}`);
+    logger.info(
+      `Enabling graceful degradation for ${componentName}`,
+      { module: 'error-handler', function: 'enableGracefulDegradation' },
+      { componentName: componentName }
+    );
 
     // Add degraded mode class
     if (element) {
@@ -351,7 +383,10 @@ class ErrorHandler {
   // Initialize error handling system
   init() {
     if (this.isInitialized) {
-      console.warn('Error handler already initialized');
+      logger.warn('Error handler already initialized', {
+        module: 'error-handler',
+        function: 'init',
+      });
       return;
     }
 
@@ -361,9 +396,16 @@ class ErrorHandler {
       this.addErrorStyles();
       this.isInitialized = true;
 
-      console.log('Error handler initialized successfully');
+      logger.info('Error handler initialized successfully', {
+        module: 'error-handler',
+        function: 'init',
+      });
     } catch (error) {
-      console.error('Failed to initialize error handler:', error);
+      logger.error(
+        'Failed to initialize error handler',
+        { module: 'error-handler', function: 'init' },
+        { error: error.message }
+      );
     }
   }
 
@@ -718,10 +760,12 @@ class ErrorHandler {
       this.errorLog = this.errorLog.slice(-this.maxLogSize);
     }
 
-    // Console logging
-    console.group('🚨 Error Logged');
-    console.error('Error Info:', errorInfo);
-    console.groupEnd();
+    // Log using structured logger
+    logger.error(
+      'Error logged',
+      { module: 'error-handler', function: 'logError' },
+      { errorInfo: errorInfo }
+    );
 
     // Send to external service if configured
     this.sendToErrorService(errorInfo);

@@ -12,27 +12,27 @@ class HtmlBundleUpdater {
     this.htmlConfigs = [
       {
         file: 'index.html',
-        bundles: ['common', 'lightbox', 'search', 'main'],
+        bundles: ['common', 'core', 'lightbox', 'search', 'main'],
         comment: 'Webpack Bundles - Optimized and minified',
       },
       {
         file: 'gallery.html',
-        bundles: ['common', 'lightbox', 'search', 'main'],
+        bundles: ['common', 'core', 'lightbox', 'search', 'main'],
         comment: 'Webpack Bundles - Optimized and minified',
       },
       {
         file: 'about.html',
-        bundles: ['common', 'lightbox', 'search', 'main'],
+        bundles: ['common', 'core', 'lightbox', 'search', 'main'],
         comment: 'Webpack Bundles - Optimized and minified',
       },
       {
         file: 'contact.html',
-        bundles: ['common', 'lightbox', 'search', 'main'],
+        bundles: ['common', 'core', 'lightbox', 'search', 'main'],
         comment: 'Webpack Bundles - Optimized and minified',
       },
       {
         file: 'artwork.html',
-        bundles: ['common', 'lightbox', 'search', 'artwork'],
+        bundles: ['common', 'core', 'lightbox', 'search', 'artwork'],
         comment: 'Webpack Bundles - Artwork specific bundle',
       },
       {

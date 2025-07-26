@@ -31,7 +31,11 @@ class SitemapService {
         lastGenerated: new Date().toISOString(),
       };
     } catch (error) {
-      console.error('Error generating sitemap data:', error);
+      logger.error(
+        'Error generating sitemap data',
+        { module: 'sitemap-service', function: 'generateSitemapData' },
+        { error: error.message }
+      );
       throw error;
     }
   }
@@ -47,7 +51,11 @@ class SitemapService {
       }
       return await response.json();
     } catch (error) {
-      console.error('Error fetching artwork data:', error);
+      logger.error(
+        'Error fetching artwork data',
+        { module: 'sitemap-service', function: 'fetchArtworkData' },
+        { error: error.message, endpoint: this.endpoints.artworkData }
+      );
       return { artworks: [], categories: [] };
     }
   }
@@ -224,20 +232,33 @@ ${urlEntries}
     try {
       const sitemapData = await this.generateSitemapData();
 
-      console.log('🗺️  Sitemap Information:');
-      console.log(`📍 Total URLs: ${sitemapData.totalCount}`);
-      console.log(`📅 Last Generated: ${sitemapData.lastGenerated}`);
-      console.log(`🔗 Base URL: ${this.baseUrl}`);
+      logger.info(
+        'Sitemap Information',
+        { module: 'sitemap-service', function: 'displaySitemapInfo' },
+        {
+          totalUrls: sitemapData.totalCount,
+          lastGenerated: sitemapData.lastGenerated,
+          baseUrl: this.baseUrl,
+        }
+      );
 
       // Group by type
       const groupedUrls = this.groupUrlsByType(sitemapData.urls);
       Object.entries(groupedUrls).forEach(([type, urls]) => {
-        console.log(`  ${type}: ${urls.length} URLs`);
+        logger.debug(
+          `Sitemap URLs by type: ${type}`,
+          { module: 'sitemap-service', function: 'displaySitemapInfo' },
+          { type: type, count: urls.length }
+        );
       });
 
       return sitemapData;
     } catch (error) {
-      console.error('Error displaying sitemap info:', error);
+      logger.error(
+        'Error displaying sitemap info',
+        { module: 'sitemap-service', function: 'displaySitemapInfo' },
+        { error: error.message }
+      );
       throw error;
     }
   }
@@ -312,9 +333,16 @@ Allow: /public/assets/favicon/
       document.body.removeChild(a);
       URL.revokeObjectURL(url);
 
-      console.log('✅ Sitemap downloaded successfully');
+      logger.info('Sitemap downloaded successfully', {
+        module: 'sitemap-service',
+        function: 'downloadSitemap',
+      });
     } catch (error) {
-      console.error('❌ Error downloading sitemap:', error);
+      logger.error(
+        'Error downloading sitemap',
+        { module: 'sitemap-service', function: 'downloadSitemap' },
+        { error: error.message }
+      );
       throw error;
     }
   }
@@ -337,9 +365,16 @@ Allow: /public/assets/favicon/
       document.body.removeChild(a);
       URL.revokeObjectURL(url);
 
-      console.log('✅ robots.txt downloaded successfully');
+      logger.info('robots.txt downloaded successfully', {
+        module: 'sitemap-service',
+        function: 'downloadRobotsTxt',
+      });
     } catch (error) {
-      console.error('❌ Error downloading robots.txt:', error);
+      logger.error(
+        'Error downloading robots.txt',
+        { module: 'sitemap-service', function: 'downloadRobotsTxt' },
+        { error: error.message }
+      );
       throw error;
     }
   }
@@ -365,15 +400,25 @@ Allow: /public/assets/favicon/
       });
 
       if (invalidUrls.length > 0) {
-        console.warn('⚠️  Invalid URLs found:');
-        invalidUrls.forEach(url => console.warn(`  - ${url}`));
+        logger.warn(
+          'Invalid URLs found',
+          { module: 'sitemap-service', function: 'validateSitemap' },
+          { invalidUrls: invalidUrls }
+        );
         return false;
       }
 
-      console.log('✅ All sitemap URLs are valid');
+      logger.info('All sitemap URLs are valid', {
+        module: 'sitemap-service',
+        function: 'validateSitemap',
+      });
       return true;
     } catch (error) {
-      console.error('❌ Error validating sitemap:', error);
+      logger.error(
+        'Error validating sitemap',
+        { module: 'sitemap-service', function: 'validateSitemap' },
+        { error: error.message }
+      );
       return false;
     }
   }
@@ -396,16 +441,23 @@ Allow: /public/assets/favicon/
         baseUrl: this.baseUrl,
       };
 
-      console.log('📊 Sitemap Statistics:');
-      console.log(`  Total URLs: ${stats.totalUrls}`);
-      stats.byType.forEach(({ type, count }) => {
-        console.log(`  ${type}: ${count}`);
-      });
-      console.log(`  Last Generated: ${stats.lastGenerated}`);
+      logger.info(
+        'Sitemap Statistics',
+        { module: 'sitemap-service', function: 'getSitemapStats' },
+        {
+          totalUrls: stats.totalUrls,
+          byType: stats.byType,
+          lastGenerated: stats.lastGenerated,
+        }
+      );
 
       return stats;
     } catch (error) {
-      console.error('❌ Error getting sitemap stats:', error);
+      logger.error(
+        'Error getting sitemap stats',
+        { module: 'sitemap-service', function: 'getSitemapStats' },
+        { error: error.message }
+      );
       return null;
     }
   }

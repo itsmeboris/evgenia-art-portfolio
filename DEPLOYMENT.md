@@ -11,6 +11,7 @@ npm run setup
 ```
 
 The setup script will:
+
 - Install all dependencies
 - Create necessary directories
 - Generate SSL certificates
@@ -30,11 +31,13 @@ The setup script will:
 ### Environment Setup
 
 1. **Quick setup (automated):**
+
    ```bash
    npm run setup:quick
    ```
 
 2. **Manual setup:**
+
    ```bash
    cp .env.example .env
    npm install
@@ -172,7 +175,7 @@ NODE_ENV=production node server.js
 
 3. **Bundle loading errors:**
    - Run `npm run dev:build` for development
-   - Run `npm run build` for production  
+   - Run `npm run build` for production
    - Check `public/dist/` directory exists
    - Verify HTML files reference correct bundle names
 

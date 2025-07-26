@@ -15,7 +15,7 @@ class UIManager {
   // Initialize all UI components
   init() {
     if (this.isInitialized) {
-      console.warn('UI manager already initialized');
+      logger.warn('UI manager already initialized', { module: 'ui', function: 'init' });
       return;
     }
 
@@ -26,9 +26,13 @@ class UIManager {
       this.initResponsiveHandling();
       this.isInitialized = true;
 
-      console.log('UI manager initialized successfully');
+      logger.info('UI manager initialized successfully', { module: 'ui', function: 'init' });
     } catch (error) {
-      console.error('Error initializing UI manager:', error);
+      logger.error(
+        'Error initializing UI manager',
+        { module: 'ui', function: 'init' },
+        { error: error.message }
+      );
     }
   }
 
@@ -38,7 +42,7 @@ class UIManager {
     const navLinks = document.querySelector('.nav-links');
 
     if (!mobileMenuToggle || !navLinks) {
-      console.log('Mobile menu elements not found');
+      logger.debug('Mobile menu elements not found', { module: 'ui', function: 'initMobileMenu' });
       return;
     }
 
@@ -139,7 +143,7 @@ class UIManager {
     const faqQuestions = document.querySelectorAll('.faq-question');
 
     if (faqQuestions.length === 0) {
-      console.log('No FAQ elements found');
+      logger.debug('No FAQ elements found', { module: 'ui', function: 'initFaqToggle' });
       return;
     }
 

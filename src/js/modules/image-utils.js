@@ -18,7 +18,11 @@ class ImageUtils {
     // Process existing images
     this.processAllImages();
 
-    console.log(`📸 Image Utils initialized - WebP supported: ${this.supportsWebP}`);
+    logger.info(
+      'Image Utils initialized',
+      { module: 'image-utils', function: 'init' },
+      { webpSupported: this.supportsWebP }
+    );
     this.isInitialized = true;
   }
 
@@ -239,7 +243,11 @@ class ImageUtils {
           img.src = loadedSrc;
           img.classList.remove('loading');
           img.classList.add('loaded');
-          console.log(`📸 Successfully loaded: ${loadedSrc}`);
+          logger.debug(
+            'Successfully loaded image',
+            { module: 'image-utils', function: 'loadImageWithFallback' },
+            { src: loadedSrc }
+          );
           resolve(img);
         })
         .catch(reject);
@@ -253,7 +261,11 @@ class ImageUtils {
         await this.loadImage(path);
         return path;
       } catch {
-        console.log(`📸 Failed to load ${path}, trying next format...`);
+        logger.debug(
+          'Failed to load image, trying next format',
+          { module: 'image-utils', function: 'loadImageWithFallback' },
+          { failedSrc: path }
+        );
         continue; // Try next image
       }
     }

@@ -302,7 +302,11 @@ class Utils {
         localStorage.setItem(key, JSON.stringify(value));
         return true;
       } catch (error) {
-        console.warn('Failed to save to localStorage:', error);
+        logger.warn(
+          'Failed to save to localStorage',
+          { module: 'utils', function: 'localStorage.set' },
+          { key: key, error: error.message }
+        );
         return false;
       }
     },
@@ -312,7 +316,11 @@ class Utils {
         const item = localStorage.getItem(key);
         return item ? JSON.parse(item) : defaultValue;
       } catch (error) {
-        console.warn('Failed to read from localStorage:', error);
+        logger.warn(
+          'Failed to read from localStorage',
+          { module: 'utils', function: 'localStorage.get' },
+          { key: key, error: error.message }
+        );
         return defaultValue;
       }
     },
@@ -322,7 +330,11 @@ class Utils {
         localStorage.removeItem(key);
         return true;
       } catch (error) {
-        console.warn('Failed to remove from localStorage:', error);
+        logger.warn(
+          'Failed to remove from localStorage',
+          { module: 'utils', function: 'localStorage.remove' },
+          { key: key, error: error.message }
+        );
         return false;
       }
     },
@@ -332,7 +344,11 @@ class Utils {
         localStorage.clear();
         return true;
       } catch (error) {
-        console.warn('Failed to clear localStorage:', error);
+        logger.warn(
+          'Failed to clear localStorage',
+          { module: 'utils', function: 'localStorage.clear' },
+          { error: error.message }
+        );
         return false;
       }
     },
@@ -345,7 +361,11 @@ class Utils {
         sessionStorage.setItem(key, JSON.stringify(value));
         return true;
       } catch (error) {
-        console.warn('Failed to save to sessionStorage:', error);
+        logger.warn(
+          'Failed to save to sessionStorage',
+          { module: 'utils', function: 'sessionStorage.set' },
+          { key: key, error: error.message }
+        );
         return false;
       }
     },
@@ -355,7 +375,11 @@ class Utils {
         const item = sessionStorage.getItem(key);
         return item ? JSON.parse(item) : defaultValue;
       } catch (error) {
-        console.warn('Failed to read from sessionStorage:', error);
+        logger.warn(
+          'Failed to read from sessionStorage',
+          { module: 'utils', function: 'sessionStorage.get' },
+          { key: key, error: error.message }
+        );
         return defaultValue;
       }
     },
@@ -365,7 +389,11 @@ class Utils {
         sessionStorage.removeItem(key);
         return true;
       } catch (error) {
-        console.warn('Failed to remove from sessionStorage:', error);
+        logger.warn(
+          'Failed to remove from sessionStorage',
+          { module: 'utils', function: 'sessionStorage.remove' },
+          { key: key, error: error.message }
+        );
         return false;
       }
     },
@@ -410,7 +438,11 @@ class Utils {
           const measure = performance.getEntriesByName(name)[0];
           return measure ? measure.duration : null;
         } catch (error) {
-          console.warn('Performance measurement failed:', error);
+          logger.warn(
+            'Performance measurement failed',
+            { module: 'utils', function: 'performanceManager.end' },
+            { name: name, error: error.message }
+          );
           return null;
         }
       }

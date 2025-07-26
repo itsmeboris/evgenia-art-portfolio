@@ -35,7 +35,7 @@ class SearchManager {
   // Initialize the search system
   init() {
     if (this.isInitialized) {
-      console.warn('Search manager already initialized');
+      logger.warn('Search manager already initialized', { module: 'search', function: 'init' });
       return;
     }
 
@@ -45,9 +45,16 @@ class SearchManager {
       this.loadArtworkData();
       this.isInitialized = true;
 
-      console.log('Search manager initialized successfully');
+      logger.info('Search manager initialized successfully', {
+        module: 'search',
+        function: 'init',
+      });
     } catch (error) {
-      console.error('Error initializing search manager:', error);
+      logger.error(
+        'Error initializing search manager',
+        { module: 'search', function: 'init' },
+        { error: error.message }
+      );
     }
   }
 
@@ -623,7 +630,11 @@ class SearchManager {
         this.artworkData = JSON.parse(savedData);
       }
     } catch (error) {
-      console.error('Error loading artwork data for search:', error);
+      logger.error(
+        'Error loading artwork data for search',
+        { module: 'search', function: 'loadArtworkData' },
+        { error: error.message }
+      );
     }
   }
 
@@ -712,7 +723,11 @@ class SearchManager {
         const results = this.searchArtworks(query);
         this.displayResults(results, query);
       } catch (error) {
-        console.error('Search error:', error);
+        logger.error(
+          'Search error',
+          { module: 'search', function: 'performSearch' },
+          { query: query, error: error.message }
+        );
         this.showError('An error occurred while searching. Please try again.');
       }
     }, 100);
@@ -998,7 +1013,11 @@ class SearchManager {
         this.searchHistory = JSON.parse(saved);
       }
     } catch (error) {
-      console.error('Error loading search history:', error);
+      logger.error(
+        'Error loading search history',
+        { module: 'search', function: 'loadSearchHistory' },
+        { error: error.message }
+      );
       this.searchHistory = [];
     }
   }
@@ -1007,7 +1026,11 @@ class SearchManager {
     try {
       localStorage.setItem('search-history', JSON.stringify(this.searchHistory));
     } catch (error) {
-      console.error('Error saving search history:', error);
+      logger.error(
+        'Error saving search history',
+        { module: 'search', function: 'saveSearchHistory' },
+        { error: error.message }
+      );
     }
   }
 

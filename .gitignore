@@ -84,6 +84,7 @@ typings/
 # IDE and editor files
 .vscode/
 .claude/
+.cursor/
 .idea/
 *.swp
 *.swo

@@ -1,29 +1,50 @@
 # Deployment Guide
 
-## Prerequisites
+## Quick Start (Recommended)
+
+🚀 **For fastest setup, use the interactive setup script:**
+
+```bash
+git clone <repository-url>
+cd evgenia-art-portfolio
+npm run setup
+```
+
+The setup script will:
+- Install all dependencies
+- Create necessary directories
+- Generate SSL certificates
+- Configure environment variables
+- Build development bundles
+- Start the server
+
+## Manual Setup
+
+### Prerequisites
 
 - Node.js (v18 or higher)
 - npm or yarn
 - SSL certificates (for HTTPS)
 - Process manager (PM2 recommended)
 
-## Environment Setup
+### Environment Setup
 
-1. **Copy environment template:**
-
+1. **Quick setup (automated):**
    ```bash
-   cp .env.example .env
+   npm run setup:quick
    ```
 
-2. **Configure environment variables:**
+2. **Manual setup:**
+   ```bash
+   cp .env.example .env
+   npm install
+   npm run dev:build
+   ```
+
+3. **Configure environment variables:**
    - Set production values in `.env`
    - Generate secure `SESSION_SECRET` (32+ characters)
    - Create bcrypt hash for `ADMIN_PASSWORD_HASH`
-
-3. **Install dependencies:**
-   ```bash
-   npm install --production
-   ```
 
 ## Building for Production
 
@@ -52,22 +73,57 @@
    - Place certificates in `certs/` directory
    - Update paths in `.env` if needed
 
+## Development vs Production Commands
+
+### Development Commands (Fast & Quick)
+
+```bash
+# Start development server (after setup)
+npm run dev:server
+
+# Full development build and start
+npm run dev
+
+# Watch for file changes (run in separate terminal)
+npm run dev:watch
+
+# Quick setup for existing project
+npm run setup:quick
+```
+
+### Production Commands (Optimized & Complete)
+
+```bash
+# Full production build and start
+npm run prod:start
+
+# Build for production only
+npm run build
+
+# Start production server
+npm run start:prod
+```
+
 ## Running in Production
 
 ### Using PM2 (Recommended)
 
 ```bash
-# Install PM2 globally
-npm install -g pm2
-
 # Start application
-pm2 start ecosystem.config.js
+npm run pm2:start
 
 # View logs
-pm2 logs evgenia-art
+npm run pm2:logs
 
-# Monitor
-pm2 monit
+# Check status
+npm run pm2:status
+
+# Monitor (requires PM2 to be running)
+npx pm2 monit
+
+# Stop/restart
+npm run pm2:stop
+npm run pm2:restart
 ```
 
 ### Using Node.js directly
@@ -115,8 +171,10 @@ NODE_ENV=production node server.js
    - Update certificate paths in `.env`
 
 3. **Bundle loading errors:**
-   - Run `npm run build` to regenerate bundles
+   - Run `npm run dev:build` for development
+   - Run `npm run build` for production  
    - Check `public/dist/` directory exists
+   - Verify HTML files reference correct bundle names
 
 ### Logs
 

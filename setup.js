@@ -127,7 +127,7 @@ STATIC_CACHE_MAX_AGE=86400000
     // Build development bundles
     console.log('\n5. Building development bundles...');
     try {
-      execSync('npm run dev:build', { stdio: 'inherit' });
+      execSync('npm run build:dev', { stdio: 'inherit' });
       console.log('   ✅ Development bundles built');
     } catch (error) {
       console.log('   ❌ Failed to build development bundles');

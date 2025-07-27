@@ -13,15 +13,23 @@ cp .env.example .env
 # Edit .env with your configuration
 
 # Build for production
-npm run build
+npm run build:prod
 
 # Start the application
-npm start
+npm run start:prod
 ```
 
 ## 📦 Production Deployment
 
-See [DEPLOYMENT.md](DEPLOYMENT.md) for detailed deployment instructions.
+See [DEPLOYMENT.md](docs/DEPLOYMENT.md) for detailed deployment instructions.
+
+## 📚 Documentation
+
+All project documentation is organized in the `docs/` folder:
+- [Architecture Overview](docs/ARCHITECTURE.md)
+- [Deployment Guide](docs/DEPLOYMENT.md)
+- [Quick Start Guide](docs/QUICKSTART.md)
+- [NPM Commands Reference](docs/NPM_COMMANDS.md)
 
 ## Project Overview
 
@@ -345,7 +353,7 @@ To run this project locally and avoid CORS issues:
    ```
 4. **Start the development server**:
    ```bash
-   npm start
+   npm run start:dev
    ```
 5. **Access the website**:
    - **HTTP**: [http://localhost:3000](http://localhost:3000)
@@ -432,7 +440,7 @@ To deploy this website:
 1. **Build for production** (optional optimization):
 
    ```bash
-   npm run build  # If you have a build script
+   npm run build:prod  # Build optimized production bundles
    ```
 
 2. **Upload files** to your web hosting server:
@@ -457,7 +465,7 @@ For hosting providers that support Node.js:
    ```
 3. **Start the application**:
    ```bash
-   npm start
+   npm run start:prod
    ```
 4. **Configure environment**:
    - Set `PORT` environment variable if required
@@ -479,7 +487,7 @@ The server is configured to listen on all network interfaces with both HTTP and 
 
 1. Start the server:
    ```
-   npm start
+   npm run start:dev
    ```
 2. Look for the local network URLs in the console output:
    ```
@@ -510,7 +518,7 @@ To make your locally running website accessible from anywhere on the internet:
 4. Start your website (in one terminal):
 
    ```
-   npm start
+   npm run start:dev
    ```
 
 5. Start the ngrok tunnel (in a second terminal):

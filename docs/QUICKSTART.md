@@ -28,21 +28,21 @@ The interactive setup will ask for:
 
 ```bash
 # Start development server
-npm run dev:server
+npm run start:dev
 
 # For active development (auto-rebuild on file changes)
-npm run dev:watch    # Terminal 1
-npm run dev:server   # Terminal 2
+npm run watch:prod    # Terminal 1 (watches for production build)
+npm run start:dev     # Terminal 2
 ```
 
 ## 🏗️ Production Deployment
 
 ```bash
 # Build and start production server
-npm run prod:start
+npm run run:prod
 
 # Or with PM2 (recommended)
-npm run pm2:start
+npm run run-pm2:prod
 ```
 
 ## 🔗 Access Points
@@ -60,19 +60,19 @@ npm run pm2:start
 
 ### Development Commands
 
-- `npm run dev:server` - Start development server
-- `npm run dev:watch` - Watch files for changes
-- `npm run dev:build` - Build development bundles
+- `npm run start:dev` - Start development server
+- `npm run watch:prod` - Watch files for changes (production mode)
+- `npm run build:dev` - Build development bundles
 
 ### Production Commands
 
-- `npm run build` - Build optimized production bundles
+- `npm run build:prod` - Build optimized production bundles
 - `npm run start:prod` - Start production server
-- `npm run prod:start` - Build and start production
+- `npm run run:prod` - Build and start production
 
 ### PM2 Commands
 
-- `npm run pm2:start` - Start with PM2 (local dependency)
+- `npm run run-pm2:prod` - Build and start with PM2 (production)
 - `npm run pm2:stop` - Stop PM2 process
 - `npm run pm2:restart` - Restart PM2 process
 - `npm run pm2:logs` - View PM2 logs
@@ -95,7 +95,7 @@ All configuration is handled automatically by the setup script. Manual configura
 2. **Missing bundles:**
 
    ```bash
-   npm run dev:build
+   npm run build:dev
    ```
 
 3. **SSL certificate issues:**

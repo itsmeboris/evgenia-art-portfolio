@@ -41,7 +41,7 @@ The setup script will:
    ```bash
    cp .env.example .env
    npm install
-   npm run dev:build
+   npm run build:dev
    ```
 
 3. **Configure environment variables:**
@@ -82,13 +82,13 @@ The setup script will:
 
 ```bash
 # Start development server (after setup)
-npm run dev:server
+npm run start:dev
 
 # Full development build and start
-npm run dev
+npm run run:dev
 
 # Watch for file changes (run in separate terminal)
-npm run dev:watch
+npm run watch:prod
 
 # Quick setup for existing project
 npm run setup:quick
@@ -98,10 +98,10 @@ npm run setup:quick
 
 ```bash
 # Full production build and start
-npm run prod:start
+npm run run:prod
 
 # Build for production only
-npm run build
+npm run build:prod
 
 # Start production server
 npm run start:prod
@@ -113,7 +113,7 @@ npm run start:prod
 
 ```bash
 # Start application
-npm run pm2:start
+npm run run-pm2:prod
 
 # View logs
 npm run pm2:logs
@@ -174,8 +174,8 @@ NODE_ENV=production node server.js
    - Update certificate paths in `.env`
 
 3. **Bundle loading errors:**
-   - Run `npm run dev:build` for development
-   - Run `npm run build` for production
+   - Run `npm run build:dev` for development
+   - Run `npm run build:prod` for production
    - Check `public/dist/` directory exists
    - Verify HTML files reference correct bundle names
 
@@ -227,7 +227,7 @@ tar -czf backup/images-$(date +%Y%m%d).tar.gz public/assets/images/
 3. **Rebuild assets:**
 
    ```bash
-   npm run build
+   npm run build:prod
    ```
 
 4. **Restart application:**

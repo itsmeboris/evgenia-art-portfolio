@@ -42,7 +42,7 @@ Automated system to update HTML files with correct webpack bundle references aft
 The complete pipeline runs automatically with one command:
 
 ```bash
-npm run build  # Quality checks + webpack build + HTML bundle updates
+npm run build:prod  # Quality checks + webpack build + HTML bundle updates
 ```
 
 #### Manual Steps
@@ -51,9 +51,8 @@ You can run individual parts of the pipeline:
 
 ```bash
 npm run build:clean    # Run quality pipeline only
-npm run build:quick    # Skip quality checks, just build
+# These commands don't exist in package.json - removed for clarity
 npm run update-bundles # Update HTML bundles manually
-npm run build:full     # Build + manual update (redundant but available)
 ```
 
 #### Development Commands
@@ -62,7 +61,7 @@ For development work:
 
 ```bash
 npm run build:dev    # Development build (no quality checks)
-npm run build:watch  # Watch mode for development
+npm run watch:prod   # Watch mode for production builds
 ```
 
 ### How It Works

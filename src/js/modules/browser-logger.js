@@ -5,6 +5,12 @@
  */
 class BrowserLogger {
   constructor() {
+    // Singleton pattern - prevent multiple instances
+    if (BrowserLogger.instance) {
+      return BrowserLogger.instance;
+    }
+    BrowserLogger.instance = this;
+
     this.isDevelopment =
       window.location.hostname === 'localhost' ||
       window.location.hostname === '127.0.0.1' ||
@@ -13,6 +19,8 @@ class BrowserLogger {
     this.maxBufferSize = 100;
     this.flushInterval = 5000; // 5 seconds
     this.isOnline = navigator.onLine;
+    this.isFlushInProgress = false; // Prevent concurrent flushes
+    this.pendingFlush = false; // Track if a flush is needed after current one completes
 
     // Set up periodic log flushing
     this.setupPeriodicFlush();
@@ -147,6 +155,13 @@ class BrowserLogger {
       return;
     }
 
+    // Prevent concurrent flushes
+    if (this.isFlushInProgress) {
+      this.pendingFlush = true;
+      return;
+    }
+
+    this.isFlushInProgress = true;
     const logsToSend = [...this.logBuffer];
     this.logBuffer = [];
 
@@ -158,8 +173,11 @@ class BrowserLogger {
     if (synchronous) {
       // Use sendBeacon for synchronous sending (page unload)
       if (navigator.sendBeacon) {
-        navigator.sendBeacon('/api/logs', JSON.stringify(payload));
+        // Create a Blob with the correct MIME type
+        const blob = new Blob([JSON.stringify(payload)], { type: 'application/json' });
+        navigator.sendBeacon('/api/logs', blob);
       }
+      this.isFlushInProgress = false;
     } else {
       // Use fetch for asynchronous sending
       fetch('/api/logs', {
@@ -168,10 +186,35 @@ class BrowserLogger {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify(payload),
-      }).catch(error => {
+      })
+      .then(response => {
+        if (!response.ok) {
+          throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+        }
+        return response.json();
+      })
+      .then(data => {
+        // Success - check if there's a pending flush
+        this.isFlushInProgress = false;
+        if (this.pendingFlush && this.logBuffer.length > 0) {
+          this.pendingFlush = false;
+          // Small delay to prevent tight loops
+          setTimeout(() => this.flushLogs(), 100);
+        }
+      })
+      .catch(error => {
         // If sending fails, put logs back in buffer
         console.error('Failed to send logs to server:', error);
         this.logBuffer = [...logsToSend, ...this.logBuffer];
+        this.isFlushInProgress = false;
+
+        // Retry after a delay if there are logs to send
+        if (this.logBuffer.length > 0) {
+          setTimeout(() => {
+            this.pendingFlush = false;
+            this.flushLogs();
+          }, 2000); // 2 second retry delay
+        }
       });
     }
   }
@@ -238,21 +281,31 @@ class BrowserLogger {
   }
 }
 
-// Create global logger instance immediately
-const browserLogger = new BrowserLogger();
-window.logger = browserLogger;
+// Create and manage singleton logger instance
+let browserLogger;
 
-// Make it available in global scope
-if (typeof global !== 'undefined') {
-  global.logger = browserLogger;
+// Ensure only one instance exists globally
+if (typeof window !== 'undefined') {
+  if (!window.browserLoggerInstance) {
+    browserLogger = new BrowserLogger();
+    window.browserLoggerInstance = browserLogger;
+    window.logger = browserLogger;
+  } else {
+    browserLogger = window.browserLoggerInstance;
+  }
+} else if (typeof global !== 'undefined') {
+  if (!global.browserLoggerInstance) {
+    browserLogger = new BrowserLogger();
+    global.browserLoggerInstance = browserLogger;
+    global.logger = browserLogger;
+  } else {
+    browserLogger = global.browserLoggerInstance;
+  }
+} else {
+  browserLogger = new BrowserLogger();
 }
 
 // Export for module systems
 if (typeof module !== 'undefined' && module.exports) {
-  module.exports = BrowserLogger;
-}
-
-// Ensure logger is available when modules are loaded
-if (typeof window !== 'undefined' && !window.logger) {
-  window.logger = browserLogger;
+  module.exports = browserLogger; // Export instance, not class
 }

@@ -6,7 +6,6 @@ yarn-error.log*
 
 # Agent Workspaces
 workspaces/*
-!workspaces/TODO.md
 
 # Runtime data
 pids

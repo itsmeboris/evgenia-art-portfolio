@@ -14,8 +14,8 @@ This folder contains all project documentation for the Evgenia Art Portfolio.
 ```
 evgenia-art-portfolio/
 ├── docs/                    # This documentation folder
-├── workspaces/             # Agent workspaces and TODO tracking
-│   └── TODO.md            # Project TODO list
+├── workspaces/             # Agent workspaces
+├── TODO.md                 # Project TODO list
 ├── CLAUDE.md              # Master prompt for AI agents
 └── README.md              # Main project readme
 ```
@@ -23,5 +23,5 @@ evgenia-art-portfolio/
 ## Quick Links
 
 - [Main README](../README.md)
-- [TODO List](../workspaces/TODO.md)
+- [TODO List](../TODO.md)
 - [AI Agent Guide](../CLAUDE.md)

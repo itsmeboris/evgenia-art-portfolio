@@ -56,6 +56,12 @@ evgenia-art-portfolio/
 │       │   └── ...         # 15 specialized modules
 │       └── main.js         # Entry point
 ├── scripts/                # Build and utility scripts
+│   ├── setup.js            # Interactive project setup wizard
+│   ├── webp-converter.js   # Image optimization utility
+│   ├── generate-sitemap.js # SEO sitemap generator
+│   ├── pre-build-quality.js # Pre-build quality checks
+│   ├── update-html-bundles.js # Bundle reference updater
+│   └── webpack-html-updater-plugin.js # Custom Webpack plugin
 ├── server.js              # Express server configuration
 ├── webpack.config.js      # Build configuration
 └── ecosystem.config.js    # PM2 deployment config

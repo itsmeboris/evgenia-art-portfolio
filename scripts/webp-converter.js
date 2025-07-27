@@ -6,7 +6,7 @@ const sharp = require('sharp');
 // Run this script to generate WebP versions of all artwork images
 
 async function convertImagesToWebP() {
-  const artworkDir = path.join(__dirname, 'public', 'assets', 'images', 'artwork');
+  const artworkDir = path.join(__dirname, '..', 'public', 'assets', 'images', 'artwork');
 
   console.log('🖼️  Starting WebP conversion...');
   console.log(`📁 Source directory: ${artworkDir}`);

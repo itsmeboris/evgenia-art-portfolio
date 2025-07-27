@@ -52,7 +52,7 @@ The website features:
 
 ### Core Modules
 
-#### 🛒 **Cart Module** (`public/js/modules/cart.js`)
+#### 🛒 **Cart Module** (`src/js/modules/cart.js`)
 
 - Complete shopping cart system with CartManager class
 - localStorage persistence for cart state
@@ -61,7 +61,7 @@ The website features:
 - Concurrency control and state management
 - Error handling and recovery mechanisms
 
-#### 🎨 **UI Module** (`public/js/modules/ui.js`)
+#### 🎨 **UI Module** (`src/js/modules/ui.js`)
 
 - Mobile menu with accessibility features
 - FAQ toggles and accordion functionality
@@ -69,7 +69,7 @@ The website features:
 - Focus management and keyboard navigation
 - Utility functions for DOM manipulation
 
-#### 🔍 **Lightbox Module** (`public/js/modules/lightbox.js`)
+#### 🔍 **Lightbox Module** (`src/js/modules/lightbox.js`)
 
 - Image viewing with gallery navigation
 - Keyboard support (arrow keys, escape)
@@ -77,7 +77,7 @@ The website features:
 - Mobile optimization with touch gestures
 - Accessibility features and screen reader support
 
-#### 🔎 **Search Module** (`public/js/modules/search.js`)
+#### 🔎 **Search Module** (`src/js/modules/search.js`)
 
 - Real-time artwork search with modal interface
 - Debounced input for performance (300ms delay)
@@ -85,7 +85,7 @@ The website features:
 - Result highlighting and relevance scoring
 - Advanced filtering by category, price, and keywords
 
-#### 📝 **Forms Module** (`public/js/modules/forms.js`)
+#### 📝 **Forms Module** (`src/js/modules/forms.js`)
 
 - Newsletter and contact form handling
 - Real-time validation with user feedback
@@ -93,7 +93,7 @@ The website features:
 - Accessibility enhancements (ARIA labels, focus management)
 - Comprehensive error handling and user notifications
 
-#### ⚠️ **Error Handler Module** (`public/js/modules/error-handler.js`)
+#### ⚠️ **Error Handler Module** (`src/js/modules/error-handler.js`)
 
 - Global error management with event listeners
 - Component-level error boundaries
@@ -101,7 +101,7 @@ The website features:
 - User-friendly error messages with retry options
 - Error categorization and logging system
 
-#### 🛠️ **Utils Module** (`public/js/modules/utils.js`)
+#### 🛠️ **Utils Module** (`src/js/modules/utils.js`)
 
 - Performance helpers (debounce, throttle)
 - Data manipulation and string formatting utilities
@@ -118,7 +118,7 @@ The website features:
 - **Performance tracking** with session IDs and user interaction logging
 - **Automatic log transmission** with offline buffering and retry mechanisms
 
-#### 🖼️ **Lazy Loader Module** (`public/js/modules/lazy-loader.js`)
+#### 🖼️ **Lazy Loader Module** (`src/js/modules/lazy-loader.js`)
 
 - Intersection Observer-based image loading
 - Concurrency control (max 3 simultaneous loads)
@@ -135,7 +135,7 @@ The website features:
 - Automatic skeleton management with withSkeleton() utility
 - Accessibility features with proper ARIA labels
 
-### 🎯 **App Manager** (`public/js/main.js`)
+### 🎯 **App Manager** (`src/js/main.js`)
 
 The central coordinator that:
 
@@ -188,38 +188,72 @@ window.app.dev.exportData();
 ├── gallery.html             # Gallery/Shop page
 ├── contact.html             # Contact page
 ├── artwork.html             # Individual artwork details
-├── shop.html                # Shopping page
+├── 404.html                 # Error page
 ├── server.js                # Node.js server with HTTP/HTTPS support
-├── certs/                   # SSL certificates for HTTPS development
-├── public/                  # Public assets
-│   ├── css/                 # CSS files
-│   │   ├── style.css        # Main stylesheet
+├── webpack.config.js        # Webpack build configuration
+├── ecosystem.config.js      # PM2 process manager configuration
+├── eslint.config.js         # ESLint configuration
+├── .prettierrc             # Prettier formatting configuration
+├── TODO.md                 # Project todo list
+├── CLAUDE.md              # AI agent configuration
+├── docs/                  # Documentation
+│   ├── ARCHITECTURE.md    # Technical architecture documentation
+│   ├── DEPLOYMENT.md      # Deployment guide
+│   ├── NPM_COMMANDS.md    # NPM scripts reference
+│   ├── QUICKSTART.md      # Quick start guide
+│   └── README.md          # Documentation index
+├── scripts/               # Build and utility scripts
+│   ├── setup.js           # Interactive project setup
+│   ├── webp-converter.js  # Image optimization utility
+│   ├── generate-sitemap.js # SEO sitemap generator
+│   ├── pre-build-quality.js # Pre-build quality checks
+│   ├── update-html-bundles.js # Bundle reference updater
+│   └── webpack-html-updater-plugin.js # Webpack plugin
+├── certs/                 # SSL certificates for HTTPS development
+├── public/                # Public assets served directly
+│   ├── css/               # CSS files
+│   │   ├── style.css      # Main stylesheet
 │   │   ├── additional-styles.css # Additional styles
-│   │   └── search-modal.css # Search modal styles
-│   ├── js/                  # JavaScript files
-│   │   ├── main.js          # App Manager (modular coordinator)
-│   │   ├── main-old.js      # Original monolithic file (backup)
-│   │   ├── artwork-loader.js # Artwork loading functionality
-│   │   └── modules/         # Modular JavaScript architecture
-│   │       ├── cart.js      # Shopping cart system
-│   │       ├── ui.js        # User interface components
-│   │       ├── lightbox.js  # Image lightbox functionality
-│   │       ├── search.js    # Search functionality
-│   │       ├── forms.js     # Form handling and validation
-│   │       ├── error-handler.js # Error management
-│   │       ├── utils.js     # Utility functions
-│   │       └── lazy-loader.js # Image lazy loading
-│   ├── data/                # Data files
+│   │   ├── search-modal.css # Search modal styles
+│   │   └── skeleton.css   # Loading skeleton styles
+│   ├── data/              # Data files
 │   │   └── artwork-data.json # Central artwork database
-│   └── assets/              # Static assets
-│       └── images/          # Image files
-├── admin/                   # Admin interface
-│   ├── index.html           # Admin panel
-│   ├── login.html           # Admin login
-│   ├── css/admin.css        # Admin styles
-│   ├── js/admin.js          # Admin functionality
-│   └── README.md            # Admin documentation
-└── README.md                # This file
+│   ├── assets/            # Static assets
+│   │   ├── images/        # Artwork and hero images
+│   │   ├── favicon/       # Favicon files
+│   │   └── logo.jpg       # Site logo
+│   ├── dist/              # Webpack build output
+│   │   ├── js/            # Bundled JavaScript files
+│   │   └── manifest.json  # Build manifest
+│   ├── robots.txt         # SEO robots file
+│   └── sitemap.xml        # SEO sitemap
+├── src/                   # Source code
+│   └── js/                # JavaScript source files
+│       ├── main.js        # App Manager (modular coordinator)
+│       ├── core-entry.js  # Core functionality entry point
+│       ├── artwork-entry.js # Artwork page entry point
+│       ├── artwork-loader.js # Artwork loading functionality
+│       └── modules/       # Modular JavaScript architecture
+│           ├── cart.js    # Shopping cart system
+│           ├── ui.js      # User interface components
+│           ├── lightbox.js # Image lightbox functionality
+│           ├── search.js  # Search functionality
+│           ├── forms.js   # Form handling and validation
+│           ├── error-handler.js # Error management
+│           ├── utils.js   # Utility functions
+│           ├── lazy-loader.js # Image lazy loading
+│           ├── logger.js  # Frontend logging
+│           └── ...        # Additional modules
+├── admin/                 # Admin interface
+│   ├── index.html         # Admin dashboard
+│   ├── login.html         # Admin login
+│   ├── css/admin.css      # Admin styles
+│   ├── js/admin.js        # Admin functionality
+│   └── README.md          # Admin documentation
+├── logs/                  # Application logs (PM2)
+├── pids/                  # Process ID files (PM2)
+├── sessions/              # Session storage files
+└── README.md              # This file
 ```
 
 ## Shopping Cart Integration
@@ -307,7 +341,7 @@ The modular architecture makes it easy to extend functionality:
 
 #### Adding a New Module
 
-1. Create a new file in `/public/js/modules/your-module.js`
+1. Create a new file in `/src/js/modules/your-module.js`
 2. Follow the module pattern:
 
    ```javascript
@@ -577,7 +611,7 @@ The website is compatible with:
 
 If you see module loading errors in the console:
 
-1. Check that all module files exist in `/public/js/modules/`
+1. Check that all module files exist in `/src/js/modules/`
 2. Verify the server is running (for absolute path resolution)
 3. Check browser console for specific error messages
 4. Use development tools: `window.app.dev.testPerformance()`
@@ -622,7 +656,7 @@ For technical issues:
 - `artwork.html` - Individual artwork detail pages
 - `public/` - Contains all assets (images, CSS, JS)
   - `public/data/artwork-data.json` - Central data file for all artwork
-  - `public/js/modules/` - Modular JavaScript architecture
+  - `src/js/modules/` - Modular JavaScript architecture
 - `admin/` - Admin interface for managing artwork
   - `admin/index.html` - Admin panel
   - `admin/README.md` - Admin documentation

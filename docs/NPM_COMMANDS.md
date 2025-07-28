@@ -62,12 +62,14 @@ This document provides a complete reference of all available npm commands in the
 ## Common Workflows
 
 ### Development
+
 ```bash
 npm run setup:quick     # First time setup
 npm run start:dev       # Start dev server
 ```
 
 ### Production Deployment
+
 ```bash
 npm run build:prod      # Build for production
 npm run run-pm2:prod    # Deploy with PM2
@@ -75,6 +77,7 @@ npm run pm2:logs        # Monitor logs
 ```
 
 ### Active Development
+
 ```bash
 # Terminal 1
 npm run watch:prod      # Auto-rebuild on changes

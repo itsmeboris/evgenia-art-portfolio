@@ -5,6 +5,7 @@
 The Evgenia Art Portfolio is a modern, full-stack web application built to showcase and sell artwork by artist Evgenia Portnov. The project represents a sophisticated e-commerce platform with a clean, responsive design and modular architecture that was recently refactored (January 2025) from a monolithic structure to a maintainable, scalable system.
 
 **Key Highlights:**
+
 - **Technology Stack:** Node.js/Express backend, Vanilla JavaScript frontend with Webpack bundling
 - **Architecture:** Server-side rendered HTML with progressive enhancement, modular JS architecture
 - **Current Status:** 70% feature complete, production-ready with ongoing enhancements
@@ -13,6 +14,7 @@ The Evgenia Art Portfolio is a modern, full-stack web application built to showc
 ## Technology Stack
 
 ### Backend
+
 - **Runtime:** Node.js (v18+)
 - **Framework:** Express.js 4.18.2
 - **Session Management:** express-session with FileStore/MongoDB support
@@ -21,12 +23,14 @@ The Evgenia Art Portfolio is a modern, full-stack web application built to showc
 - **Process Manager:** PM2 for production deployment
 
 ### Frontend
+
 - **Core:** Vanilla JavaScript (ES6+) with modular architecture
 - **Build Tool:** Webpack 5 with code splitting and optimization
 - **CSS:** Modular CSS with Webpack extraction and minification
 - **Image Handling:** WebP conversion, lazy loading, lightbox functionality
 
 ### Data Storage
+
 - **Current:** JSON file-based storage (`public/data/artwork-data.json`)
 - **Sessions:** File-based or MongoDB sessions
 - **Future:** PostgreSQL migration planned (HIGH priority)
@@ -74,12 +78,14 @@ evgenia-art-portfolio/
 The frontend follows a **Progressive Enhancement** pattern with modular JavaScript:
 
 **Module System:**
+
 - **15 Specialized Modules** handling specific concerns (cart, search, forms, etc.)
 - **Event-driven communication** between modules
 - **Lazy loading** for performance optimization
 - **Error boundaries** with automatic recovery
 
 **Key Modules:**
+
 - `cart.js` - Complete e-commerce cart with localStorage persistence
 - `search.js` - Real-time search with debouncing and history
 - `lightbox.js` - Advanced image viewer with touch support
@@ -87,6 +93,7 @@ The frontend follows a **Progressive Enhancement** pattern with modular JavaScri
 - `logger.js` - Structured frontend logging
 
 **Build Process:**
+
 - Webpack 5 with multiple entry points
 - Code splitting for optimal loading
 - Terser for minification
@@ -97,6 +104,7 @@ The frontend follows a **Progressive Enhancement** pattern with modular JavaScri
 Express.js server with layered middleware architecture:
 
 **Request Flow:**
+
 1. **Security Layer:** Helmet, rate limiting, CSRF protection
 2. **Session Management:** File-based or MongoDB sessions
 3. **Authentication:** Session-based admin auth with bcrypt
@@ -104,6 +112,7 @@ Express.js server with layered middleware architecture:
 5. **Static Serving:** Optimized asset delivery with caching
 
 **Security Features:**
+
 - Rate limiting (100 requests/15min general, 10/15min for login)
 - CSRF tokens for form submissions
 - Secure session configuration
@@ -113,12 +122,14 @@ Express.js server with layered middleware architecture:
 ### 3. **Data Architecture**
 
 **Current State:**
+
 - Artwork data stored in JSON file (`artwork-data.json`)
 - 40+ artwork entries with metadata
 - Categories: Floral, Towns, Birds
 - Session data in file system or MongoDB
 
 **Data Structure:**
+
 ```json
 {
   "id": "unique-identifier",
@@ -160,12 +171,14 @@ Express.js server with layered middleware architecture:
 ### 🚧 In Progress / Planned
 
 **High Priority:**
+
 1. **Database Migration** (3-5 days)
    - Move from JSON to PostgreSQL
    - Design proper schema
    - Implement migration scripts
 
 **Medium Priority:**
+
 1. **API Architecture** (2 days) - 60% complete
    - Versioned API structure (/api/v1/)
    - OpenAPI documentation
@@ -189,6 +202,7 @@ Express.js server with layered middleware architecture:
    - Google Analytics 4 setup
 
 **Low Priority:**
+
 - Email integration
 - Advanced image optimization
 - A/B testing framework
@@ -198,6 +212,7 @@ Express.js server with layered middleware architecture:
 ## Performance Characteristics
 
 **Current Performance:**
+
 - **Initial Load:** ~2-3s (with images)
 - **Time to Interactive:** <1s
 - **Bundle Sizes:**
@@ -206,6 +221,7 @@ Express.js server with layered middleware architecture:
   - Admin: ~20KB (authenticated only)
 
 **Optimization Strategies:**
+
 - Code splitting by route
 - Image lazy loading
 - WebP format for images
@@ -236,6 +252,7 @@ Express.js server with layered middleware architecture:
 ## Deployment Architecture
 
 **Production Setup:**
+
 1. **Process Management:** PM2 with clustering
 2. **SSL/TLS:** Self-signed or CA certificates
 3. **Environment:** Production/Development modes
@@ -243,6 +260,7 @@ Express.js server with layered middleware architecture:
 5. **Sessions:** Persistent file storage or MongoDB
 
 **Deployment Commands:**
+
 ```bash
 npm run build:prod          # Production build
 npm run run-pm2:prod       # Start with PM2
@@ -253,18 +271,21 @@ npm run pm2:status         # Check status
 ## Future Roadmap
 
 ### Phase 1: Database & API (Q1 2025)
+
 - PostgreSQL implementation
 - RESTful API v1
 - Data migration tools
 - API documentation
 
 ### Phase 2: Testing & Quality (Q2 2025)
+
 - Comprehensive test suite
 - CI/CD pipeline
 - Performance monitoring
 - Error tracking (Sentry)
 
 ### Phase 3: Features & Scale (Q3 2025)
+
 - Customer accounts
 - Order management
 - Email notifications
@@ -272,6 +293,7 @@ npm run pm2:status         # Check status
 - Multi-artist support
 
 ### Phase 4: Advanced Features (Q4 2025)
+
 - AI-powered recommendations
 - Virtual gallery tours
 - Social media integration

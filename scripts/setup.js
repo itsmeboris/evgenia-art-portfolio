@@ -35,6 +35,16 @@ async function setup() {
     const adminUsername = (await question('Enter admin username (default: admin): ')) || 'admin';
     const adminPassword = (await question('Enter admin password (default: admin): ')) || 'admin';
 
+    // Get database configuration
+    console.log('\n🗄️  Database Configuration:');
+    const dbUser = (await question('Enter database username (default: postgres): ')) || 'postgres';
+    const dbPassword =
+      (await question('Enter database password (default: postgres): ')) || 'postgres';
+    const dbName =
+      (await question('Enter database name (default: evgenia_art_dev): ')) || 'evgenia_art_dev';
+    const dbHost = (await question('Enter database host (default: localhost): ')) || 'localhost';
+    const dbPort = (await question('Enter database port (default: 5432): ')) || '5432';
+
     // No need to ask about PM2 - it's now a local dependency
 
     console.log('\n🔧 Setting up project...\n');
@@ -109,6 +119,13 @@ SECURE_COOKIES=false
 # Performance
 COMPRESSION_LEVEL=6
 STATIC_CACHE_MAX_AGE=86400000
+
+# Database Configuration
+DB_HOST=${dbHost}
+DB_PORT=${dbPort}
+DB_NAME=${dbName}
+DB_USER=${dbUser}
+DB_PASSWORD=${dbPassword}
 `;
 
     fs.writeFileSync('.env', envContent);
@@ -124,8 +141,98 @@ STATIC_CACHE_MAX_AGE=86400000
       throw error;
     }
 
+    // Setup PostgreSQL Database
+    console.log('\n5. Setting up PostgreSQL database...');
+    try {
+      // Check if PostgreSQL is installed
+      try {
+        execSync('which psql', { stdio: 'pipe' });
+        console.log('   ✅ PostgreSQL is installed');
+      } catch {
+        console.log('   ⚠️  PostgreSQL not found. Installing...');
+        execSync(
+          'sudo apt update && sudo apt install -y postgresql postgresql-contrib postgresql-client-common',
+          { stdio: 'inherit' }
+        );
+        console.log('   ✅ PostgreSQL installed');
+      }
+
+      // Check if PostgreSQL is running
+      try {
+        execSync('pg_isready', { stdio: 'pipe' });
+        console.log('   ✅ PostgreSQL is running');
+      } catch {
+        console.log(
+          '   ⚠️  PostgreSQL is not running. Please run: sudo systemctl start postgresql'
+        );
+        const startNow = await question('   Would you like to start PostgreSQL now? (y/N): ');
+        if (startNow.toLowerCase() === 'y' || startNow.toLowerCase() === 'yes') {
+          try {
+            execSync('sudo systemctl start postgresql', { stdio: 'inherit' });
+            console.log('   ✅ PostgreSQL started');
+          } catch (error) {
+            console.log(
+              '   ⚠️  Could not start PostgreSQL automatically. Please run manually: sudo systemctl start postgresql'
+            );
+          }
+        }
+      }
+
+      // Create database user if it doesn't exist, or update password
+      try {
+        execSync(
+          `sudo -u postgres psql -c "CREATE USER ${dbUser} WITH SUPERUSER PASSWORD '${dbPassword}';" 2>/dev/null`,
+          { stdio: 'pipe' }
+        );
+        console.log(`   ✅ Created database user: ${dbUser}`);
+      } catch {
+        console.log(`   ✅ Database user ${dbUser} already exists, updating password...`);
+        execSync(
+          `sudo -u postgres psql -c "ALTER USER ${dbUser} PASSWORD '${dbPassword}';" 2>/dev/null`,
+          { stdio: 'pipe' }
+        );
+        console.log(`   ✅ Password updated for user: ${dbUser}`);
+      }
+
+      // Create database if it doesn't exist
+      try {
+        execSync(`sudo -u postgres createdb ${dbName} -O ${dbUser} 2>/dev/null`, { stdio: 'pipe' });
+        console.log(`   ✅ Created database: ${dbName}`);
+      } catch {
+        console.log(`   ✅ Database ${dbName} already exists`);
+      }
+
+      // Test database connection
+      console.log('   🔧 Testing database connection...');
+      execSync('node src/scripts/testDatabase.js', { stdio: 'inherit' });
+      console.log('   ✅ Database connection verified');
+
+      // Initialize database schema
+      console.log('   🔧 Initializing database schema...');
+      execSync('node src/scripts/initDatabase.js', { stdio: 'inherit' });
+      console.log('   ✅ Database schema initialized');
+
+      // Migrate artwork data
+      console.log('   🔧 Migrating artwork data...');
+      execSync('node src/scripts/migrateArtworkData.js', { stdio: 'inherit' });
+      console.log('   ✅ Artwork data migrated');
+    } catch (error) {
+      console.log('   ❌ PostgreSQL setup failed');
+      console.log('   💡 Manual setup required:');
+      console.log(
+        '      1. Install PostgreSQL: sudo apt-get install postgresql postgresql-contrib'
+      );
+      console.log('      2. Start PostgreSQL: sudo systemctl start postgresql');
+      console.log(
+        `      3. Create user: sudo -u postgres psql -c "CREATE USER ${dbUser} WITH SUPERUSER PASSWORD '${dbPassword}';"`
+      );
+      console.log(`      4. Create database: sudo -u postgres createdb ${dbName} -O ${dbUser}`);
+      console.log('      5. Run: node src/scripts/initDatabase.js');
+      console.log('      6. Run: node src/scripts/migrateArtworkData.js');
+    }
+
     // Build development bundles
-    console.log('\n5. Building development bundles...');
+    console.log('\n6. Building development bundles...');
     try {
       execSync('npm run build:dev', { stdio: 'inherit' });
       console.log('   ✅ Development bundles built');
@@ -135,7 +242,7 @@ STATIC_CACHE_MAX_AGE=86400000
     }
 
     // PM2 is now a local dependency - no global installation needed
-    console.log('\n6. PM2 setup complete (included as local dependency)');
+    console.log('\n7. PM2 setup complete (included as local dependency)');
 
     console.log('\n🎉 Setup completed successfully!\n');
     console.log('📋 Next Steps:');

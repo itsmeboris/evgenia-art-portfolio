@@ -187,16 +187,22 @@ function sanitizeInput(input) {
 }
 
 // Session configuration - use memory store in development to avoid Windows file permission issues
+// Check if we're running on localhost (for testing production builds locally)
+const isLocalhost =
+  process.env.NODE_ENV !== 'production' || process.env.LOCALHOST_TESTING === 'true';
+
 const sessionConfig = {
   secret: SESSION_SECRET,
   genid: () => uuidv4(), // Use UUID for session IDs
   resave: false,
   saveUninitialized: false,
   cookie: {
-    secure: process.env.NODE_ENV === 'production', // HTTPS only in production
+    // Only require HTTPS in production AND not on localhost
+    secure: process.env.NODE_ENV === 'production' && !isLocalhost,
     httpOnly: true, // Prevent XSS
     maxAge: 1000 * 60 * 60 * 2, // 2 hours
-    sameSite: isDevelopment ? 'lax' : 'strict', // More permissive in development
+    // Use lax for localhost testing, strict for actual production
+    sameSite: isDevelopment || isLocalhost ? 'lax' : 'strict',
   },
   name: 'evgenia.sid', // Custom session name
 };
@@ -219,7 +225,13 @@ if (process.env.NODE_ENV === 'production') {
   logger.info(
     'Using file-based session storage (production)',
     { module: 'server', function: 'sessionConfig' },
-    { storageType: 'file', environment: 'production' }
+    {
+      storageType: 'file',
+      environment: 'production',
+      cookieSecure: sessionConfig.cookie.secure,
+      sameSite: sessionConfig.cookie.sameSite,
+      isLocalhost: isLocalhost,
+    }
   );
 } else {
   logger.warn(
@@ -229,6 +241,8 @@ if (process.env.NODE_ENV === 'production') {
       storageType: 'memory',
       environment: 'development',
       note: 'Sessions will be lost when server restarts',
+      cookieSecure: sessionConfig.cookie.secure,
+      sameSite: sessionConfig.cookie.sameSite,
     }
   );
 }
@@ -317,10 +331,12 @@ app.use((req, res, next) => {
     if (!req.session.csrfSecret) {
       req.session.csrfSecret = csrfProtection.secretSync();
     }
-    // Generate or retrieve CSRF token
-    const token = csrfProtection.create(req.session.csrfSecret);
-    res.locals.csrfToken = token;
-    req.csrfToken = () => token;
+    // Generate or retrieve CSRF token (cache in session)
+    if (!req.session.csrfToken) {
+      req.session.csrfToken = csrfProtection.create(req.session.csrfSecret);
+    }
+    res.locals.csrfToken = req.session.csrfToken;
+    req.csrfToken = () => req.session.csrfToken;
   }
   next();
 });
@@ -339,13 +355,26 @@ function validateCSRF(req, res, next) {
   try {
     const token = req.body._csrf || req.query._csrf || req.headers['x-csrf-token'];
     const secret = req.session?.csrfSecret;
+    const sessionToken = req.session?.csrfToken;
 
-    if (!token || !secret || !csrfProtection.verify(secret, token)) {
+    if (!token || !secret || !sessionToken) {
       return res.status(403).json({
         success: false,
         message: 'Invalid CSRF token. Please refresh the page and try again.',
       });
     }
+
+    // Verify the token matches both the secret and the session token
+    if (!csrfProtection.verify(secret, token) || token !== sessionToken) {
+      return res.status(403).json({
+        success: false,
+        message: 'Invalid CSRF token. Please refresh the page and try again.',
+      });
+    }
+
+    // Regenerate CSRF token for next request (security measure)
+    req.session.csrfToken = csrfProtection.create(req.session.csrfSecret);
+
     next();
   } catch (error) {
     logger.error('CSRF validation error', error, { module: 'server', function: 'validateCSRF' });
@@ -460,12 +489,19 @@ app.get('/api/csrf-token', (req, res) => {
     if (!req.session.csrfSecret) {
       req.session.csrfSecret = csrfProtection.secretSync();
     }
-    const token = csrfProtection.create(req.session.csrfSecret);
-    res.json({ csrfToken: token });
+    // Generate or retrieve CSRF token (cache in session)
+    if (!req.session.csrfToken) {
+      req.session.csrfToken = csrfProtection.create(req.session.csrfSecret);
+    }
+    res.json({ csrfToken: req.session.csrfToken });
   } else {
     res.status(500).json({ error: 'Session not available' });
   }
 });
+
+// API v1 routes
+const apiRoutes = require('./src/routes/api');
+app.use('/api/v1', apiRoutes);
 
 // Login page (no authentication required) - clean URL
 app.get('/admin/login', (req, res) => {

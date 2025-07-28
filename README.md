@@ -5,15 +5,19 @@ A modern, responsive portfolio and e-commerce website for artist Evgenia Portnov
 ## 🚀 Quick Start
 
 ```bash
-# Install dependencies
-npm install
+# Clone the repository
+git clone <repository-url>
+cd evgenia-art-portfolio
 
-# Set up environment
-cp .env.example .env
+# Interactive setup (includes database setup)
+node scripts/setup.js
+
+# Or manual setup:
+npm install                    # Install dependencies
+cp .env.example .env          # Copy environment template
 # Edit .env with your configuration
-
-# Build for production
-npm run build:prod
+npm run db:setup              # Initialize database and migrate data
+npm run build:prod            # Build for production
 
 # Start the application
 npm run start:prod
@@ -26,6 +30,7 @@ See [DEPLOYMENT.md](docs/DEPLOYMENT.md) for detailed deployment instructions.
 ## 📚 Documentation
 
 All project documentation is organized in the `docs/` folder:
+
 - [Architecture Overview](docs/ARCHITECTURE.md)
 - [Deployment Guide](docs/DEPLOYMENT.md)
 - [Quick Start Guide](docs/QUICKSTART.md)
@@ -41,7 +46,10 @@ The website features:
 - About page that tells Evgenia's artistic journey
 - Contact page with a form and FAQs
 - **Modern modular JavaScript architecture** with performance optimization
-- **Shopping cart system** with localStorage persistence
+- **PostgreSQL database** with complete data management system
+- **RESTful API v1** with comprehensive CRUD operations
+- **Shopping cart system** with database persistence
+- **Order management** with complete e-commerce workflow
 - **Advanced image loading** with lazy loading and lightbox functionality
 - **Real-time search** with debouncing and search history
 - **Comprehensive error handling** with automatic recovery

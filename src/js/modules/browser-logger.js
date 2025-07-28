@@ -187,35 +187,35 @@ class BrowserLogger {
         },
         body: JSON.stringify(payload),
       })
-      .then(response => {
-        if (!response.ok) {
-          throw new Error(`HTTP ${response.status}: ${response.statusText}`);
-        }
-        return response.json();
-      })
-      .then(data => {
-        // Success - check if there's a pending flush
-        this.isFlushInProgress = false;
-        if (this.pendingFlush && this.logBuffer.length > 0) {
-          this.pendingFlush = false;
-          // Small delay to prevent tight loops
-          setTimeout(() => this.flushLogs(), 100);
-        }
-      })
-      .catch(error => {
-        // If sending fails, put logs back in buffer
-        console.error('Failed to send logs to server:', error);
-        this.logBuffer = [...logsToSend, ...this.logBuffer];
-        this.isFlushInProgress = false;
-
-        // Retry after a delay if there are logs to send
-        if (this.logBuffer.length > 0) {
-          setTimeout(() => {
+        .then(response => {
+          if (!response.ok) {
+            throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+          }
+          return response.json();
+        })
+        .then(data => {
+          // Success - check if there's a pending flush
+          this.isFlushInProgress = false;
+          if (this.pendingFlush && this.logBuffer.length > 0) {
             this.pendingFlush = false;
-            this.flushLogs();
-          }, 2000); // 2 second retry delay
-        }
-      });
+            // Small delay to prevent tight loops
+            setTimeout(() => this.flushLogs(), 100);
+          }
+        })
+        .catch(error => {
+          // If sending fails, put logs back in buffer
+          console.error('Failed to send logs to server:', error);
+          this.logBuffer = [...logsToSend, ...this.logBuffer];
+          this.isFlushInProgress = false;
+
+          // Retry after a delay if there are logs to send
+          if (this.logBuffer.length > 0) {
+            setTimeout(() => {
+              this.pendingFlush = false;
+              this.flushLogs();
+            }, 2000); // 2 second retry delay
+          }
+        });
     }
   }
 

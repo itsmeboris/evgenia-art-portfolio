@@ -8,7 +8,7 @@ const path = require('path');
 
 class HtmlBundleUpdater {
   constructor() {
-    this.manifestPath = path.join(__dirname, '../public/dist/manifest.json');
+    this.manifestPath = path.join(__dirname, '../../public/dist/manifest.json');
     this.htmlConfigs = [
       {
         file: 'index.html',
@@ -83,7 +83,7 @@ class HtmlBundleUpdater {
 
   // Update HTML file with new bundle references
   updateHtmlFile(config, manifest) {
-    const filePath = path.join(__dirname, '..', config.file);
+          const filePath = path.join(__dirname, '../..', config.file);
 
     if (!fs.existsSync(filePath)) {
       console.warn(`⚠️  HTML file not found: ${filePath}`);

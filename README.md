@@ -10,7 +10,7 @@ git clone <repository-url>
 cd evgenia-art-portfolio
 
 # Interactive setup (includes database setup)
-node scripts/setup.js
+node scripts/utilities/setup.js
 
 # Or manual setup:
 npm install                    # Install dependencies
@@ -211,12 +211,20 @@ window.app.dev.exportData();
 │   ├── QUICKSTART.md      # Quick start guide
 │   └── README.md          # Documentation index
 ├── scripts/               # Build and utility scripts
-│   ├── setup.js           # Interactive project setup
-│   ├── webp-converter.js  # Image optimization utility
-│   ├── generate-sitemap.js # SEO sitemap generator
-│   ├── pre-build-quality.js # Pre-build quality checks
-│   ├── update-html-bundles.js # Bundle reference updater
-│   └── webpack-html-updater-plugin.js # Webpack plugin
+│   ├── css-optimization/  # CSS optimization tools
+│   │   ├── critical-css.js # Critical CSS extraction
+│   │   ├── fix-critical-css.js # Critical CSS fixes
+│   │   ├── purge-unused-css.js # Unused CSS removal
+│   │   ├── purgecss.config.js # PurgeCSS configuration
+│   │   └── restore-css.js # CSS backup restoration
+│   ├── build-tools/       # Build process utilities
+│   │   ├── update-html-bundles.js # Bundle reference updater
+│   │   └── webpack-html-updater-plugin.js # Webpack plugin
+│   └── utilities/         # General utility scripts
+│       ├── setup.js       # Interactive project setup
+│       ├── webp-converter.js # Image optimization utility
+│       ├── generate-sitemap.js # SEO sitemap generator
+│       └── pre-build-quality.js # Pre-build quality checks
 ├── certs/                 # SSL certificates for HTTPS development
 ├── public/                # Public assets served directly
 │   ├── css/               # CSS files

@@ -11,8 +11,8 @@ const path = require('path');
 class SitemapGenerator {
   constructor() {
     this.baseUrl = 'https://evgeniaart.com'; // Update with actual domain
-    this.outputPath = path.join(__dirname, '../public/sitemap.xml');
-    this.artworkDataPath = path.join(__dirname, '../public/data/artwork-data.json');
+    this.outputPath = path.join(__dirname, '../../public/sitemap.xml');
+          this.artworkDataPath = path.join(__dirname, '../../public/data/artwork-data.json');
     this.staticPages = [
       {
         url: '/',
@@ -226,7 +226,7 @@ ${urlEntries}
    * Generate robots.txt with sitemap reference
    */
   generateRobotsTxt() {
-    const robotsPath = path.join(__dirname, '../public/robots.txt');
+    const robotsPath = path.join(__dirname, '../../public/robots.txt');
     const robotsContent = `User-agent: *
 Allow: /
 

@@ -4,8 +4,24 @@ const readline = require('readline');
 const fs = require('fs');
 const path = require('path');
 const crypto = require('crypto');
-const bcrypt = require('bcrypt');
 const { execSync } = require('child_process');
+
+// Check if bcrypt is available, install dependencies if not
+let bcrypt;
+try {
+  bcrypt = require('bcrypt');
+} catch (error) {
+  console.log('📦 Dependencies not found. Installing...\n');
+  try {
+    execSync('npm install', { stdio: 'inherit' });
+    bcrypt = require('bcrypt');
+    console.log('✅ Dependencies installed successfully\n');
+  } catch (installError) {
+    console.error('❌ Failed to install dependencies:', installError.message);
+    console.log('💡 Please run "npm install" manually before running setup.\n');
+    process.exit(1);
+  }
+}
 
 const rl = readline.createInterface({
   input: process.stdin,
@@ -134,10 +150,11 @@ DB_PASSWORD=${dbPassword}
     // Install dependencies
     console.log('\n4. Installing dependencies...');
     try {
-      execSync('npm install', { stdio: 'inherit' });
+      execSync('npm install', { stdio: 'pipe' });
       console.log('   ✅ Dependencies installed');
     } catch (error) {
       console.log('   ❌ Failed to install dependencies');
+      execSync('npm install', { stdio: 'inherit' });
       throw error;
     }
 
@@ -204,18 +221,43 @@ DB_PASSWORD=${dbPassword}
 
       // Test database connection
       console.log('   🔧 Testing database connection...');
-      execSync('node src/scripts/testDatabase.js', { stdio: 'inherit' });
-      console.log('   ✅ Database connection verified');
+      try {
+        execSync('node src/scripts/testDatabase.js', { stdio: 'pipe' });
+        console.log('   ✅ Database connection verified');
+      } catch (testError) {
+        console.log('   ❌ Database connection test failed');
+        execSync('node src/scripts/testDatabase.js', { stdio: 'inherit' });
+        throw testError;
+      }
 
       // Initialize database schema
+      // Try normal init first, fallback to force mode if Sequelize alter fails
       console.log('   🔧 Initializing database schema...');
-      execSync('node src/scripts/initDatabase.js', { stdio: 'inherit' });
-      console.log('   ✅ Database schema initialized');
+      try {
+        execSync('node src/scripts/initDatabase.js', { stdio: 'pipe' });
+        console.log('   ✅ Database schema initialized');
+      } catch (initError) {
+        console.log('   ⚠️  Retrying with force mode...');
+        try {
+          execSync('node src/scripts/initDatabase.js --force', { stdio: 'pipe' });
+          console.log('   ✅ Database schema initialized (force mode)');
+        } catch (forceError) {
+          console.log('   ❌ Database initialization failed');
+          execSync('node src/scripts/initDatabase.js --force', { stdio: 'inherit' });
+          throw forceError;
+        }
+      }
 
       // Migrate artwork data
       console.log('   🔧 Migrating artwork data...');
-      execSync('node src/scripts/migrateArtworkData.js', { stdio: 'inherit' });
-      console.log('   ✅ Artwork data migrated');
+      try {
+        execSync('node src/scripts/migrateArtworkData.js', { stdio: 'pipe' });
+        console.log('   ✅ Artwork data migrated');
+      } catch (migrateError) {
+        console.log('   ❌ Artwork migration failed');
+        execSync('node src/scripts/migrateArtworkData.js', { stdio: 'inherit' });
+        throw migrateError;
+      }
     } catch (error) {
       console.log('   ❌ PostgreSQL setup failed');
       console.log('   💡 Manual setup required:');
@@ -234,10 +276,11 @@ DB_PASSWORD=${dbPassword}
     // Build development bundles
     console.log('\n6. Building development bundles...');
     try {
-      execSync('npm run build:dev', { stdio: 'inherit' });
+      execSync('npm run build:dev', { stdio: 'pipe' });
       console.log('   ✅ Development bundles built');
     } catch (error) {
       console.log('   ❌ Failed to build development bundles');
+      execSync('npm run build:dev', { stdio: 'inherit' });
       throw error;
     }
 

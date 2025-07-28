@@ -5,7 +5,7 @@ yarn-debug.log*
 yarn-error.log*
 
 # Agent Workspaces
-workspaces/*
+workspaces/
 
 # Runtime data
 pids
@@ -86,7 +86,8 @@ typings/
 
 # IDE and editor files
 .vscode/
-.claude/
+.claude/*
+!.claude/agents/
 .cursor/
 .idea/
 *.swp
@@ -148,3 +149,9 @@ webpack-stats.json
 # Claude Code temporary files
 CLAUDE.*.md
 *.claude.md
+
+# JSON backup files
+public/data/artwork-data.json.backup.*
+
+# Agent workspaces
+workspaces/

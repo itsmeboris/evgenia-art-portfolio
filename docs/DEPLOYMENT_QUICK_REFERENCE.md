@@ -16,8 +16,8 @@ node scripts/utilities/setup.js
 # 3. Setup production environment
 sudo npm run systemd:prod
 
-# 4. Configure nginx and SSL for domain access
-sudo npm run deploy:nginx evgenia-art.shuktech.shop
+# 4. Configure nginx and SSL manually
+# See PRODUCTION_DEPLOYMENT.md for detailed steps
 
 # 5. Get real SSL certificate (after DNS is configured)
 sudo certbot --nginx -d evgenia-art.shuktech.shop
@@ -26,12 +26,10 @@ sudo certbot --nginx -d evgenia-art.shuktech.shop
 ## 🔄 Regular Updates (After Code Changes)
 
 ```bash
-# Pull latest changes and deploy
-sudo npm run deploy:update
-
-# Or deploy specific branch
-sudo npm run deploy:update:main
-sudo npm run deploy:update:dev
+# Simple two-step process - this is all you need!
+cd /home/boris/evgenia-art-portfolio
+git pull origin master
+sudo npm run systemd:prod
 ```
 
 ## 📊 Service Management
@@ -46,24 +44,21 @@ sudo npm run deploy:update:dev
 
 ## 🌐 Domain & SSL Management
 
-| Command                              | Description                      |
-| ------------------------------------ | -------------------------------- |
-| `sudo npm run deploy:nginx [domain]` | Configure nginx + SSL for domain |
-| `sudo certbot --nginx -d [domain]`   | Get real SSL certificate         |
-| `sudo certbot renew`                 | Renew SSL certificates           |
-| `sudo nginx -t`                      | Test nginx configuration         |
-| `sudo systemctl reload nginx`        | Reload nginx config              |
+| Command                           | Description                  |
+| --------------------------------- | ---------------------------- |
+| `sudo certbot --nginx -d [domain]` | Get real SSL certificate     |
+| `sudo certbot renew`              | Renew SSL certificates       |
+| `sudo nginx -t`                   | Test nginx configuration     |
+| `sudo systemctl reload nginx`     | Reload nginx config          |
 
 ## 🔧 Manual Deployment Process
 
 ### Initial Server Setup
-
 ```bash
 # 1. Production user and directories
 sudo ./scripts/production-setup.sh
 
-# 2. Configure nginx and SSL
-sudo ./scripts/deployment/configure-nginx.sh evgenia-art.shuktech.shop
+# 2. Configure nginx manually (see PRODUCTION_DEPLOYMENT.md)
 
 # 3. Remove IP restrictions from systemd
 sudo nano /etc/systemd/system/evgenia-art.service
@@ -79,14 +74,11 @@ sudo systemctl restart evgenia-art nginx
 ```
 
 ### Update Deployment
-
 ```bash
-# 1. Pull changes
+# Simple process - recommended
 cd /home/boris/evgenia-art-portfolio
-git pull origin main
-
-# 2. Deploy to production
-sudo ./scripts/deployment/update-deployment.sh
+git pull origin master
+sudo npm run systemd:prod
 
 # Alternative: Manual deployment
 sudo rsync -av --exclude='.git/' --exclude='node_modules/' \
@@ -108,7 +100,6 @@ sudo systemctl restart evgenia-art
 | **Production .env**       | `/opt/evgenia-art-portfolio/.env`         |
 | **Application Logs**      | `/opt/evgenia-art-portfolio/logs/`        |
 | **Nginx Logs**            | `/var/log/nginx/`                         |
-| **Backups**               | `/opt/backups/evgenia-art/`               |
 
 ## 🚨 Troubleshooting Commands
 
@@ -176,11 +167,11 @@ sudo journalctl -u evgenia-art --since "10 minutes ago" | grep -i error
 
 ## 💡 Quick Tips
 
-- **Always backup before updates**: Automated in deployment script
+- **Simple deployment**: Just `git pull` + `sudo npm run systemd:prod`
 - **Check logs after deployment**: `sudo npm run systemd:logs`
 - **Test local first**: `npm run run:dev` in development
 - **Use Let's Encrypt**: Free SSL certificates that auto-renew
-- **Monitor disk space**: `/opt/backups/` and `/var/log/` can grow
+- **Monitor disk space**: `/var/log/` can grow over time
 - **Keep dependencies updated**: Check `npm audit` periodically
 
 ---

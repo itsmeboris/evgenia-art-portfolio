@@ -344,7 +344,6 @@
 
 /* Responsive adjustments */
 @media (max-width: 768px) {
-
   .skeleton-artwork-detail {
     grid-template-columns: 1fr;
     gap: 20px;

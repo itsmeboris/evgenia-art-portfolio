@@ -7,7 +7,7 @@ class SitemapService {
   constructor() {
     this.baseUrl = window.location.origin;
     this.endpoints = {
-      artworkData: '/public/data/artwork-data.json',
+      artworkData: '/api/v1/artworks/all',
       sitemap: '/sitemap.xml',
       robotsTxt: '/robots.txt',
     };

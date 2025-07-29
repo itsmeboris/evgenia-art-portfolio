@@ -12,7 +12,7 @@ class SitemapGenerator {
   constructor() {
     this.baseUrl = 'https://evgeniaart.com'; // Update with actual domain
     this.outputPath = path.join(__dirname, '../../public/sitemap.xml');
-          this.artworkDataPath = path.join(__dirname, '../../public/data/artwork-data.json');
+    this.artworkDataPath = path.join(__dirname, '../../public/data/artwork-data.json');
     this.staticPages = [
       {
         url: '/',

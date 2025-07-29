@@ -68,7 +68,7 @@ export default [
     },
   },
   {
-            files: ['server.js', 'scripts/utilities/webp-converter.js', 'webpack.config.js'],
+    files: ['server.js', 'scripts/utilities/webp-converter.js', 'webpack.config.js'],
     languageOptions: {
       sourceType: 'script',
     },

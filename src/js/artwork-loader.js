@@ -1,11 +1,17 @@
-// Artwork Loader - Dynamically loads artwork data from JSON file
+// Artwork Loader - Dynamically loads artwork data from API with JSON fallback
 
 document.addEventListener('DOMContentLoaded', function () {
   // Use a small delay to ensure stylesheets are loaded before manipulating the DOM
   setTimeout(() => {
-    // Fetch artwork data from the JSON file
+    // Show loading state
+    showLoadingState();
+
+    // Fetch artwork data from the API
     fetchArtworkData()
       .then(data => {
+        // Hide loading state
+        hideLoadingState();
+
         // Initialize all artwork components
         initHeroSliderDynamic(data);
         initGalleryFilters(data);
@@ -16,18 +22,20 @@ document.addEventListener('DOMContentLoaded', function () {
       })
       .catch(error => {
         console.error('Error loading artwork data:', error);
+        // Hide loading state
+        hideLoadingState();
         // Show error message to user
         displayErrorMessage('Failed to load artwork data. Please try refreshing the page.');
       });
   }, 100); // Small delay to allow stylesheets to load
 });
 
-// Fetch artwork data from the JSON file
+// Fetch artwork data from the API
 function fetchArtworkData() {
-  return fetch('/public/data/artwork-data.json')
+  return fetch('/api/v1/artworks/all')
     .then(response => {
       if (!response.ok) {
-        throw new Error(`HTTP error! Status: ${response.status}`);
+        throw new Error(`API error! Status: ${response.status}`);
       }
       return response.json();
     })
@@ -57,7 +65,8 @@ function fetchArtworkData() {
           id: category.id,
           title: category.name,
           description: category.description,
-          image: category.image,
+          image: category.featured_artwork?.image || category.image,
+          featured_artwork: category.featured_artwork,
         })),
         settings: data.settings || { currency: '₪', imagePath: 'public/assets/images/artwork/' },
       };
@@ -70,7 +79,131 @@ function fetchArtworkData() {
       );
 
       return transformedData;
+    })
+    .catch(error => {
+      console.error('API fetch failed, trying fallback:', error);
+
+      // Fallback to JSON file if API fails
+      return fetch('/public/data/artwork-data.json')
+        .then(response => {
+          if (!response.ok) {
+            throw new Error(`JSON fallback error! Status: ${response.status}`);
+          }
+          return response.json();
+        })
+        .then(data => {
+          console.warn('Using JSON fallback data source');
+
+          // Apply same processing as API data
+          data.artworks.forEach(artwork => {
+            if (!artwork.id) {
+              artwork.id = artwork.title
+                .toLowerCase()
+                .replace(/\s+/g, '-')
+                .replace(/[^a-z0-9-]/g, '');
+            }
+          });
+
+          try {
+            localStorage.setItem('evgenia-artwork-data', JSON.stringify(data));
+          } catch (e) {
+            console.warn('Unable to store artwork data in localStorage:', e);
+          }
+
+          const transformedData = {
+            artworks: data.artworks,
+            collections: data.categories.map(category => ({
+              id: category.id,
+              title: category.name,
+              description: category.description,
+              image: category.featured_artwork?.image || category.image,
+              featured_artwork: category.featured_artwork,
+            })),
+            settings: data.settings || {
+              currency: '₪',
+              imagePath: 'public/assets/images/artwork/',
+            },
+          };
+
+          window.dispatchEvent(
+            new CustomEvent('artwork-data-loaded', {
+              detail: transformedData,
+            })
+          );
+
+          return transformedData;
+        })
+        .catch(fallbackError => {
+          console.error('Both API and JSON fallback failed:', fallbackError);
+          throw new Error('Unable to load artwork data from any source');
+        });
     });
+}
+
+// Show loading state indicator
+function showLoadingState() {
+  const loadingDiv = document.createElement('div');
+  loadingDiv.id = 'artwork-loading-indicator';
+  loadingDiv.style.cssText = `
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 3px;
+    background: linear-gradient(90deg, #9e7e5c, #c4a474, #9e7e5c);
+    background-size: 200% 100%;
+    animation: loadingBar 2s ease-in-out infinite;
+    z-index: 9999;
+  `;
+
+  // Add loading animation keyframes if not already present
+  if (!document.querySelector('#loading-animation-styles')) {
+    const styleEl = document.createElement('style');
+    styleEl.id = 'loading-animation-styles';
+    styleEl.textContent = `
+      @keyframes loadingBar {
+        0% { background-position: 200% 0; }
+        100% { background-position: -200% 0; }
+      }
+      .loading-text {
+        position: fixed;
+        top: 20px;
+        left: 50%;
+        transform: translateX(-50%);
+        background: rgba(255, 255, 255, 0.95);
+        padding: 8px 16px;
+        border-radius: 20px;
+        color: #9e7e5c;
+        font-size: 14px;
+        font-weight: 500;
+        box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        z-index: 10000;
+      }
+    `;
+    document.head.appendChild(styleEl);
+  }
+
+  document.body.appendChild(loadingDiv);
+
+  // Add loading text indicator
+  const loadingText = document.createElement('div');
+  loadingText.id = 'artwork-loading-text';
+  loadingText.className = 'loading-text';
+  loadingText.textContent = 'Loading artwork collection...';
+  document.body.appendChild(loadingText);
+}
+
+// Hide loading state indicator
+function hideLoadingState() {
+  const loadingDiv = document.getElementById('artwork-loading-indicator');
+  const loadingText = document.getElementById('artwork-loading-text');
+
+  if (loadingDiv) {
+    loadingDiv.remove();
+  }
+  if (loadingText) {
+    loadingText.remove();
+  }
 }
 
 // Display error message on the page
@@ -135,17 +268,25 @@ function initGalleryGrid(data) {
         artworkItem.setAttribute('data-category', artwork.category);
         artworkItem.setAttribute('data-id', artwork.id);
 
-        // Format the price with the correct currency
-        let formattedPrice =
-          artwork.price !== null && artwork.price !== undefined
-            ? `${currency}${artwork.price}`
-            : 'Price on request';
+        // Format the price with the correct currency and handle invalid prices
+        let formattedPrice = 'Price on request';
+        let isForSale = true;
+
+        if (artwork.price !== null && artwork.price !== undefined && artwork.price !== '') {
+          const priceNum = parseFloat(artwork.price);
+          if (!isNaN(priceNum) && priceNum > 0) {
+            formattedPrice = `${currency}${priceNum}`;
+          } else {
+            formattedPrice = 'Not For Sale';
+            isForSale = false;
+          }
+        }
 
         artworkItem.innerHTML = `
                 <div class="artwork-image">
                     <a href="/artwork/${artwork.id}">
-                        <img src="${window.utils ? window.utils.ensureAbsolutePath(artwork.image) : artwork.image.startsWith('/') ? artwork.image : '/' + artwork.image}" 
-                             alt="${artwork.title} Painting" 
+                        <img src="${window.utils ? window.utils.ensureAbsolutePath(artwork.image) : artwork.image.startsWith('/') ? artwork.image : '/' + artwork.image}"
+                             alt="${artwork.title} Painting"
                              loading="lazy"
                              onerror="this.onerror=null;this.src='${placeholderImageURI}';">
                     </a>
@@ -154,7 +295,11 @@ function initGalleryGrid(data) {
                     <h3><a href="/artwork/${artwork.id}">${artwork.title}</a></h3>
                     <p class="artwork-dimensions">${artwork.dimensions} | ${artwork.medium}</p>
                     <p class="artwork-price">${formattedPrice}</p>
-                    <a href="#" class="btn primary-btn add-to-cart" data-id="${artwork.id}">Add to Cart</a>
+                    ${
+                      isForSale
+                        ? `<a href="#" class="btn primary-btn add-to-cart" data-id="${artwork.id}">Add to Cart</a>`
+                        : `<a href="/contact?inquiry=${encodeURIComponent(`I am interested in the piece "${artwork.title}". Could you please provide more information about this artwork?`)}" class="btn secondary-btn">Contact About Piece</a>`
+                    }
                 </div>
             `;
 
@@ -293,17 +438,25 @@ function initLatestArtwork(data) {
     artworkItem.setAttribute('data-category', artwork.category);
     artworkItem.setAttribute('data-id', artwork.id);
 
-    // Format the price with the correct currency
-    let formattedPrice =
-      artwork.price !== null && artwork.price !== undefined
-        ? `${currency}${artwork.price}`
-        : 'Price on request';
+    // Format the price with the correct currency and handle invalid prices
+    let formattedPrice = 'Price on request';
+    let isForSale = true;
+
+    if (artwork.price !== null && artwork.price !== undefined && artwork.price !== '') {
+      const priceNum = parseFloat(artwork.price);
+      if (!isNaN(priceNum) && priceNum > 0) {
+        formattedPrice = `${currency}${priceNum}`;
+      } else {
+        formattedPrice = 'Not For Sale';
+        isForSale = false;
+      }
+    }
 
     artworkItem.innerHTML = `
             <div class="artwork-image">
                 <a href="/artwork/${artwork.id}">
-                    <img src="${window.utils ? window.utils.ensureAbsolutePath(artwork.image) : artwork.image.startsWith('/') ? artwork.image : '/' + artwork.image}" 
-                         alt="${artwork.title} Painting" 
+                    <img src="${window.utils ? window.utils.ensureAbsolutePath(artwork.image) : artwork.image.startsWith('/') ? artwork.image : '/' + artwork.image}"
+                         alt="${artwork.title} Painting"
                          loading="lazy"
                          onerror="this.onerror=null;this.src='${placeholderImageURI}';">
                 </a>
@@ -312,7 +465,11 @@ function initLatestArtwork(data) {
                 <h3><a href="/artwork/${artwork.id}">${artwork.title}</a></h3>
                 <p class="artwork-dimensions">${artwork.dimensions} | ${artwork.medium}</p>
                 <p class="artwork-price">${formattedPrice}</p>
-                <a href="#" class="btn primary-btn add-to-cart" data-id="${artwork.id}">Add to Cart</a>
+                ${
+                  isForSale
+                    ? `<a href="#" class="btn primary-btn add-to-cart" data-id="${artwork.id}">Add to Cart</a>`
+                    : `<a href="/contact?inquiry=${encodeURIComponent(`I am interested in the piece "${artwork.title}". Could you please provide more information about this artwork?`)}" class="btn secondary-btn">Contact About Piece</a>`
+                }
             </div>
         `;
 
@@ -486,8 +643,8 @@ function initHeroSliderDynamic(data) {
                     </div>
                 </div>
                 <div class="slide-image">
-                    <img src="${window.utils ? window.utils.ensureAbsolutePath(collection.image) : collection.image.startsWith('/') ? collection.image : '/' + collection.image}" 
-                         alt="${collection.title}" 
+                    <img src="${window.utils ? window.utils.ensureAbsolutePath(collection.image) : collection.image.startsWith('/') ? collection.image : '/' + collection.image}"
+                         alt="${collection.title}"
                          loading="lazy"
                          onerror="this.onerror=null;this.src='${placeholderImageURI}';">
                 </div>

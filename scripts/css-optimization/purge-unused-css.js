@@ -98,7 +98,6 @@ async function runPurgeCSS() {
     console.log('- Test First Contentful Paint (FCP) improvements');
     console.log('- Verify CSS bundle size reduction in Network tab');
     console.log('- Test on mobile devices for real-world performance');
-
   } catch (error) {
     console.error('❌ Error during CSS purging:', error);
     console.log('\nRecommendations:');
@@ -143,8 +142,10 @@ console.log('✅ Restore completed!');
 }
 
 // Run the purging process
-runPurgeCSS().then(() => {
-  createRestoreScript();
-}).catch(error => {
-  console.error('Failed to complete CSS optimization:', error);
-});
+runPurgeCSS()
+  .then(() => {
+    createRestoreScript();
+  })
+  .catch(error => {
+    console.error('Failed to complete CSS optimization:', error);
+  });

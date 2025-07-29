@@ -257,7 +257,7 @@ app.use(
     msg: 'HTTP {{req.method}} {{req.url}}',
     expressFormat: true,
     colorize: isDevelopment,
-    ignoreRoute: function (req, res) {
+    ignoreRoute: function (req) {
       // Skip logging for static assets in production
       return (
         !isDevelopment &&
@@ -590,6 +590,27 @@ app.get('/webp-test.html', (req, res) => {
   res.sendFile(path.join(__dirname, 'webp-test.html'));
 });
 
+// Route for API integration test (development only)
+if (isDevelopment) {
+  app.get('/api-integration-test.html', (req, res) => {
+    res.sendFile(path.join(__dirname, 'public/api-integration-test.html'));
+  });
+}
+
+// Development route for src files (for testing only)
+if (isDevelopment) {
+  app.use(
+    '/src',
+    express.static(path.join(__dirname, 'src'), {
+      setHeaders: (res, filePath) => {
+        if (filePath.endsWith('.js')) {
+          res.setHeader('Content-Type', 'application/javascript; charset=utf-8');
+        }
+      },
+    })
+  );
+}
+
 // Newsletter subscription endpoint
 app.post(
   '/newsletter/subscribe',
@@ -783,6 +804,88 @@ const server = app.listen(port, '0.0.0.0', () => {
       },
     }
   );
+
+  // Enhanced mobile testing information
+  console.log('\n🚀 SERVER READY FOR TESTING');
+  console.log('='.repeat(50));
+  console.log(`📱 MOBILE DEVICE TESTING URLS:`);
+
+  // Get local IP addresses for mobile testing with better detection
+  const os = require('os');
+  const networkInterfaces = os.networkInterfaces();
+  const allIPs = [];
+
+  Object.keys(networkInterfaces).forEach(interfaceName => {
+    networkInterfaces[interfaceName].forEach(iface => {
+      if (iface.family === 'IPv4' && !iface.internal) {
+        const ipInfo = {
+          address: iface.address,
+          interface: interfaceName,
+          priority: 0,
+        };
+
+        // Prioritize common network ranges for mobile access
+        if (iface.address.startsWith('192.168.')) {
+          ipInfo.priority = 3; // Highest priority - typical home networks
+        } else if (iface.address.startsWith('10.')) {
+          ipInfo.priority = 2; // Medium priority - private networks
+        } else if (iface.address.startsWith('172.')) {
+          ipInfo.priority = 1; // Lower priority - often Docker/virtual
+        }
+
+        allIPs.push(ipInfo);
+      }
+    });
+  });
+
+  // Sort by priority (highest first)
+  allIPs.sort((a, b) => b.priority - a.priority);
+
+  if (allIPs.length > 0) {
+    console.log('   📝 TRY THESE IPs IN ORDER:');
+    allIPs.forEach((ipInfo, index) => {
+      const priority = index === 0 ? '🎯 BEST' : `${index + 1}.`;
+      console.log(`   ${priority} http://${ipInfo.address}:${port}/ (${ipInfo.interface})`);
+      if (isDevelopment) {
+        console.log(`      🧪 http://${ipInfo.address}:${port}/api-integration-test.html`);
+      }
+      if (httpsOptions) {
+        console.log(`      🔒 https://${ipInfo.address}:${httpsPort}/`);
+      }
+      console.log('');
+    });
+  } else {
+    console.log('   ⚠️  No external network interfaces found.');
+    console.log('   💡 If using WSL, try: wsl hostname -I');
+  }
+
+  // WSL-specific instructions
+  console.log('\n🔧 WSL USERS - MOBILE ACCESS SETUP:');
+  console.log('   1️⃣  Get Windows IP: cmd.exe /c "ipconfig | findstr IPv4"');
+  console.log('   2️⃣  Enable WSL port forwarding (run in Windows PowerShell as Admin):');
+  console.log(
+    '      netsh interface portproxy add v4tov4 listenport=3000 listenaddress=0.0.0.0 connectport=3000 connectaddress=localhost'
+  );
+  console.log('   3️⃣  Test with Windows IP (example): http://192.168.1.63:3000/');
+  console.log(
+    '   4️⃣  Cleanup later: netsh interface portproxy delete v4tov4 listenport=3000 listenaddress=0.0.0.0'
+  );
+
+  console.log('\n💻 DESKTOP TESTING URLS:');
+  console.log(`   🏠 http://localhost:${port}/`);
+  if (isDevelopment) {
+    console.log(`   🧪 http://localhost:${port}/api-integration-test.html (dev only)`);
+  }
+  console.log(`   👨‍💼 http://localhost:${port}/admin/`);
+
+  console.log('\n📋 TESTING CHECKLIST:');
+  console.log('   ✅ Desktop: Open test URL in browser');
+  console.log('   ✅ Mobile: Connect to same WiFi network');
+  console.log('   ✅ Mobile: Use IP address URLs above');
+  if (isDevelopment) {
+    console.log('   ✅ API Test: Check /api-integration-test.html (dev only)');
+  }
+  console.log('='.repeat(50) + '\n');
 });
 
 // Create HTTPS server if certificates are available

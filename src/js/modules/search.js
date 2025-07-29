@@ -815,10 +815,19 @@ class SearchManager {
       query
     );
 
-    const formattedPrice =
-      artwork.price !== null && artwork.price !== undefined
-        ? `${currency}${artwork.price}`
-        : 'Price on request';
+    // Format the price with the correct currency and handle invalid prices
+    let formattedPrice = 'Price on request';
+    let isForSale = true;
+
+    if (artwork.price !== null && artwork.price !== undefined && artwork.price !== '') {
+      const priceNum = parseFloat(artwork.price);
+      if (!isNaN(priceNum) && priceNum > 0) {
+        formattedPrice = `${currency}${priceNum}`;
+      } else {
+        formattedPrice = 'Not For Sale';
+        isForSale = false;
+      }
+    }
 
     resultItem.innerHTML = `
             <a href="/artwork/${artwork.id}" class="search-result-link">
@@ -833,7 +842,11 @@ class SearchManager {
             </a>
             <div class="search-result-actions">
                 <a href="/gallery?collection=${artwork.category}" class="btn outline-btn">View Collection</a>
-                <button class="btn primary-btn add-to-cart-btn" data-id="${artwork.id}">Add to Cart</button>
+                ${
+                  isForSale
+                    ? `<button class="btn primary-btn add-to-cart-btn" data-id="${artwork.id}">Add to Cart</button>`
+                    : `<a href="/contact?inquiry=${encodeURIComponent(`I am interested in the piece "${artwork.title}". Could you please provide more information about this artwork?`)}" class="btn secondary-btn">Contact About Piece</a>`
+                }
             </div>
         `;
 

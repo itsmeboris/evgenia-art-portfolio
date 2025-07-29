@@ -9,7 +9,7 @@ const cssFiles = [
   './public/css/style.css',
   './public/css/additional-styles.css',
   './public/css/skeleton.css',
-  './public/css/search-modal.css'
+  './public/css/search-modal.css',
 ];
 
 cssFiles.forEach(file => {

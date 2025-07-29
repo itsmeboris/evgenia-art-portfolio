@@ -427,7 +427,7 @@ class MetaTags {
       }
 
       // Fetch from API
-      const response = await fetch('/public/data/artwork-data.json');
+      const response = await fetch('/api/v1/artworks/all');
       const data = await response.json();
       return data.artworks.find(artwork => artwork.id === artworkId);
     } catch (error) {

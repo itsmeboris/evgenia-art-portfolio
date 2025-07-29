@@ -7,14 +7,14 @@ console.log('🔧 Fixing Critical CSS Implementation...\n');
 // Function to fix CSS loading in HTML files
 function fixCriticalCSS(htmlFile) {
   console.log(`Fixing ${htmlFile}...`);
-  
+
   if (!fs.existsSync(htmlFile)) {
     console.log(`File ${htmlFile} not found, skipping...`);
     return;
   }
-  
+
   let html = fs.readFileSync(htmlFile, 'utf8');
-  
+
   // Update the critical CSS to remove the visibility hidden issue
   // and add proper CSS loading script
   const updatedCriticalCSS = `
@@ -212,7 +212,7 @@ nav {
       });
     </script>`
   );
-  
+
   fs.writeFileSync(htmlFile, html, 'utf8');
   console.log(`✅ Fixed critical CSS in ${htmlFile}`);
 }
@@ -224,7 +224,7 @@ const htmlFiles = [
   'artwork.html',
   'about.html',
   'contact.html',
-  '404.html'
+  '404.html',
 ];
 
 htmlFiles.forEach(file => {
@@ -237,4 +237,4 @@ console.log('- Removed visibility: hidden from body (content shows immediately)'
 console.log('- Added basic styles for gallery, about, and contact pages');
 console.log('- Added proper CSS loading detection script');
 console.log('- Maintained performance benefits of critical CSS');
-console.log('\nTest all pages to verify they now render correctly!'); 
+console.log('\nTest all pages to verify they now render correctly!');

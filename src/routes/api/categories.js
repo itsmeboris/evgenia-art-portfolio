@@ -6,12 +6,12 @@ const router = express.Router();
 
 // Category descriptions mapping (from JSON structure)
 const categoryDescriptions = {
-  'birds': 'Freedom and grace captured in acrylic',
-  'floral': 'Vibrant expressions of nature\'s beauty',
-  'towns': 'Dreamlike urban landscapes',
-  'landscapes': 'Serene natural vistas',
-  'abstracts': 'Emotional expressions in color',
-  'portraits': 'Capturing human essence'
+  birds: 'Freedom and grace captured in acrylic',
+  floral: "Vibrant expressions of nature's beauty",
+  towns: 'Dreamlike urban landscapes',
+  landscapes: 'Serene natural vistas',
+  abstracts: 'Emotional expressions in color',
+  portraits: 'Capturing human essence',
 };
 
 /**
@@ -21,18 +21,15 @@ async function generateCategories() {
   try {
     // Get category counts using direct query to avoid Sequelize grouping issues
     const categoryStats = await Artwork.findAll({
-      attributes: [
-        'category',
-        [sequelize.fn('COUNT', sequelize.col('category')), 'artwork_count']
-      ],
+      attributes: ['category', [sequelize.fn('COUNT', sequelize.col('category')), 'artwork_count']],
       group: ['category'],
-      raw: true
+      raw: true,
     });
 
     // Get featured artwork for each category
     const featuredArtworks = await Artwork.findAll({
       where: { featured: true },
-      attributes: ['id', 'title', 'image', 'category']
+      attributes: ['id', 'title', 'image', 'category'],
     });
 
     // Create featured artwork lookup
@@ -50,18 +47,20 @@ async function generateCategories() {
       description: categoryDescriptions[stat.category] || `Beautiful ${stat.category} collection`,
       image: `public/assets/images/categories/${stat.category}.webp`,
       artwork_count: parseInt(stat.artwork_count),
-      featured_artwork: featuredByCategory[stat.category] ? {
-        id: featuredByCategory[stat.category].id,
-        title: featuredByCategory[stat.category].title,
-        image: featuredByCategory[stat.category].image
-      } : null
+      featured_artwork: featuredByCategory[stat.category]
+        ? {
+            id: featuredByCategory[stat.category].id,
+            title: featuredByCategory[stat.category].title,
+            image: featuredByCategory[stat.category].image,
+          }
+        : null,
     }));
 
     return categories;
   } catch (error) {
     logger.error('Error generating categories', {
       error: error.message,
-      function: 'generateCategories'
+      function: 'generateCategories',
     });
     return [];
   }
@@ -78,8 +77,8 @@ router.get('/', async (req, res) => {
     // Add cache headers for categories (changes infrequently)
     res.set({
       'Cache-Control': 'public, max-age=1800', // 30 minutes cache
-      'ETag': `"categories-${categories.length}"`,
-      'Last-Modified': new Date().toUTCString()
+      ETag: `"categories-${categories.length}"`,
+      'Last-Modified': new Date().toUTCString(),
     });
 
     res.json({
@@ -87,24 +86,23 @@ router.get('/', async (req, res) => {
       total: categories.length,
       meta: {
         last_updated: new Date().toISOString(),
-        api_version: '1.1'
-      }
+        api_version: '1.1',
+      },
     });
 
     logger.info('Enhanced categories retrieved successfully', {
-      categoriesCount: categories.length
+      categoriesCount: categories.length,
     });
-
   } catch (error) {
     logger.error('Error retrieving enhanced categories', {
       error: error.message,
-      stack: error.stack
+      stack: error.stack,
     });
     res.status(500).json({
       error: 'Failed to retrieve categories',
-      message: error.message
+      message: error.message,
     });
   }
 });
 
-module.exports = router; 
+module.exports = router;

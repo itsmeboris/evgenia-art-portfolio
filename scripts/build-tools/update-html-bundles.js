@@ -83,7 +83,7 @@ class HtmlBundleUpdater {
 
   // Update HTML file with new bundle references
   updateHtmlFile(config, manifest) {
-          const filePath = path.join(__dirname, '../..', config.file);
+    const filePath = path.join(__dirname, '../..', config.file);
 
     if (!fs.existsSync(filePath)) {
       console.warn(`⚠️  HTML file not found: ${filePath}`);

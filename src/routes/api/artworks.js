@@ -7,18 +7,18 @@ const router = express.Router();
 
 // Category descriptions mapping (from JSON structure)
 const categoryDescriptions = {
-  'birds': 'Freedom and grace captured in acrylic',
-  'floral': 'Vibrant expressions of nature\'s beauty',
-  'towns': 'Dreamlike urban landscapes',
-  'landscapes': 'Serene natural vistas',
-  'abstracts': 'Emotional expressions in color',
-  'portraits': 'Capturing human essence'
+  birds: 'Freedom and grace captured in acrylic',
+  floral: "Vibrant expressions of nature's beauty",
+  towns: 'Dreamlike urban landscapes',
+  landscapes: 'Serene natural vistas',
+  abstracts: 'Emotional expressions in color',
+  portraits: 'Capturing human essence',
 };
 
 // Application settings (matching JSON structure)
 const applicationSettings = {
   currency: '₪',
-  imagePath: 'public/assets/images/artwork/'
+  imagePath: 'public/assets/images/artwork/',
 };
 
 /**
@@ -28,18 +28,15 @@ async function generateCategories() {
   try {
     // Get category counts using proper Sequelize syntax
     const categoryStats = await Artwork.findAll({
-      attributes: [
-        'category',
-        [sequelize.fn('COUNT', sequelize.col('category')), 'artwork_count']
-      ],
+      attributes: ['category', [sequelize.fn('COUNT', sequelize.col('category')), 'artwork_count']],
       group: ['category'],
-      raw: true
+      raw: true,
     });
 
     // Get featured artwork for each category
     const featuredArtworks = await Artwork.findAll({
       where: { featured: true },
-      attributes: ['id', 'title', 'image', 'category']
+      attributes: ['id', 'title', 'image', 'category'],
     });
 
     // Create featured artwork lookup
@@ -57,18 +54,20 @@ async function generateCategories() {
       description: categoryDescriptions[stat.category] || `Beautiful ${stat.category} collection`,
       image: `public/assets/images/categories/${stat.category}.webp`,
       artwork_count: parseInt(stat.artwork_count),
-      featured_artwork: featuredByCategory[stat.category] ? {
-        id: featuredByCategory[stat.category].id,
-        title: featuredByCategory[stat.category].title,
-        image: featuredByCategory[stat.category].image
-      } : null
+      featured_artwork: featuredByCategory[stat.category]
+        ? {
+            id: featuredByCategory[stat.category].id,
+            title: featuredByCategory[stat.category].title,
+            image: featuredByCategory[stat.category].image,
+          }
+        : null,
     }));
 
     return categories;
   } catch (error) {
     logger.error('Error generating categories', {
       error: error.message,
-      function: 'generateCategories'
+      function: 'generateCategories',
     });
     return [];
   }
@@ -86,8 +85,8 @@ router.get('/all', async (req, res) => {
     const artworks = await Artwork.findAll({
       order: [['createdAt', 'DESC']],
       attributes: {
-        exclude: ['metadata'] // Exclude metadata for frontend compatibility
-      }
+        exclude: ['metadata'], // Exclude metadata for frontend compatibility
+      },
     });
 
     // Generate categories from artwork data
@@ -103,15 +102,15 @@ router.get('/all', async (req, res) => {
         total_categories: categories.length,
         last_updated: new Date().toISOString(),
         api_version: '1.1',
-        response_time_ms: Date.now() - startTime
-      }
+        response_time_ms: Date.now() - startTime,
+      },
     };
 
     // Add cache headers for performance
     res.set({
       'Cache-Control': 'public, max-age=300', // 5 minutes cache
-      'ETag': `"artworks-all-${artworks.length}-${Date.now()}"`,
-      'Last-Modified': new Date().toUTCString()
+      ETag: `"artworks-all-${artworks.length}-${Date.now()}"`,
+      'Last-Modified': new Date().toUTCString(),
     });
 
     res.json(response);
@@ -119,17 +118,16 @@ router.get('/all', async (req, res) => {
     logger.info('All artworks retrieved successfully', {
       count: artworks.length,
       categories: categories.length,
-      response_time_ms: Date.now() - startTime
+      response_time_ms: Date.now() - startTime,
     });
-
   } catch (error) {
     logger.error('Error retrieving all artworks', {
       error: error.message,
-      stack: error.stack
+      stack: error.stack,
     });
     res.status(500).json({
       error: 'Failed to retrieve artworks',
-      message: error.message
+      message: error.message,
     });
   }
 });
@@ -152,7 +150,7 @@ router.get('/', async (req, res) => {
       order = 'DESC',
       search,
       include_categories,
-      include_settings
+      include_settings,
     } = req.query;
 
     // Build where clause
@@ -208,7 +206,7 @@ router.get('/', async (req, res) => {
     // Add cache headers
     res.set({
       'Cache-Control': 'public, max-age=60', // 1 minute cache for paginated results
-      'ETag': `"artworks-${page}-${limit}-${total}"`,
+      ETag: `"artworks-${page}-${limit}-${total}"`,
     });
 
     res.json(response);
@@ -217,7 +215,7 @@ router.get('/', async (req, res) => {
       count: artworks.length,
       total,
       filters: { category, subcategory, featured, availability, search },
-      includes: { categories: !!include_categories, settings: !!include_settings }
+      includes: { categories: !!include_categories, settings: !!include_settings },
     });
   } catch (error) {
     logger.error('Error retrieving artworks', {
@@ -244,13 +242,13 @@ router.get('/search', async (req, res) => {
       page = 1,
       limit = 20,
       highlight = false,
-      suggestions = false
+      suggestions = false,
     } = req.query;
 
     if (!query) {
       return res.status(400).json({
         error: 'Search query is required',
-        message: 'Please provide a search query using the "q" parameter'
+        message: 'Please provide a search query using the "q" parameter',
       });
     }
 
@@ -262,8 +260,8 @@ router.get('/search', async (req, res) => {
         { title: { [Op.iLike]: `%${query}%` } },
         { description: { [Op.iLike]: `%${query}%` } },
         { tags: { [Op.contains]: [query] } },
-        { medium: { [Op.iLike]: `%${query}%` } }
-      ]
+        { medium: { [Op.iLike]: `%${query}%` } },
+      ],
     };
 
     // Add additional filters
@@ -279,8 +277,8 @@ router.get('/search', async (req, res) => {
       offset,
       order: [['createdAt', 'DESC']],
       attributes: {
-        exclude: ['metadata']
-      }
+        exclude: ['metadata'],
+      },
     });
 
     // Build response
@@ -291,12 +289,12 @@ router.get('/search', async (req, res) => {
         page: parseInt(page),
         limit: parseInt(limit),
         total,
-        totalPages: Math.ceil(total / parseInt(limit))
+        totalPages: Math.ceil(total / parseInt(limit)),
       },
       performance: {
         response_time_ms: Date.now() - startTime,
-        query_analyzed: true
-      }
+        query_analyzed: true,
+      },
     };
 
     // Add highlighting if requested
@@ -325,7 +323,7 @@ router.get('/search', async (req, res) => {
       const categories = [...new Set(artworks.map(a => a.category))];
       response.suggestions = {
         categories,
-        related_terms: [] // Could be enhanced with more sophisticated suggestion logic
+        related_terms: [], // Could be enhanced with more sophisticated suggestion logic
       };
     }
 
@@ -338,14 +336,14 @@ router.get('/search', async (req, res) => {
 
       response.filters = {
         categories: Object.keys(categoryStats),
-        total_by_category: categoryStats
+        total_by_category: categoryStats,
       };
     }
 
     // Add cache headers for search results
     res.set({
       'Cache-Control': 'public, max-age=300', // 5 minutes cache
-      'ETag': `"search-${query}-${total}-${page}"`
+      ETag: `"search-${query}-${total}-${page}"`,
     });
 
     res.json(response);
@@ -355,17 +353,16 @@ router.get('/search', async (req, res) => {
       total_results: total,
       page,
       response_time_ms: Date.now() - startTime,
-      filters: { category, featured }
+      filters: { category, featured },
     });
-
   } catch (error) {
     logger.error('Error performing search', {
       error: error.message,
-      query: req.query
+      query: req.query,
     });
     res.status(500).json({
       error: 'Search failed',
-      message: error.message
+      message: error.message,
     });
   }
 });
@@ -451,7 +448,6 @@ router.get('/categories/list', async (req, res) => {
     });
   }
 });
-
 
 /**
  * POST /api/artworks (Admin only)

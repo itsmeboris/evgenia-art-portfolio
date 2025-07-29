@@ -255,41 +255,41 @@ nav {
 // Function to inline critical CSS in HTML files
 function inlineCriticalCSS(htmlFile) {
   console.log(`Processing ${htmlFile}...`);
-  
+
   if (!fs.existsSync(htmlFile)) {
     console.log(`File ${htmlFile} not found, skipping...`);
     return;
   }
-  
+
   let html = fs.readFileSync(htmlFile, 'utf8');
-  
+
   // Check if critical CSS is already inlined
   if (html.includes('/* Critical CSS - Above the fold styles */')) {
     console.log(`Critical CSS already inlined in ${htmlFile}, skipping...`);
     return;
   }
-  
+
   // Remove the old inline style that only had visibility hidden
   html = html.replace(
     /<style>\s*body\s*\{\s*visibility:\s*hidden;\s*\}\s*\.loaded\s*\{\s*visibility:\s*visible;\s*\}\s*<\/style>/,
     ''
   );
-  
+
   // Find the location to insert critical CSS (before closing </head>)
   const headCloseIndex = html.indexOf('</head>');
   if (headCloseIndex === -1) {
     console.log(`No </head> tag found in ${htmlFile}, skipping...`);
     return;
   }
-  
+
   // Insert critical CSS
   const beforeHead = html.substring(0, headCloseIndex);
   const afterHead = html.substring(headCloseIndex);
-  
+
   const criticalCSSBlock = `    <style>${criticalCSS}</style>\n`;
-  
+
   const newHTML = beforeHead + criticalCSSBlock + afterHead;
-  
+
   // Write the updated HTML
   fs.writeFileSync(htmlFile, newHTML, 'utf8');
   console.log(`✅ Critical CSS inlined in ${htmlFile}`);
@@ -298,15 +298,15 @@ function inlineCriticalCSS(htmlFile) {
 // Function to defer non-critical CSS loading
 function deferNonCriticalCSS(htmlFile) {
   console.log(`Deferring non-critical CSS in ${htmlFile}...`);
-  
+
   let html = fs.readFileSync(htmlFile, 'utf8');
-  
+
   // Convert CSS links to defer loading (except for fonts and external CSS)
   html = html.replace(
     /<link rel="stylesheet" href="(public\/css\/[^"]+)"\s*\/?>/g,
     '<link rel="preload" href="$1" as="style" onload="this.onload=null;this.rel=\'stylesheet\'">\n    <noscript><link rel="stylesheet" href="$1"></noscript>'
   );
-  
+
   fs.writeFileSync(htmlFile, html, 'utf8');
   console.log(`✅ Non-critical CSS deferred in ${htmlFile}`);
 }
@@ -318,7 +318,7 @@ const htmlFiles = [
   'artwork.html',
   'about.html',
   'contact.html',
-  '404.html'
+  '404.html',
 ];
 
 console.log('🚀 Starting Critical CSS Implementation...\n');
@@ -333,4 +333,4 @@ console.log('✅ Critical CSS implementation completed!');
 console.log('\nNext steps:');
 console.log('1. Test all pages for visual regressions');
 console.log('2. Measure performance improvements');
-console.log('3. Proceed with unused CSS removal'); 
+console.log('3. Proceed with unused CSS removal');

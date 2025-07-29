@@ -1,23 +1,23 @@
 # Active Tasks - Evgenia Art Portfolio
 
 **Last Updated:** January 29, 2025
-**Project Status:** 43/68 tasks completed (63.2% completion rate)
+**Project Status:** 43/69 tasks completed (62.3% completion rate)
 
 > 📋 **Note:** All completed tasks moved to [`COMPLETED_TASKS.md`](./COMPLETED_TASKS.md) for better organization
 
 ## Progress Tracker
 
-- ✅ **Completed:** 43/68 items (63.2%) - See [`COMPLETED_TASKS.md`](./COMPLETED_TASKS.md)
+- ✅ **Completed:** 43/69 items (62.3%) - See [`COMPLETED_TASKS.md`](./COMPLETED_TASKS.md)
 - 🔴 **Critical:** 0 items remaining
-- 🟠 **High:** 3 items remaining
+- 🟠 **High:** 4 items remaining
 - 🟡 **Medium:** 14 items remaining
 - 🟢 **Low:** 8 items remaining
 
-**Total Active Tasks:** 25 items
+**Total Active Tasks:** 26 items
 
 ---
 
-## 🟠 **HIGH PRIORITY** (3 items)
+## 🟠 **HIGH PRIORITY** (4 items)
 
 ### ♿ Implement Accessibility Compliance (URGENT)
 
@@ -79,6 +79,42 @@
 **Expected Impact:** Maintains data consistency across all layers, ensures reliable fallback functionality, prevents stale data issues.
 
 **Added:** January 14, 2025 - Critical gap identified during API migration research
+
+### 🐳 Implement Docker-Based Production Deployment
+
+**Priority:** HIGH | **Effort:** 2-3 days | **Impact:** 9/10
+**Status:** Ready to Start
+
+- [ ] Create optimized Dockerfile for Node.js application
+- [ ] Set up Docker Compose configuration for multi-service deployment (app + database)
+- [ ] Configure PostgreSQL container with persistent volumes
+- [ ] Implement container networking and port mapping (80→HTTP, 443→HTTPS)
+- [ ] Integrate Let's Encrypt SSL certificate management within containers
+- [ ] Set up automatic container restart policies and health checks
+- [ ] Configure environment variable management for production
+- [ ] Test complete Docker stack deployment and validation
+- [ ] Document Docker deployment and maintenance procedures
+
+**Context:** **PRODUCTION DEPLOYMENT MIGRATION** - Moving from problematic systemd deployment to containerized approach. Current server is clean Ubuntu 24.04.2 LTS with Docker installed and ready.
+
+**Technical Requirements:**
+
+- **Container Isolation:** Application runs in controlled Docker environment
+- **Multi-Service Stack:** App container + PostgreSQL container with Docker Compose
+- **SSL Integration:** Automated HTTPS with Let's Encrypt certificate renewal
+- **Port Management:** Docker handles networking (no manual iptables configuration)
+- **Development Parity:** Same containers work in development and production
+
+**Infrastructure Status:**
+
+- **Server:** Clean Ubuntu 24.04.2 LTS (13.61.217.218) with Docker Engine installed
+- **Firewall:** UFW configured with ports 22, 80, 443 open
+- **AWS Security Group:** Properly configured for container deployment
+- **DNS:** evgenia-art.shuktech.shop → 13.61.217.218 (verified working)
+
+**Expected Impact:** Reliable, isolated production deployment with simplified management, automatic SSL, and easy scaling capabilities.
+
+**Added:** July 29, 2025 - Docker deployment strategy for production server
 
 ---
 

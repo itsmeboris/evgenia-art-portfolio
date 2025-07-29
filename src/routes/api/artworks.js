@@ -2,6 +2,7 @@ const express = require('express');
 const { Op } = require('sequelize');
 const { Artwork, sequelize } = require('../../models');
 const logger = require('../../js/modules/logger');
+const { requireAdminAuth, optionalAdminAuth } = require('../../middleware/adminAuth');
 
 const router = express.Router();
 
@@ -453,9 +454,8 @@ router.get('/categories/list', async (req, res) => {
  * POST /api/artworks (Admin only)
  * Create a new artwork
  */
-router.post('/', async (req, res) => {
+router.post('/', requireAdminAuth, async (req, res) => {
   try {
-    // TODO: Add admin authentication middleware
     const artworkData = req.body;
 
     const artwork = await Artwork.create(artworkData);
@@ -482,9 +482,8 @@ router.post('/', async (req, res) => {
  * PUT /api/artworks/:id (Admin only)
  * Update an existing artwork
  */
-router.put('/:id', async (req, res) => {
+router.put('/:id', requireAdminAuth, async (req, res) => {
   try {
-    // TODO: Add admin authentication middleware
     const { id } = req.params;
     const updateData = req.body;
 
@@ -524,9 +523,8 @@ router.put('/:id', async (req, res) => {
  * DELETE /api/artworks/:id (Admin only)
  * Delete an artwork
  */
-router.delete('/:id', async (req, res) => {
+router.delete('/:id', requireAdminAuth, async (req, res) => {
   try {
-    // TODO: Add admin authentication middleware
     const { id } = req.params;
 
     const deleted = await Artwork.destroy({

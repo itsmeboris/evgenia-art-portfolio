@@ -12,6 +12,57 @@ let artworkData = {
 
 // Data Management Functions
 function saveData() {
+  console.log('🚀 Saving data to API...');
+
+  // Try API save first, fallback to JSON download if needed
+  saveToAPI()
+    .then(() => {
+      console.log('✅ Data saved successfully to database');
+      showMessage('✅ Data saved successfully to database!', 'success');
+
+      // Save to localStorage as backup
+      localStorage.setItem('evgenia-artwork-data', JSON.stringify(artworkData));
+    })
+    .catch(error => {
+      console.warn('⚠️ API save failed, falling back to JSON download:', error.message);
+      showMessage('⚠️ API save failed, downloading JSON file as fallback', 'warning');
+
+      // Fallback to original JSON download behavior
+      downloadJSONFallback();
+    });
+}
+
+// API save function
+async function saveToAPI() {
+  try {
+    // Save all artworks via batch API
+    const response = await fetch('/api/v1/admin/artworks/batch', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      credentials: 'same-origin',
+      body: JSON.stringify({
+        artworks: artworkData.artworks
+      })
+    });
+
+    if (!response.ok) {
+      throw new Error(`API error! Status: ${response.status}`);
+    }
+
+    const result = await response.json();
+    console.log('✅ Batch save result:', result);
+
+    return result;
+  } catch (error) {
+    console.error('❌ API save error:', error);
+    throw error;
+  }
+}
+
+// Fallback JSON download function (original behavior)
+function downloadJSONFallback() {
   // Create JSON content with proper formatting
   const dataStr = JSON.stringify(artworkData, null, 2);
 
@@ -31,7 +82,7 @@ function saveData() {
   instructionsDiv.innerHTML = `
         <div class="modal-like">
             <h3>Save Changes</h3>
-            <p>Since this is a static website, please download the updated JSON file and replace the existing one at:</p>
+            <p>API save failed. Please download the updated JSON file and replace the existing one at:</p>
             <code>public/data/artwork-data.json</code>
             <p>After replacing the file, refresh the page to see your changes.</p>
             <div class="button-container">
@@ -63,30 +114,30 @@ function saveData() {
 }
 
 function loadData() {
-  console.log('Loading data from:', '/public/data/artwork-data.json');
+  console.log('🚀 Loading data from API...');
 
-  // Try to fetch from the JSON file
-  return fetch('/public/data/artwork-data.json')
+  // API-FIRST APPROACH: Try to fetch from API first, fallback to JSON
+  return fetch('/api/v1/artworks/all')
     .then(response => {
-      console.log('Response status:', response.status);
+      console.log('✅ API Response status:', response.status);
       if (!response.ok) {
-        throw new Error(`HTTP error! Status: ${response.status}`);
+        throw new Error(`API error! Status: ${response.status}`);
       }
       return response.json();
     })
     .then(data => {
-      console.log('Loaded data:', data);
+      console.log('✅ API data loaded successfully:', data);
 
       if (!data || !data.categories || !data.artworks) {
-        throw new Error('Invalid data structure in artwork-data.json');
+        throw new Error('Invalid data structure from API');
       }
 
       artworkData = data;
-      console.log('Data loaded from JSON file');
-      console.log('Categories:', artworkData.categories.length);
-      console.log('Artworks:', artworkData.artworks.length);
+      console.log('✅ Data loaded from API (database)');
+      console.log('📊 Categories:', artworkData.categories.length);
+      console.log('📊 Artworks:', artworkData.artworks.length);
 
-      // Also save to localStorage as a backup
+      // Save to localStorage as backup
       localStorage.setItem('evgenia-artwork-data', JSON.stringify(artworkData));
 
       // Initialize the UI components with the loaded data
@@ -96,15 +147,33 @@ function loadData() {
 
       return true;
     })
-    .catch(error => {
-      console.error('Error loading from JSON file:', error);
+    .catch(apiError => {
+      console.warn('⚠️ API loading failed:', apiError.message);
+      console.log('🔄 Falling back to JSON file...');
 
-      // Fallback to localStorage if JSON file loading fails
-      const savedData = localStorage.getItem('evgenia-artwork-data');
-      if (savedData) {
-        try {
-          artworkData = JSON.parse(savedData);
-          console.log('Data loaded from local storage (fallback)');
+      // FALLBACK 1: Try JSON file if API fails
+      return fetch('/public/data/artwork-data.json')
+        .then(response => {
+          console.log('📁 JSON Response status:', response.status);
+          if (!response.ok) {
+            throw new Error(`JSON error! Status: ${response.status}`);
+          }
+          return response.json();
+        })
+        .then(data => {
+          console.log('📁 JSON data loaded successfully');
+
+          if (!data || !data.categories || !data.artworks) {
+            throw new Error('Invalid data structure in JSON file');
+          }
+
+          artworkData = data;
+          console.log('📁 Data loaded from JSON file (fallback)');
+          console.log('📊 Categories:', artworkData.categories.length);
+          console.log('📊 Artworks:', artworkData.artworks.length);
+
+          // Save to localStorage as backup
+          localStorage.setItem('evgenia-artwork-data', JSON.stringify(artworkData));
 
           // Initialize the UI components with the loaded data
           renderArtworks();
@@ -112,13 +181,44 @@ function loadData() {
           initDashboard();
 
           return true;
-        } catch (e) {
-          console.error('Error parsing data from local storage:', e);
-        }
-      }
+        })
+        .catch(jsonError => {
+          console.warn('⚠️ JSON file loading failed:', jsonError.message);
+          console.log('🔄 Falling back to localStorage...');
 
-      console.log('Using default data');
-      return false;
+          // FALLBACK 2: Try localStorage if both API and JSON fail
+          const savedData = localStorage.getItem('evgenia-artwork-data');
+          if (savedData) {
+            try {
+              artworkData = JSON.parse(savedData);
+              console.log('💾 Data loaded from localStorage (emergency fallback)');
+
+              // Initialize the UI components with the loaded data
+              renderArtworks();
+              renderCategories();
+              initDashboard();
+
+              return true;
+            } catch (e) {
+              console.error('❌ Error parsing localStorage data:', e);
+            }
+          }
+
+          // FALLBACK 3: Use default empty data
+          console.error('❌ All data sources failed! Using default empty data.');
+          artworkData = {
+            artworks: [],
+            categories: [],
+            settings: { currency: '₪', imagePath: 'public/assets/images/artwork/' }
+          };
+
+          // Initialize with empty data
+          renderArtworks();
+          renderCategories();
+          initDashboard();
+
+          return false;
+        });
     });
 }
 

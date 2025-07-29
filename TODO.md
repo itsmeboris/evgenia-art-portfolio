@@ -4,10 +4,10 @@ _Last updated: July 28, 2025_
 
 ## Progress Tracker
 
-- ✅ **Completed:** 41/63 items (65.1%)
+- ✅ **Completed:** 41/68 items (60.3%)
 - 🔴 **Critical:** 0 items remaining
-- 🟠 **High:** 3 items remaining (1 original + 2 UX)
-- 🟡 **Medium:** 11 items remaining (8 original + 3 UX + 2 production optimization)
+- 🟠 **High:** 5 items remaining (1 original + 2 UX + 2 API gaps)
+- 🟡 **Medium:** 14 items remaining (8 original + 3 UX + 2 production + 3 workflow)
 - 🟢 **Low:** 8 items remaining (8 original)
 
 **Note:** Progress verified as of July 28, 2025 - all marked incomplete items confirmed through comprehensive codebase analysis. UX improvements added based on comprehensive design audit.
@@ -152,6 +152,92 @@ The backend database migration is complete with 40 artworks migrated and API v1 
 **Expected Impact:** Proactive performance management, early issue detection, optimized user experience.
 
 **Added:** January 14, 2025 - Post migration production optimization
+
+### 🔄 Implement Bidirectional Database-JSON Synchronization
+
+**Priority:** HIGH | **Effort:** 2-3 days | **Impact:** 9/10
+**Status:** Not Started
+
+- [ ] Create automatic JSON file sync when database changes occur
+- [ ] Implement database trigger or API hook for JSON updates
+- [ ] Add scheduled sync job to ensure JSON file stays current
+- [ ] Create manual sync API endpoint for immediate JSON refresh
+- [ ] Add JSON file validation and error handling
+- [ ] Implement atomic JSON file updates (write + rename)
+- [ ] Add sync status monitoring and logging
+
+**Context:** **CRITICAL GAP DISCOVERED** - Database API migration is complete, but JSON files become stale after database changes. This breaks the fallback strategy and creates data inconsistency.
+
+**Technical Requirements:**
+- Database changes must trigger JSON file updates
+- Fallback JSON files must stay synchronized with database
+- Manual refresh capability for immediate sync needs
+
+**Expected Impact:** Maintains data consistency across all layers, ensures reliable fallback functionality, prevents stale data issues.
+
+**Added:** January 14, 2025 - Critical gap identified during API migration research
+
+### 🖼️ Implement Automatic WebP Image Conversion
+
+**Priority:** MEDIUM | **Effort:** 2 days | **Impact:** 7/10
+**Status:** Not Started
+
+- [ ] Integrate WebP conversion into image upload API workflow
+- [ ] Add automatic Sharp-based conversion during multer processing
+- [ ] Implement original format preservation alongside WebP versions
+- [ ] Add conversion quality and settings configuration
+- [ ] Create batch conversion for existing uploaded images
+- [ ] Add WebP conversion status indicators in admin panel
+- [ ] Implement conversion error handling and fallbacks
+
+**Context:** Manual WebP conversion script exists but not integrated into upload workflow. Images uploaded via admin panel are not automatically optimized.
+
+**Current State:** WebP converter script available but requires manual execution (`scripts/utilities/webp-converter.js`)
+
+**Expected Impact:** Automatic image optimization, reduced bandwidth usage, improved page load performance.
+
+**Added:** January 14, 2025 - Identified during image upload workflow analysis
+
+### 🖼️ Complete Image Upload-to-Artwork Workflow
+
+**Priority:** MEDIUM | **Effort:** 3 days | **Impact:** 8/10
+**Status:** Not Started
+
+- [ ] Auto-create artwork records after successful image uploads
+- [ ] Implement metadata extraction from image EXIF data
+- [ ] Add drag-drop integration with artwork creation form
+- [ ] Create upload progress indicators and error handling
+- [ ] Implement image preview with crop/resize options
+- [ ] Add bulk artwork creation from multiple uploads
+- [ ] Integrate with WebP conversion pipeline
+
+**Context:** Image upload API works but requires manual artwork record creation. No seamless workflow from upload to published artwork.
+
+**Current Gap:** Users can upload images but must manually create artwork records separately.
+
+**Expected Impact:** Streamlined content management, reduced manual work, improved admin user experience.
+
+**Added:** January 14, 2025 - Workflow gap identified during upload process analysis
+
+### 📖 Update Admin Documentation Architecture
+
+**Priority:** HIGH | **Effort:** 0.5 days | **Impact:** 6/10
+**Status:** Not Started
+
+- [ ] Rewrite `admin/README.md` to reflect database API architecture
+- [ ] Update workflow instructions for real-time database operations
+- [ ] Remove outdated JSON file download/upload instructions
+- [ ] Document new admin API endpoints and functionality
+- [ ] Add troubleshooting section for database connectivity issues
+- [ ] Create migration guide for users familiar with old JSON workflow
+
+**Context:** **CRITICAL DOCUMENTATION BUG** - `admin/README.md` describes completely outdated JSON-based workflow, not current database API architecture.
+
+**Current Problem:** Documentation claims "All artwork data is stored in a single JSON file" - completely incorrect after API migration.
+
+**Expected Impact:** Accurate documentation, reduced user confusion, proper onboarding for new administrators.
+
+**Added:** January 14, 2025 - Critical documentation inconsistency discovered
 
 ### 🔧 Resolve ESLint Warnings
 
@@ -550,8 +636,10 @@ The backend database migration is complete with 40 artworks migrated and API v1 
 
 _Last updated: January 14, 2025_
 _Status verified: January 14, 2025_
-_Total items: 63 | Completed: 41 | Remaining: 22_
+_Total items: 68 | Completed: 41 | Remaining: 27_
 
 **Latest Update (January 14, 2025):** 🎉 **COMPLETE DATABASE API MIGRATION ACCOMPLISHED!** Both frontend and admin panel now use database API with real-time operations. All complex workarounds removed (89KB+ code reduction). Clean, maintainable architecture achieved.
 
-**Verification Summary:** All database migration tasks completed successfully. Added production optimization tasks for cache invalidation and performance monitoring. System ready for production with proper fallback strategies.
+**CRITICAL GAPS DISCOVERED:** Comprehensive API research revealed 5 important gaps: bidirectional DB-JSON sync missing, WebP conversion not automatic, image upload workflow incomplete, and admin documentation completely outdated. All gaps added to TODO for systematic resolution.
+
+**Verification Summary:** Core migration tasks completed successfully. Added production optimization tasks and identified workflow completion needs. System functional but requires gap resolution for production readiness.

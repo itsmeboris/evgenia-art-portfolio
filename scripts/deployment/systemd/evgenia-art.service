@@ -1,0 +1,64 @@
+[Unit]
+Description=Evgenia Art Portfolio Node.js Application
+Documentation=https://github.com/evgenia-art-portfolio
+After=network.target network-online.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+# USER CONFIGURATION - Update these for your deployment environment
+User=evgenia-art
+Group=evgenia-art
+WorkingDirectory=/opt/evgenia-art-portfolio
+ExecStart=/usr/bin/node server.js
+ExecReload=/bin/kill -USR2 $MAINPID
+Restart=always
+RestartSec=10s
+TimeoutStartSec=60s
+TimeoutStopSec=60s
+
+# Environment Configuration
+Environment=NODE_ENV=production
+Environment=PORT=3000
+EnvironmentFile=-/opt/evgenia-art-portfolio/.env
+
+# Process Management
+PIDFile=/opt/evgenia-art-portfolio/pids/evgenia-art-systemd.pid
+KillMode=mixed
+KillSignal=SIGTERM
+SendSIGKILL=yes
+TimeoutStopSec=5
+
+# Logging Configuration
+StandardOutput=append:/opt/evgenia-art-portfolio/logs/systemd-out.log
+StandardError=append:/opt/evgenia-art-portfolio/logs/systemd-error.log
+SyslogIdentifier=evgenia-art
+
+# Security Hardening
+NoNewPrivileges=yes
+ProtectSystem=strict
+ProtectHome=read-only
+ReadWritePaths=/opt/evgenia-art-portfolio/logs
+ReadWritePaths=/opt/evgenia-art-portfolio/pids
+ReadWritePaths=/opt/evgenia-art-portfolio/sessions
+ReadWritePaths=/opt/evgenia-art-portfolio/public/uploads
+PrivateTmp=yes
+ProtectKernelTunables=yes
+ProtectKernelModules=yes
+ProtectControlGroups=yes
+
+# Resource Limits
+LimitNOFILE=65536
+LimitNPROC=4096
+MemoryMax=1G
+TasksMax=4096
+
+# Network Security
+IPAddressDeny=any
+IPAddressAllow=localhost
+IPAddressAllow=10.0.0.0/8
+IPAddressAllow=172.16.0.0/12
+IPAddressAllow=192.168.0.0/16
+
+[Install]
+WantedBy=multi-user.target

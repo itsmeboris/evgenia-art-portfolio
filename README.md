@@ -25,14 +25,16 @@ npm run start:prod
 
 ## 📦 Production Deployment
 
-See [DEPLOYMENT.md](docs/DEPLOYMENT.md) for detailed deployment instructions.
+See [SYSTEMD_DEPLOYMENT.md](docs/SYSTEMD_DEPLOYMENT.md) for detailed deployment instructions with enterprise-grade security.
 
 ## 📚 Documentation
 
 All project documentation is organized in the `docs/` folder:
 
 - [Architecture Overview](docs/ARCHITECTURE.md)
-- [Deployment Guide](docs/DEPLOYMENT.md)
+- [systemd Deployment Guide](docs/SYSTEMD_DEPLOYMENT.md) - **Comprehensive production deployment**
+- [Workflow Integration](docs/WORKFLOW_INTEGRATION.md) - **Setup script integration**
+- [Legacy Deployment Guide](docs/DEPLOYMENT.md) - Basic deployment reference
 - [Quick Start Guide](docs/QUICKSTART.md)
 - [NPM Commands Reference](docs/NPM_COMMANDS.md)
 
@@ -190,86 +192,18 @@ window.app.dev.exportData();
 ## Project Structure
 
 ```
-/
-├── index.html               # Homepage
-├── about.html               # About page
-├── gallery.html             # Gallery/Shop page
-├── contact.html             # Contact page
-├── artwork.html             # Individual artwork details
-├── 404.html                 # Error page
-├── server.js                # Node.js server with HTTP/HTTPS support
-├── webpack.config.js        # Webpack build configuration
-├── ecosystem.config.js      # PM2 process manager configuration
-├── eslint.config.js         # ESLint configuration
-├── .prettierrc             # Prettier formatting configuration
-├── TODO.md                 # Project todo list
-├── CLAUDE.md              # AI agent configuration
-├── docs/                  # Documentation
-│   ├── ARCHITECTURE.md    # Technical architecture documentation
-│   ├── DEPLOYMENT.md      # Deployment guide
-│   ├── NPM_COMMANDS.md    # NPM scripts reference
-│   ├── QUICKSTART.md      # Quick start guide
-│   └── README.md          # Documentation index
-├── scripts/               # Build and utility scripts
-│   ├── css-optimization/  # CSS optimization tools
-│   │   ├── critical-css.js # Critical CSS extraction
-│   │   ├── fix-critical-css.js # Critical CSS fixes
-│   │   ├── purge-unused-css.js # Unused CSS removal
-│   │   ├── purgecss.config.js # PurgeCSS configuration
-│   │   └── restore-css.js # CSS backup restoration
-│   ├── build-tools/       # Build process utilities
-│   │   ├── update-html-bundles.js # Bundle reference updater
-│   │   └── webpack-html-updater-plugin.js # Webpack plugin
-│   └── utilities/         # General utility scripts
-│       ├── setup.js       # Interactive project setup
-│       ├── webp-converter.js # Image optimization utility
-│       ├── generate-sitemap.js # SEO sitemap generator
-│       └── pre-build-quality.js # Pre-build quality checks
-├── certs/                 # SSL certificates for HTTPS development
-├── public/                # Public assets served directly
-│   ├── css/               # CSS files
-│   │   ├── style.css      # Main stylesheet
-│   │   ├── additional-styles.css # Additional styles
-│   │   ├── search-modal.css # Search modal styles
-│   │   └── skeleton.css   # Loading skeleton styles
-│   ├── data/              # Data files
-│   │   └── artwork-data.json # Central artwork database
-│   ├── assets/            # Static assets
-│   │   ├── images/        # Artwork and hero images
-│   │   ├── favicon/       # Favicon files
-│   │   └── logo.jpg       # Site logo
-│   ├── dist/              # Webpack build output
-│   │   ├── js/            # Bundled JavaScript files
-│   │   └── manifest.json  # Build manifest
-│   ├── robots.txt         # SEO robots file
-│   └── sitemap.xml        # SEO sitemap
-├── src/                   # Source code
-│   └── js/                # JavaScript source files
-│       ├── main.js        # App Manager (modular coordinator)
-│       ├── core-entry.js  # Core functionality entry point
-│       ├── artwork-entry.js # Artwork page entry point
-│       ├── artwork-loader.js # Artwork loading functionality
-│       └── modules/       # Modular JavaScript architecture
-│           ├── cart.js    # Shopping cart system
-│           ├── ui.js      # User interface components
-│           ├── lightbox.js # Image lightbox functionality
-│           ├── search.js  # Search functionality
-│           ├── forms.js   # Form handling and validation
-│           ├── error-handler.js # Error management
-│           ├── utils.js   # Utility functions
-│           ├── lazy-loader.js # Image lazy loading
-│           ├── logger.js  # Frontend logging
-│           └── ...        # Additional modules
-├── admin/                 # Admin interface
-│   ├── index.html         # Admin dashboard
-│   ├── login.html         # Admin login
-│   ├── css/admin.css      # Admin styles
-│   ├── js/admin.js        # Admin functionality
-│   └── README.md          # Admin documentation
-├── logs/                  # Application logs (PM2)
-├── pids/                  # Process ID files (PM2)
-├── sessions/              # Session storage files
-└── README.md              # This file
+evgenia-art-portfolio/
+├── 📚 docs/                    # All documentation centralized
+│   ├── SYSTEMD_DEPLOYMENT.md    # Complete deployment guide
+│   ├── WORKFLOW_INTEGRATION.md  # Setup integration guide
+│   └── ...                      # Other documentation
+├── 🚀 scripts/                 # All scripts organized
+│   ├── deployment/              # Deployment configurations
+│   │   └── systemd/             # systemd service files
+│   └── *.sh                     # Deployment scripts
+├── 📋 README.md                # Updated with new references
+├── 📦 package.json
+└── 🔒 [NO .service files]      # Clean root directory
 ```
 
 ## Shopping Cart Integration

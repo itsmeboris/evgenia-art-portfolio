@@ -14,7 +14,7 @@ function requireAdminAuth(req, res, next) {
       ip: req.ip,
       userAgent: req.get('User-Agent'),
       timestamp: new Date().toISOString(),
-      sessionId: req.sessionID
+      sessionId: req.sessionID,
     });
 
     next();
@@ -24,13 +24,13 @@ function requireAdminAuth(req, res, next) {
       action: `${req.method} ${req.originalUrl}`,
       ip: req.ip,
       userAgent: req.get('User-Agent'),
-      timestamp: new Date().toISOString()
+      timestamp: new Date().toISOString(),
     });
 
     res.status(401).json({
       error: 'Authentication required',
       message: 'Admin authentication required for this operation',
-      requiresLogin: true
+      requiresLogin: true,
     });
   }
 }
@@ -45,7 +45,7 @@ function optionalAdminAuth(req, res, next) {
       user: req.session.user.username || 'admin',
       action: `${req.method} ${req.originalUrl}`,
       ip: req.ip,
-      timestamp: new Date().toISOString()
+      timestamp: new Date().toISOString(),
     });
   }
   next();
@@ -53,5 +53,5 @@ function optionalAdminAuth(req, res, next) {
 
 module.exports = {
   requireAdminAuth,
-  optionalAdminAuth
+  optionalAdminAuth,
 };

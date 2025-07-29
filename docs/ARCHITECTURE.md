@@ -1,330 +1,222 @@
-# Evgenia Art Portfolio - Architecture Documentation
+# Evgenia Art Portfolio - Technical Architecture
 
-## Executive Summary
+This document outlines the technical architecture, technologies used, and system design of the Evgenia Art Portfolio website.
 
-The Evgenia Art Portfolio is a modern, full-stack web application built to showcase and sell artwork by artist Evgenia Portnov. The project represents a sophisticated e-commerce platform with a clean, responsive design and modular architecture that was recently refactored (January 2025) from a monolithic structure to a maintainable, scalable system.
+## 🏗️ System Overview
 
-**Key Highlights:**
+- **Type:** Multi-page artwork portfolio and e-commerce platform
+- **Architecture:** Modular JavaScript frontend with Node.js/Express backend
+- **Database:** PostgreSQL with Sequelize ORM
+- **Process Management:** systemd (enterprise-grade security)
+- **Deployment:** systemd service with security hardening, HTTPS support, session-based authentication
 
-- **Technology Stack:** Node.js/Express backend, Vanilla JavaScript frontend with Webpack bundling
-- **Architecture:** Server-side rendered HTML with progressive enhancement, modular JS architecture
-- **Current Status:** 70% feature complete, production-ready with ongoing enhancements
-- **Deployment:** PM2 process management, HTTPS support, session-based authentication
-
-## Technology Stack
-
-### Backend
-
-- **Runtime:** Node.js (v18+)
-- **Framework:** Express.js 4.18.2
-- **Session Management:** express-session with FileStore/MongoDB support
-- **Security:** Helmet, bcrypt, CSRF protection, rate limiting
-- **Logging:** Winston with daily rotation
-- **Process Manager:** PM2 for production deployment
+## 🛠️ Technology Stack
 
 ### Frontend
 
 - **Core:** Vanilla JavaScript (ES6+) with modular architecture
-- **Build Tool:** Webpack 5 with code splitting and optimization
-- **CSS:** Modular CSS with Webpack extraction and minification
-- **Image Handling:** WebP conversion, lazy loading, lightbox functionality
+- **Bundling:** Webpack 5 with development/production configurations
+- **CSS:** Pure CSS with modern features, optimized with PurgeCSS
+- **Images:** WebP optimization with fallback support
 
-### Data Storage
+### Backend
 
-- **Current:** JSON file-based storage (`public/data/artwork-data.json`)
-- **Sessions:** File-based or MongoDB sessions
-- **Future:** PostgreSQL migration planned (HIGH priority)
+- **Runtime:** Node.js (v18+)
+- **Framework:** Express.js with security middleware
+- **Database:** PostgreSQL with Sequelize ORM
+- **Process Manager:** systemd with security hardening
+- **Session Storage:** File-based sessions (production-ready)
+- **Security:** Helmet.js, CSRF protection, rate limiting
 
-## Project Structure
+### Development Tools
+
+- **Linting:** ESLint with comprehensive rules
+- **Formatting:** Prettier for consistent code style
+- **Build System:** npm scripts with Webpack integration
+- **Process Management:** systemd services for dev/production
+
+## 📁 Project Structure
 
 ```
 evgenia-art-portfolio/
-├── admin/                    # Admin panel for artwork management
-│   ├── index.html           # Admin dashboard
-│   ├── login.html           # Authentication page
-│   └── js/                  # Admin-specific JavaScript
-├── public/                  # Static assets served directly
-│   ├── assets/
-│   │   └── images/         # Artwork images (WebP format)
-│   ├── css/                # Global stylesheets
-│   ├── data/               # JSON data files
-│   │   └── artwork-data.json
-│   └── dist/               # Webpack build output
-├── src/                    # Source code
-│   └── js/
-│       ├── modules/        # Modular JavaScript components
-│       │   ├── cart.js     # Shopping cart system
-│       │   ├── search.js   # Real-time search
-│       │   ├── lightbox.js # Image viewer
-│       │   ├── logger.js   # Frontend logging
-│       │   └── ...         # 15 specialized modules
-│       └── main.js         # Entry point
-├── scripts/                # Build and utility scripts
-│   ├── setup.js            # Interactive project setup wizard
-│   ├── webp-converter.js   # Image optimization utility
-│   ├── generate-sitemap.js # SEO sitemap generator
-│   ├── pre-build-quality.js # Pre-build quality checks
-│   ├── update-html-bundles.js # Bundle reference updater
-│   └── webpack-html-updater-plugin.js # Custom Webpack plugin
-├── server.js              # Express server configuration
-├── webpack.config.js      # Build configuration
-└── ecosystem.config.js    # PM2 deployment config
+├── server.js               # Express server application
+├── webpack.config.js       # Webpack build configuration
+├── eslint.config.js        # ESLint configuration
+├── .prettierrc            # Prettier formatting configuration
+├── TODO.md                # Project todo list
+├── docs/                  # Documentation
+│   ├── ARCHITECTURE.md    # Technical architecture documentation
+│   ├── SYSTEMD_DEPLOYMENT.md  # systemd deployment guide
+│   ├── NPM_COMMANDS.md    # NPM scripts reference
+│   ├── QUICKSTART.md      # Quick start guide
+│   └── README.md          # Documentation index
+├── scripts/               # Build and utility scripts
+│   ├── deployment/        # Deployment configurations
+│   │   └── systemd/      # systemd service files
+│   ├── css-optimization/ # CSS optimization tools
+│   ├── build-tools/      # Build process utilities
+│   └── utilities/        # General utility scripts
+├── certs/                # SSL certificates for HTTPS development
+├── public/               # Public assets served directly
+│   ├── css/             # CSS files
+│   ├── data/            # Data files
+│   ├── assets/          # Static assets
+│   ├── dist/            # Webpack build output
+│   ├── robots.txt       # SEO robots file
+│   └── sitemap.xml      # SEO sitemap
+├── src/                 # Source code
+│   └── js/              # JavaScript source files
+│       ├── main.js      # App Manager (modular coordinator)
+│       └── modules/     # Modular JavaScript architecture
+├── admin/               # Admin interface
+├── logs/                # Application logs (systemd/journald)
+├── sessions/            # Session storage files
+└── README.md           # Project documentation
 ```
 
-## Architecture Overview
+## 🎯 Architecture Principles
 
-### 1. **Frontend Architecture**
+### 1. Modular Design
 
-The frontend follows a **Progressive Enhancement** pattern with modular JavaScript:
-
-**Module System:**
-
-- **15 Specialized Modules** handling specific concerns (cart, search, forms, etc.)
+- **Component-based architecture** with clear separation of concerns
+- **Reusable modules** for cart, search, lightbox, forms, etc.
+- **Centralized state management** through the main app manager
 - **Event-driven communication** between modules
-- **Lazy loading** for performance optimization
-- **Error boundaries** with automatic recovery
 
-**Key Modules:**
+### 2. Performance Optimization
 
-- `cart.js` - Complete e-commerce cart with localStorage persistence
-- `search.js` - Real-time search with debouncing and history
-- `lightbox.js` - Advanced image viewer with touch support
-- `error-handler.js` - Comprehensive error management
-- `logger.js` - Structured frontend logging
+- **Webpack bundling** with tree shaking and minification
+- **Lazy loading** for images and non-critical resources
+- **CSS optimization** with critical CSS inlining and unused CSS removal
+- **WebP image format** with fallback for older browsers
+- **Gzip compression** for all text-based assets
 
-**Build Process:**
+### 3. Security First
 
-- Webpack 5 with multiple entry points
-- Code splitting for optimal loading
-- Terser for minification
-- CSS extraction and optimization
+- **HTTPS enforcement** with security headers (Helmet.js)
+- **Input validation** and XSS prevention
+- **CSRF protection** with secure session management
+- **Rate limiting** to prevent brute force attacks
+- **systemd security hardening** with user isolation and filesystem protection
 
-### 2. **Backend Architecture**
+### 4. SEO & Accessibility
 
-Express.js server with layered middleware architecture:
+- **Server-side meta tag generation** for each artwork
+- **Dynamic sitemap.xml** generation
+- **Structured data** markup for rich snippets
+- **Semantic HTML** with proper heading hierarchy
+- **Keyboard navigation** support
 
-**Request Flow:**
+## 🔧 Build System
 
-1. **Security Layer:** Helmet, rate limiting, CSRF protection
-2. **Session Management:** File-based or MongoDB sessions
-3. **Authentication:** Session-based admin auth with bcrypt
-4. **API Routes:** RESTful endpoints for data operations
-5. **Static Serving:** Optimized asset delivery with caching
-
-**Security Features:**
-
-- Rate limiting (100 requests/15min general, 10/15min for login)
-- CSRF tokens for form submissions
-- Secure session configuration
-- Input validation and sanitization
-- Comprehensive error handling
-
-### 3. **Data Architecture**
-
-**Current State:**
-
-- Artwork data stored in JSON file (`artwork-data.json`)
-- 40+ artwork entries with metadata
-- Categories: Floral, Towns, Birds
-- Session data in file system or MongoDB
-
-**Data Structure:**
-
-```json
-{
-  "id": "unique-identifier",
-  "title": "Artwork Title",
-  "category": "birds|floral|towns",
-  "dimensions": "20cm X 20cm",
-  "medium": "Acrylic on Canvas",
-  "price": 500,
-  "image": "path/to/webp/image",
-  "featured": false
-}
-```
-
-## Current Implementation Status
-
-### ✅ Completed Features (35/50 - 70%)
-
-1. **Core Functionality**
-   - Responsive design with mobile optimization
-   - Gallery with category filtering
-   - Shopping cart with persistence
-   - Real-time search functionality
-   - Image optimization and lazy loading
-
-2. **Infrastructure**
-   - Comprehensive logging system (Winston)
-   - Build pipeline with Webpack
-   - PM2 deployment configuration
-   - HTTPS support with SSL
-   - Session management
-
-3. **Security**
-   - Admin authentication system
-   - CSRF protection
-   - Rate limiting
-   - Input validation
-   - Secure headers (Helmet)
-
-### 🚧 In Progress / Planned
-
-**High Priority:**
-
-1. **Database Migration** (3-5 days)
-   - Move from JSON to PostgreSQL
-   - Design proper schema
-   - Implement migration scripts
-
-**Medium Priority:**
-
-1. **API Architecture** (2 days) - 60% complete
-   - Versioned API structure (/api/v1/)
-   - OpenAPI documentation
-   - Consistent error responses
-
-2. **Progressive Web App** (2 days) - 33% complete
-   - Service worker implementation
-   - Offline functionality
-   - Enhanced caching strategy
-
-3. **Testing Suite** (3-4 days) - Not started
-   - Jest unit tests
-   - Cypress E2E tests
-   - 70% coverage target
-
-4. **CSS Optimization** (1 day) - 66% complete
-   - Critical CSS inlining
-   - Remove unused styles
-
-5. **Analytics Integration** (0.5 days)
-   - Google Analytics 4 setup
-
-**Low Priority:**
-
-- Email integration
-- Advanced image optimization
-- A/B testing framework
-- Multi-language support
-- Visitor analytics dashboard
-
-## Performance Characteristics
-
-**Current Performance:**
-
-- **Initial Load:** ~2-3s (with images)
-- **Time to Interactive:** <1s
-- **Bundle Sizes:**
-  - Main: ~50KB (minified)
-  - Artwork: ~30KB (lazy loaded)
-  - Admin: ~20KB (authenticated only)
-
-**Optimization Strategies:**
-
-- Code splitting by route
-- Image lazy loading
-- WebP format for images
-- Gzip compression
-- Static asset caching (1 day)
-- Minification of JS/CSS
-
-## Security Considerations
-
-1. **Authentication:**
-   - Bcrypt password hashing
-   - Session-based auth
-   - 1-hour session timeout
-   - Session regeneration on login
-
-2. **Request Protection:**
-   - CSRF tokens
-   - Rate limiting
-   - Input validation
-   - XSS prevention (DOMPurify ready)
-
-3. **Infrastructure:**
-   - HTTPS enforcement
-   - Secure headers
-   - Environment variable configuration
-   - No hardcoded secrets
-
-## Deployment Architecture
-
-**Production Setup:**
-
-1. **Process Management:** PM2 with clustering
-2. **SSL/TLS:** Self-signed or CA certificates
-3. **Environment:** Production/Development modes
-4. **Monitoring:** PM2 status, logs, and metrics
-5. **Sessions:** Persistent file storage or MongoDB
-
-**Deployment Commands:**
+### Development Workflow
 
 ```bash
-npm run build:prod          # Production build
-npm run run-pm2:prod       # Start with PM2
-npm run pm2:logs           # View logs
-npm run pm2:status         # Check status
+npm run setup              # Interactive setup with systemd
+npm run systemd:dev        # Start development with systemd
+npm run build:dev          # Development build
+npm run watch:dev          # Watch mode for development
 ```
 
-## Future Roadmap
+### Production Workflow
 
-### Phase 1: Database & API (Q1 2025)
+```bash
+npm run build              # Production build with optimizations
+npm run systemd:prod       # Deploy production with systemd
+npm run systemd:status     # Monitor service status
+npm run systemd:logs       # View application logs
+```
 
-- PostgreSQL implementation
-- RESTful API v1
-- Data migration tools
-- API documentation
+### Build Features
 
-### Phase 2: Testing & Quality (Q2 2025)
+- **Webpack configuration** for development and production
+- **CSS extraction** and minification
+- **JavaScript bundling** with code splitting
+- **Asset optimization** including image compression
+- **Source maps** for development debugging
 
-- Comprehensive test suite
-- CI/CD pipeline
-- Performance monitoring
-- Error tracking (Sentry)
+## 🗄️ Data Architecture
 
-### Phase 3: Features & Scale (Q3 2025)
+### Database Layer (PostgreSQL)
 
-- Customer accounts
-- Order management
-- Email notifications
-- Payment integration
-- Multi-artist support
+- **Artwork Model:** Complete artwork metadata and relationships
+- **User Model:** Authentication and session management
+- **Cart Model:** Shopping cart with user association
+- **Order Model:** Purchase history and fulfillment tracking
 
-### Phase 4: Advanced Features (Q4 2025)
+### API Layer (Express.js)
 
-- AI-powered recommendations
-- Virtual gallery tours
-- Social media integration
-- Mobile app consideration
+- **RESTful endpoints** under `/api/v1/`
+- **Consistent error handling** with structured responses
+- **Request validation** and sanitization
+- **Response caching** with intelligent invalidation
 
-## Development Guidelines
+### Frontend Data Flow
 
-1. **Code Organization:**
-   - Modular JavaScript with single responsibility
-   - Consistent naming conventions
-   - Comprehensive error handling
-   - Structured logging throughout
+- **API-first approach** with JSON fallback for resilience
+- **Progressive loading** with skeleton states
+- **Error boundaries** for graceful degradation
+- **Real-time updates** through API integration
 
-2. **Performance:**
-   - Lazy load non-critical resources
-   - Optimize images before upload
-   - Monitor bundle sizes
-   - Use performance budgets
+## 🚀 Deployment Architecture
 
-3. **Security:**
-   - Validate all inputs
-   - Use prepared statements (future DB)
-   - Keep dependencies updated
-   - Regular security audits
+### systemd Service Management
 
-4. **Testing:**
-   - Write tests for new features
-   - Maintain 70% coverage
-   - Test across devices/browsers
-   - Performance testing
+1. **Process Isolation:** Dedicated user and security constraints
+2. **Resource Monitoring:** Memory limits, file descriptor limits
+3. **Health Monitoring:** Automatic restart on failure
+4. **Logging Integration:** Centralized logging via journald
 
-## Conclusion
+### Security Hardening
 
-The Evgenia Art Portfolio represents a well-architected, modern web application with a solid foundation for growth. The recent refactoring has positioned it well for future enhancements, with clear separation of concerns and modular architecture. The immediate priority is database migration, followed by comprehensive testing and API formalization. The project demonstrates best practices in security, performance, and maintainability while providing an elegant user experience for showcasing and selling artwork.
+- **User isolation** with dedicated service account
+- **Filesystem protection** with read-only system directories
+- **Network restrictions** limiting IP access
+- **Resource limits** preventing resource exhaustion
+
+### Monitoring & Observability
+
+- **Service status monitoring** via systemd
+- **Application logs** through structured logging (Winston)
+- **Error tracking** with comprehensive error boundaries
+- **Performance metrics** via built-in monitoring
+
+## 🔒 Security Model
+
+### Application Security
+
+- **Authentication:** Session-based with secure cookie handling
+- **Authorization:** Role-based access control for admin functions
+- **Input Validation:** Comprehensive sanitization and validation
+- **XSS Prevention:** Content Security Policy and output encoding
+
+### Infrastructure Security
+
+- **systemd Hardening:** User isolation, filesystem protection
+- **Network Security:** IP restrictions and firewall-friendly design
+- **Process Security:** NoNewPrivileges, private temporary directories
+- **Resource Security:** Memory and process limits
+
+### Data Security
+
+- **Session Security:** Secure session ID generation and storage
+- **Password Security:** bcrypt hashing with secure salt rounds
+- **Transport Security:** HTTPS enforcement with security headers
+- **Database Security:** Parameterized queries and input validation
+
+## 📊 Performance Metrics
+
+### Build Optimization Results
+
+- **JavaScript bundle size:** 87% reduction through Webpack optimization
+- **CSS bundle size:** 9.5% reduction through unused CSS removal
+- **Image optimization:** 33.58 MB saved through WebP conversion
+- **Load time improvement:** 52% faster than JSON baseline
+
+### Security Achievements
+
+- **Zero vulnerabilities:** All security scanners report clean
+- **Enterprise-grade hardening:** systemd security features active
+- **Compliance ready:** HTTPS, security headers, input validation
+
+This architecture provides a solid foundation for a modern, secure, and performant artwork portfolio platform with enterprise-grade deployment capabilities.

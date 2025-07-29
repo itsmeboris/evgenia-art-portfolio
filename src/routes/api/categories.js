@@ -118,7 +118,7 @@ router.post('/', requireAdminAuth, async (req, res) => {
     if (!id || !name) {
       return res.status(400).json({
         error: 'Validation failed',
-        message: 'Category id and name are required'
+        message: 'Category id and name are required',
       });
     }
 
@@ -139,14 +139,14 @@ router.post('/', requireAdminAuth, async (req, res) => {
         description: categoryDescriptions[id],
         image: `public/assets/images/categories/${id}.webp`,
         artwork_count: 0,
-        featured_artwork: null
+        featured_artwork: null,
       });
     }
 
     logger.info('Category created/updated successfully', {
       categoryId: id,
       name,
-      description
+      description,
     });
   } catch (error) {
     logger.error('Error creating/updating category', {
@@ -171,13 +171,13 @@ router.put('/:id', requireAdminAuth, async (req, res) => {
 
     // Check if category has artworks
     const artworkCount = await Artwork.count({
-      where: { category: id }
+      where: { category: id },
     });
 
     if (artworkCount === 0) {
       return res.status(404).json({
         error: 'Category not found',
-        message: 'Category has no artworks and cannot be updated'
+        message: 'Category has no artworks and cannot be updated',
       });
     }
 
@@ -194,7 +194,7 @@ router.put('/:id', requireAdminAuth, async (req, res) => {
 
     logger.info('Category updated successfully', {
       categoryId: id,
-      changes: { name, description }
+      changes: { name, description },
     });
   } catch (error) {
     logger.error('Error updating category', {
@@ -219,14 +219,14 @@ router.delete('/:id', requireAdminAuth, async (req, res) => {
 
     // Check if category has artworks
     const artworkCount = await Artwork.count({
-      where: { category: id }
+      where: { category: id },
     });
 
     if (artworkCount > 0) {
       return res.status(400).json({
         error: 'Cannot delete category',
         message: `Category has ${artworkCount} artworks. Move or delete artworks first.`,
-        artworkCount
+        artworkCount,
       });
     }
 
@@ -236,7 +236,7 @@ router.delete('/:id', requireAdminAuth, async (req, res) => {
     res.status(204).send();
 
     logger.info('Category deleted successfully', {
-      categoryId: id
+      categoryId: id,
     });
   } catch (error) {
     logger.error('Error deleting category', {

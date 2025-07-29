@@ -1,6 +1,8 @@
 # Quick Start Guide
 
-## 🚀 Super Fast Setup
+Get the Evgenia Art Portfolio running in under 5 minutes with secure systemd deployment.
+
+## 🚀 Super Quick Start (Recommended)
 
 ```bash
 git clone <repository-url>
@@ -8,115 +10,197 @@ cd evgenia-art-portfolio
 npm run setup
 ```
 
-The interactive setup will ask for:
+The interactive setup will:
 
-- Server IP (default: localhost)
-- Server port (default: 3000)
-- Admin username (default: admin)
-- Admin password (default: admin)
+- Install dependencies
+- Create necessary directories
+- Generate SSL certificates
+- Configure environment variables
+- Build optimized bundles
+- Deploy with secure systemd service
 
-## 📋 What the Setup Does
+## 📋 Manual Setup
 
-1. ✅ Installs all dependencies
-2. ✅ Creates required directories (`logs`, `pids`, `sessions`, `certs`)
-3. ✅ Generates SSL certificates for HTTPS
-4. ✅ Creates `.env` file with your configuration
-5. ✅ Builds development bundles
-6. ✅ Ready to start development server
-
-## 🔄 Daily Development Workflow
+### 1. Install Dependencies
 
 ```bash
-# Start development server
-npm run start:dev
-
-# For active development (auto-rebuild on file changes)
-npm run watch:prod    # Terminal 1 (watches for production build)
-npm run start:dev     # Terminal 2
+npm install
 ```
 
-## 🏗️ Production Deployment
+### 2. Environment Configuration
 
 ```bash
-# Build and start production server
-npm run run:prod
-
-# Or with PM2 (recommended)
-npm run run-pm2:prod
+cp .env.example .env
+# Edit .env with your configuration
 ```
 
-## 🔗 Access Points
+### 3. Build Assets
 
-- **Website:** http://localhost:3000
-- **Admin Panel:** http://localhost:3000/admin/
-- **HTTPS:** https://localhost:3443
+```bash
+npm run build:dev     # Development build
+# or
+npm run build:prod    # Production build
+```
 
-## 🛠️ Available Commands
+### 4. Deploy with systemd
 
-### Setup Commands
+```bash
+# Development (current user)
+npm run systemd:dev
 
-- `npm run setup` - Interactive setup script
-- `npm run setup:quick` - Quick automated setup
+# Production (dedicated user)
+npm run systemd:prod
+```
 
-### Development Commands
+## 🔧 Development Workflow
 
-- `npm run start:dev` - Start development server
-- `npm run watch:prod` - Watch files for changes (production mode)
-- `npm run build:dev` - Build development bundles
+### Daily Development
 
-### Production Commands
+```bash
+# Start development service
+npm run systemd:dev
 
-- `npm run build:prod` - Build optimized production bundles
-- `npm run start:prod` - Start production server
-- `npm run run:prod` - Build and start production
+# View logs in separate terminal
+npm run systemd:logs
 
-### PM2 Commands
+# Check service status
+npm run systemd:status
+```
 
-- `npm run run-pm2:prod` - Build and start with PM2 (production)
-- `npm run pm2:stop` - Stop PM2 process
-- `npm run pm2:restart` - Restart PM2 process
-- `npm run pm2:logs` - View PM2 logs
-- `npm run pm2:status` - Check PM2 status
+### Making Changes
 
-## 🔧 Configuration
+```bash
+# Build changes
+npm run build:dev
 
-All configuration is handled automatically by the setup script. Manual configuration details are in [DEPLOYMENT.md](DEPLOYMENT.md).
+# Restart service to apply changes
+npm run systemd:restart
 
-## 🆘 Troubleshooting
+# Monitor for issues
+npm run systemd:logs:errors
+```
+
+## 🚀 Production Deployment
+
+### Standard Production
+
+```bash
+npm run build                # Build optimized assets
+npm run systemd:prod         # Deploy production service
+npm run systemd:logs         # Monitor deployment
+```
+
+### Interactive Deployment
+
+```bash
+npm run deploy               # Choose environment and options
+```
+
+## 📊 Monitoring Commands
+
+### Service Status
+
+- `npm run systemd:status` - Check if service is running
+- `npm run systemd:logs` - View live logs
+- `npm run systemd:logs:recent` - Recent log entries (last 100)
+
+### Log Analysis
+
+- `npm run systemd:logs:errors` - Filter error messages
+- `npm run systemd:logs:ips` - View IP access patterns
+- `npm run systemd:logs:requests` - Monitor request patterns
+
+### Service Control
+
+- `npm run systemd:start` - Start service
+- `npm run systemd:stop` - Stop service
+- `npm run systemd:restart` - Restart service
+
+## 🔍 Troubleshooting
+
+### Service Won't Start
+
+```bash
+# Check status for error details
+npm run systemd:status
+
+# View recent error logs
+npm run systemd:logs:errors
+
+# Check if port is in use
+sudo lsof -i :3000 -i :3443
+```
 
 ### Common Issues
 
-1. **Port already in use:**
+**Port Already in Use:**
 
-   ```bash
-   lsof -ti:3000 | xargs kill -9
-   ```
+```bash
+sudo lsof -i :3000 -i :3443
+sudo kill <PID>
+npm run systemd:restart
+```
 
-2. **Missing bundles:**
+**Permission Issues:**
 
-   ```bash
-   npm run build:dev
-   ```
+```bash
+# Development: check file permissions
+ls -la scripts/deployment/systemd/evgenia-art-dev.service
 
-3. **SSL certificate issues:**
-   ```bash
-   npm run setup  # Re-run setup to regenerate certificates
-   ```
+# Production: may need to create service user
+sudo ./scripts/production-setup.sh
+```
 
-For detailed troubleshooting, see [DEPLOYMENT.md](DEPLOYMENT.md).
+**Build Issues:**
 
-## 📱 Mobile Testing
+```bash
+# Clean and rebuild
+rm -rf public/dist/
+npm run build:dev
+npm run systemd:restart
+```
 
-The server automatically detects your local IP for mobile testing:
+## 📁 Project Structure
 
-- Check the console output for your mobile URL
-- Usually: `http://192.168.x.x:3000`
+```
+evgenia-art-portfolio/
+├── 📚 docs/                   # Documentation
+├── 🚀 scripts/                # Deployment scripts
+│   └── deployment/systemd/    # systemd service files
+├── 🔧 public/dist/            # Built assets
+├── 💻 src/js/                 # Source code
+└── 🔒 logs/                   # Application logs
+```
 
-## 🎯 Next Steps
+## 🔒 Security Features
 
-1. Visit http://localhost:3000 to see the portfolio
-2. Access http://localhost:3000/admin/ to manage content
-3. Make changes to files and see them update instantly
-4. Deploy to production when ready
+Your deployment includes:
 
-That's it! You're ready to develop and deploy the art portfolio. 🎨
+- **User Isolation** - Dedicated service user for production
+- **Filesystem Protection** - Read-only system directories
+- **Resource Limits** - Memory and process constraints
+- **Network Security** - IP address restrictions
+- **Automatic Restart** - Service recovery on failure
+
+## 📚 Next Steps
+
+Once running, explore:
+
+- **[systemd Deployment Guide](SYSTEMD_DEPLOYMENT.md)** - Complete deployment documentation
+- **[NPM Commands](NPM_COMMANDS.md)** - All available commands
+- **[Architecture Overview](ARCHITECTURE.md)** - Technical details
+
+## 🎯 Quick Reference
+
+| Task                   | Command                  |
+| ---------------------- | ------------------------ |
+| Setup new environment  | `npm run setup`          |
+| Start development      | `npm run systemd:dev`    |
+| Deploy production      | `npm run systemd:prod`   |
+| View logs              | `npm run systemd:logs`   |
+| Check status           | `npm run systemd:status` |
+| Interactive deployment | `npm run deploy`         |
+
+---
+
+**Ready to go! Your portfolio is now running with enterprise-grade security.** 🎉🔒

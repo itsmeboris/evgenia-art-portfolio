@@ -117,7 +117,7 @@ certs/
 # Session files
 sessions/
 
-# PM2 logs and process files
+# Process logs and files (legacy reference)
 logs/
 pids/
 *.pid

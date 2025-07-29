@@ -18,19 +18,21 @@ router.get('/session', (req, res) => {
       authenticated: true,
       user: {
         username: req.session.user.username,
-        loginTime: req.session.user.loginTime
+        loginTime: req.session.user.loginTime,
       },
-      sessionId: req.sessionID
+      sessionId: req.sessionID,
     });
   } else {
     res.status(401).json({
       authenticated: false,
       error: 'No valid admin session',
-      session: req.session ? {
-        exists: true,
-        hasUser: !!req.session.user,
-        userAuthenticated: req.session.user ? req.session.user.authenticated : false
-      } : { exists: false }
+      session: req.session
+        ? {
+            exists: true,
+            hasUser: !!req.session.user,
+            userAuthenticated: req.session.user ? req.session.user.authenticated : false,
+          }
+        : { exists: false },
     });
   }
 });
@@ -47,24 +49,24 @@ const storage = multer.diskStorage({
     } catch (error) {
       logger.error('Error creating upload directory', {
         error: error.message,
-        uploadPath
+        uploadPath,
       });
       cb(error);
     }
   },
   filename: (req, file, cb) => {
     // Generate unique filename with original extension
-    const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
+    const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1e9);
     const ext = path.extname(file.originalname);
     cb(null, file.fieldname + '-' + uniqueSuffix + ext);
-  }
+  },
 });
 
 const upload = multer({
   storage,
   limits: {
     fileSize: 10 * 1024 * 1024, // 10MB limit
-    files: 10 // Maximum 10 files
+    files: 10, // Maximum 10 files
   },
   fileFilter: (req, file, cb) => {
     // Check if file is an image
@@ -73,7 +75,7 @@ const upload = multer({
     } else {
       cb(new Error('Only image files are allowed'), false);
     }
-  }
+  },
 });
 
 /**
@@ -85,7 +87,7 @@ router.post('/upload', requireAdminAuth, upload.array('images', 10), async (req,
     if (!req.files || req.files.length === 0) {
       return res.status(400).json({
         error: 'No files uploaded',
-        message: 'Please select at least one image file'
+        message: 'Please select at least one image file',
       });
     }
 
@@ -95,27 +97,27 @@ router.post('/upload', requireAdminAuth, upload.array('images', 10), async (req,
       path: file.path,
       relativePath: path.relative('public', file.path),
       size: file.size,
-      mimetype: file.mimetype
+      mimetype: file.mimetype,
     }));
 
     res.json({
       message: 'Images uploaded successfully',
       files: uploadedFiles,
-      count: uploadedFiles.length
+      count: uploadedFiles.length,
     });
 
     logger.info('Images uploaded successfully', {
       fileCount: uploadedFiles.length,
-      files: uploadedFiles.map(f => f.filename)
+      files: uploadedFiles.map(f => f.filename),
     });
   } catch (error) {
     logger.error('Error uploading images', {
       error: error.message,
-      stack: error.stack
+      stack: error.stack,
     });
     res.status(500).json({
       error: 'Failed to upload images',
-      message: error.message
+      message: error.message,
     });
   }
 });
@@ -131,7 +133,7 @@ router.post('/artworks/batch', requireAdminAuth, async (req, res) => {
     if (!Array.isArray(artworks) || artworks.length === 0) {
       return res.status(400).json({
         error: 'Invalid batch data',
-        message: 'Please provide an array of artworks'
+        message: 'Please provide an array of artworks',
       });
     }
 
@@ -143,7 +145,10 @@ router.post('/artworks/batch', requireAdminAuth, async (req, res) => {
       }
       if (!artwork.id) {
         // Generate ID if not provided
-        artwork.id = artwork.title.toLowerCase().replace(/[^a-z0-9]/g, '-').replace(/-+/g, '-');
+        artwork.id = artwork.title
+          .toLowerCase()
+          .replace(/[^a-z0-9]/g, '-')
+          .replace(/-+/g, '-');
       }
     });
 
@@ -151,7 +156,7 @@ router.post('/artworks/batch', requireAdminAuth, async (req, res) => {
       return res.status(400).json({
         error: 'Validation failed',
         message: 'Some artworks have validation errors',
-        errors
+        errors,
       });
     }
 
@@ -159,16 +164,16 @@ router.post('/artworks/batch', requireAdminAuth, async (req, res) => {
     const transaction = await sequelize.transaction();
     try {
       const processedArtworks = [];
-      
+
       for (const artwork of artworks) {
         const [instance, created] = await Artwork.upsert(artwork, {
           transaction,
-          returning: true
+          returning: true,
         });
-        
+
         processedArtworks.push({
           ...instance.toJSON(),
-          _operation: created ? 'created' : 'updated'
+          _operation: created ? 'created' : 'updated',
         });
       }
 
@@ -181,14 +186,14 @@ router.post('/artworks/batch', requireAdminAuth, async (req, res) => {
         message: `Artworks processed successfully: ${createdCount} created, ${updatedCount} updated`,
         artworks: processedArtworks,
         count: processedArtworks.length,
-        operations: { created: createdCount, updated: updatedCount }
+        operations: { created: createdCount, updated: updatedCount },
       });
 
       logger.info('Batch artworks processed successfully', {
         count: processedArtworks.length,
         created: createdCount,
         updated: updatedCount,
-        artworkIds: processedArtworks.map(a => a.id)
+        artworkIds: processedArtworks.map(a => a.id),
       });
     } catch (error) {
       await transaction.rollback();
@@ -197,11 +202,11 @@ router.post('/artworks/batch', requireAdminAuth, async (req, res) => {
   } catch (error) {
     logger.error('Error processing batch artworks', {
       error: error.message,
-      data: req.body
+      data: req.body,
     });
     res.status(500).json({
       error: 'Failed to process artworks',
-      message: error.message
+      message: error.message,
     });
   }
 });
@@ -220,14 +225,14 @@ router.get('/stats', requireAdminAuth, async (req, res) => {
     const categoryStats = await Artwork.findAll({
       attributes: ['category', [sequelize.fn('COUNT', sequelize.col('category')), 'count']],
       group: ['category'],
-      raw: true
+      raw: true,
     });
 
     // Get recent artworks
     const recentArtworks = await Artwork.findAll({
       order: [['createdAt', 'DESC']],
       limit: 5,
-      attributes: ['id', 'title', 'category', 'createdAt']
+      attributes: ['id', 'title', 'category', 'createdAt'],
     });
 
     const stats = {
@@ -237,34 +242,34 @@ router.get('/stats', requireAdminAuth, async (req, res) => {
         byCategory: categoryStats.reduce((acc, stat) => {
           acc[stat.category] = parseInt(stat.count);
           return acc;
-        }, {})
+        }, {}),
       },
       categories: {
         total: categoryStats.length,
         list: categoryStats.map(stat => ({
           id: stat.category,
           name: stat.category.charAt(0).toUpperCase() + stat.category.slice(1),
-          count: parseInt(stat.count)
-        }))
+          count: parseInt(stat.count),
+        })),
       },
       recent: recentArtworks,
-      lastUpdated: new Date().toISOString()
+      lastUpdated: new Date().toISOString(),
     };
 
     res.json(stats);
 
     logger.info('Admin stats retrieved successfully', {
       totalArtworks,
-      categoriesCount: categoryStats.length
+      categoriesCount: categoryStats.length,
     });
   } catch (error) {
     logger.error('Error retrieving admin stats', {
       error: error.message,
-      stack: error.stack
+      stack: error.stack,
     });
     res.status(500).json({
       error: 'Failed to retrieve statistics',
-      message: error.message
+      message: error.message,
     });
   }
 });
@@ -277,21 +282,24 @@ router.post('/export', requireAdminAuth, async (req, res) => {
   try {
     // Get all artworks
     const artworks = await Artwork.findAll({
-      order: [['category', 'ASC'], ['title', 'ASC']]
+      order: [
+        ['category', 'ASC'],
+        ['title', 'ASC'],
+      ],
     });
 
     // Get categories
     const categoryStats = await Artwork.findAll({
       attributes: ['category', [sequelize.fn('COUNT', sequelize.col('category')), 'count']],
       group: ['category'],
-      raw: true
+      raw: true,
     });
 
     const categories = categoryStats.map(stat => ({
       id: stat.category,
       name: stat.category.charAt(0).toUpperCase() + stat.category.slice(1),
       description: `Beautiful ${stat.category} collection`,
-      artwork_count: parseInt(stat.count)
+      artwork_count: parseInt(stat.count),
     }));
 
     const exportData = {
@@ -299,30 +307,30 @@ router.post('/export', requireAdminAuth, async (req, res) => {
       categories,
       settings: {
         currency: '₪',
-        imagePath: 'public/assets/images/artwork/'
+        imagePath: 'public/assets/images/artwork/',
       },
       meta: {
         exportDate: new Date().toISOString(),
         version: '2.0',
         totalArtworks: artworks.length,
-        totalCategories: categories.length
-      }
+        totalCategories: categories.length,
+      },
     };
 
     res.json(exportData);
 
     logger.info('Data exported successfully', {
       artworkCount: artworks.length,
-      categoryCount: categories.length
+      categoryCount: categories.length,
     });
   } catch (error) {
     logger.error('Error exporting data', {
       error: error.message,
-      stack: error.stack
+      stack: error.stack,
     });
     res.status(500).json({
       error: 'Failed to export data',
-      message: error.message
+      message: error.message,
     });
   }
 });

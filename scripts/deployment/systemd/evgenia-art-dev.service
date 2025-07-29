@@ -1,0 +1,54 @@
+[Unit]
+Description=Evgenia Art Portfolio Node.js Application (Development)
+Documentation=https://github.com/evgenia-art-portfolio
+After=network.target network-online.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+# DEVELOPMENT CONFIGURATION
+User=boris
+Group=boris
+WorkingDirectory=/home/boris/projects/evgenia-art-portfolio
+ExecStart=/usr/bin/node server.js
+ExecReload=/bin/kill -USR2 $MAINPID
+Restart=always
+RestartSec=10s
+TimeoutStartSec=60s
+TimeoutStopSec=60s
+
+# Environment Configuration
+Environment=NODE_ENV=development
+Environment=PORT=3000
+EnvironmentFile=-/home/boris/projects/evgenia-art-portfolio/.env
+
+# Process Management
+PIDFile=/home/boris/projects/evgenia-art-portfolio/pids/evgenia-art-systemd.pid
+KillMode=mixed
+KillSignal=SIGTERM
+SendSIGKILL=yes
+TimeoutStopSec=5
+
+# Logging Configuration
+StandardOutput=append:/home/boris/projects/evgenia-art-portfolio/logs/systemd-out.log
+StandardError=append:/home/boris/projects/evgenia-art-portfolio/logs/systemd-error.log
+SyslogIdentifier=evgenia-art-dev
+
+# Security Hardening (Relaxed for development)
+NoNewPrivileges=yes
+ProtectSystem=false
+ProtectHome=false
+ReadWritePaths=/home/boris/projects/evgenia-art-portfolio
+PrivateTmp=no
+
+# Resource Limits (Relaxed for development)
+LimitNOFILE=65536
+LimitNPROC=4096
+MemoryMax=2G
+TasksMax=8192
+
+# Network Security (Open for development)
+# IPAddressDeny and IPAddressAllow commented out for development flexibility
+
+[Install]
+WantedBy=multi-user.target 

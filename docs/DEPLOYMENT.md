@@ -1,236 +1,60 @@
 # Deployment Guide
 
-## Quick Start (Recommended)
+**📋 This guide has been superseded by comprehensive systemd deployment documentation.**
 
-🚀 **For fastest setup, use the interactive setup script:**
+## 🚀 **Recommended: systemd Deployment (Secure)**
+
+For complete, up-to-date deployment instructions, see:
+**[📖 SYSTEMD_DEPLOYMENT.md](SYSTEMD_DEPLOYMENT.md)**
+
+### Quick Start
 
 ```bash
 git clone <repository-url>
 cd evgenia-art-portfolio
-npm run setup
+npm run setup  # Choose systemd for secure deployment
 ```
 
-The setup script will:
+## 🔒 **Security Note**
 
-- Install all dependencies
-- Create necessary directories
-- Generate SSL certificates
-- Configure environment variables
-- Build development bundles
-- Start the server
+**PM2 has been removed** from this project due to security vulnerabilities (ReDoS attack). All deployment now uses **systemd** for enterprise-grade security and performance.
 
-## Manual Setup
+## 📚 **Available Documentation**
 
-### Prerequisites
+- **[📖 SYSTEMD_DEPLOYMENT.md](SYSTEMD_DEPLOYMENT.md)** - Complete production deployment guide
+- **[🔧 WORKFLOW_INTEGRATION.md](WORKFLOW_INTEGRATION.md)** - Workflow integration with your existing setup
+- **[🏗️ ARCHITECTURE.md](ARCHITECTURE.md)** - System architecture overview
+- **[⚡ QUICKSTART.md](QUICKSTART.md)** - Development quick start
 
-- Node.js (v18 or higher)
-- npm or yarn
-- SSL certificates (for HTTPS)
-- Process manager (PM2 recommended)
+## 📋 **Available Commands**
 
-### Environment Setup
-
-1. **Quick setup (automated):**
-
-   ```bash
-   npm run setup:quick
-   ```
-
-2. **Manual setup:**
-
-   ```bash
-   cp .env.example .env
-   npm install
-   npm run build:dev
-   ```
-
-3. **Configure environment variables:**
-   - Set production values in `.env`
-   - Generate secure `SESSION_SECRET` (32+ characters)
-   - Create bcrypt hash for `ADMIN_PASSWORD_HASH`
-
-## Building for Production
-
-1. **Build optimized bundles:**
-
-   ```bash
-   npm run build
-   ```
-
-2. **Verify build output:**
-   ```bash
-   ls -la public/dist/
-   ```
-
-## SSL Certificate Setup
-
-1. **For development (self-signed):**
-
-   ```bash
-   mkdir certs
-   openssl req -x509 -newkey rsa:4096 -keyout certs/key.pem -out certs/cert.pem -days 365 -nodes
-   ```
-
-2. **For production:**
-   - Use Let's Encrypt or your certificate authority
-   - Place certificates in `certs/` directory
-   - Update paths in `.env` if needed
-
-## Development vs Production Commands
-
-### Development Commands (Fast & Quick)
+### Setup
 
 ```bash
-# Start development server (after setup)
-npm run start:dev
-
-# Full development build and start
-npm run run:dev
-
-# Watch for file changes (run in separate terminal)
-npm run watch:prod
-
-# Quick setup for existing project
-npm run setup:quick
+npm run setup          # Interactive setup with systemd
 ```
 
-### Production Commands (Optimized & Complete)
+### Development
 
 ```bash
-# Full production build and start
-npm run run:prod
-
-# Build for production only
-npm run build:prod
-
-# Start production server
-npm run start:prod
+npm run systemd:dev    # Deploy development with systemd
+npm run start:dev      # Direct development server
 ```
 
-## Running in Production
-
-### Using PM2 (Recommended)
+### Production
 
 ```bash
-# Start application
-npm run run-pm2:prod
-
-# View logs
-npm run pm2:logs
-
-# Check status
-npm run pm2:status
-
-# Monitor (requires PM2 to be running)
-npx pm2 monit
-
-# Stop/restart
-npm run pm2:stop
-npm run pm2:restart
+npm run systemd:prod   # Deploy production with systemd
+npm run deploy         # Interactive deployment
 ```
 
-### Using Node.js directly
+### Monitoring
 
 ```bash
-NODE_ENV=production node server.js
+npm run systemd:status # Check service status
+npm run systemd:logs   # View live logs
 ```
 
-## Health Checks
+---
 
-- Health endpoint: `GET /health`
-- Admin panel: `https://yourdomain.com/admin`
-- SSL check: `https://yourdomain.com`
-
-## Performance Optimizations
-
-- ✅ Gzip compression enabled
-- ✅ Static asset caching
-- ✅ WebP image optimization
-- ✅ JavaScript minification
-- ✅ CSS optimization
-
-## Security Features
-
-- ✅ HTTPS enforcement
-- ✅ Security headers (Helmet.js)
-- ✅ Rate limiting
-- ✅ CSRF protection
-- ✅ Session security
-- ✅ Input validation
-
-## Troubleshooting
-
-### Common Issues
-
-1. **Port already in use:**
-
-   ```bash
-   lsof -ti:3000 | xargs kill -9
-   ```
-
-2. **SSL certificate issues:**
-   - Check certificate validity
-   - Verify file permissions
-   - Update certificate paths in `.env`
-
-3. **Bundle loading errors:**
-   - Run `npm run build:dev` for development
-   - Run `npm run build:prod` for production
-   - Check `public/dist/` directory exists
-   - Verify HTML files reference correct bundle names
-
-### Logs
-
-- Application logs: `pm2 logs evgenia-art`
-- Error logs: Check console output
-- Session logs: `sessions/` directory
-
-## Monitoring
-
-- Set up log rotation
-- Monitor disk usage (`public/dist/`, `sessions/`)
-- Track SSL certificate expiration
-- Monitor application performance
-
-## Backup Strategy
-
-### Critical Files to Backup
-
-- `public/data/artwork-data.json` - Artwork database
-- `public/assets/images/` - Image files
-- `.env` - Environment configuration
-- `sessions/` - User sessions (optional)
-
-### Backup Commands
-
-```bash
-# Backup artwork data
-cp public/data/artwork-data.json backup/artwork-data-$(date +%Y%m%d).json
-
-# Backup images
-tar -czf backup/images-$(date +%Y%m%d).tar.gz public/assets/images/
-```
-
-## Updates and Maintenance
-
-1. **Update dependencies:**
-
-   ```bash
-   npm update
-   npm audit fix
-   ```
-
-2. **Update artwork data:**
-   - Use admin panel
-   - Or manually update `public/data/artwork-data.json`
-
-3. **Rebuild assets:**
-
-   ```bash
-   npm run build:prod
-   ```
-
-4. **Restart application:**
-   ```bash
-   pm2 restart evgenia-art
-   ```
+**For complete instructions, see [SYSTEMD_DEPLOYMENT.md](SYSTEMD_DEPLOYMENT.md)**

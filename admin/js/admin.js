@@ -43,8 +43,8 @@ async function saveToAPI() {
       },
       credentials: 'same-origin',
       body: JSON.stringify({
-        artworks: artworkData.artworks
-      })
+        artworks: artworkData.artworks,
+      }),
     });
 
     if (!response.ok) {
@@ -209,7 +209,7 @@ function loadData() {
           artworkData = {
             artworks: [],
             categories: [],
-            settings: { currency: '₪', imagePath: 'public/assets/images/artwork/' }
+            settings: { currency: '₪', imagePath: 'public/assets/images/artwork/' },
           };
 
           // Initialize with empty data

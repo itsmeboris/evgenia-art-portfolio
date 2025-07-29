@@ -61,8 +61,6 @@ async function setup() {
     const dbHost = (await question('Enter database host (default: localhost): ')) || 'localhost';
     const dbPort = (await question('Enter database port (default: 5432): ')) || '5432';
 
-    // No need to ask about PM2 - it's now a local dependency
-
     console.log('\n🔧 Setting up project...\n');
 
     // Create necessary directories
@@ -284,24 +282,94 @@ DB_PASSWORD=${dbPassword}
       throw error;
     }
 
-    // PM2 is now a local dependency - no global installation needed
-    console.log('\n7. PM2 setup complete (included as local dependency)');
+    // Process Manager Setup (systemd - secure by default)
+    console.log('\n7. systemd Deployment (Secure Process Management)...');
+    console.log('   🔒 Setting up systemd (enterprise-grade security)...');
+
+    const deploymentType = await question(
+      '   🚀 Deploy after setup? [D]evelopment / [P]roduction / [S]kip: '
+    );
+
+    let deploymentStatus = 'ready';
+    const choice = deploymentType.toLowerCase();
+
+    try {
+      if (choice === 'd' || choice === 'dev' || choice === 'development' || choice === '') {
+        console.log('   📍 Development deployment selected');
+        console.log('   ✅ systemd service files ready');
+        console.log('   🚀 Starting development service...');
+
+        // Start development service
+        execSync('npm run systemd:dev', { stdio: 'inherit' });
+        deploymentStatus = 'running-dev';
+        console.log('   ✅ Development service started successfully');
+      } else if (choice === 'p' || choice === 'prod' || choice === 'production') {
+        console.log('   📍 Production deployment selected');
+        console.log('   ✅ systemd service files ready');
+        console.log('   🚀 Starting production service...');
+
+        // Start production service
+        execSync('npm run systemd:prod', { stdio: 'inherit' });
+        deploymentStatus = 'running-prod';
+        console.log('   ✅ Production service started successfully');
+      } else {
+        console.log('   ⏭️  Deployment skipped - manual deployment required');
+        console.log('   ✅ systemd service files ready');
+        deploymentStatus = 'manual';
+      }
+    } catch (error) {
+      console.log('   ⚠️  systemd setup prepared - manual deployment required');
+      console.log('   💡 Run: npm run systemd:dev for development');
+      console.log('   💡 Run: npm run systemd:prod for production');
+      deploymentStatus = 'manual';
+    }
 
     console.log('\n🎉 Setup completed successfully!\n');
-    console.log('📋 Next Steps:');
-    console.log('==============');
-    console.log(`🚀 Development: npm run dev:server`);
-    console.log(`🔗 Local URL: http://${serverIP}:${serverPort}`);
-    console.log(`🔐 Admin Panel: http://${serverIP}:${serverPort}/admin/`);
-    console.log(`   Username: ${adminUsername}`);
-    console.log(`   Password: ${adminPassword}`);
-    console.log('\n🔄 Available Commands:');
-    console.log('   npm run dev:server    - Start development server');
-    console.log('   npm run dev:watch     - Watch for file changes');
-    console.log('   npm run build         - Build for production');
-    console.log('   npm run start:prod    - Start production server');
-    console.log('   npm run pm2:start     - Deploy with PM2 (local dependency)');
-    console.log('   npm run pm2:status    - Check PM2 status');
+
+    if (deploymentStatus === 'running-dev') {
+      console.log('🚀 Your DEVELOPMENT application is LIVE and running with systemd!');
+      console.log('========================================================');
+      console.log(`🔗 Website: http://${serverIP}:${serverPort}`);
+      console.log(`🔐 Admin Panel: http://${serverIP}:${serverPort}/admin/`);
+      console.log(`   Username: ${adminUsername}`);
+      console.log(`   Password: ${adminPassword}`);
+      console.log('\n📊 Development Service Management:');
+      console.log('   npm run systemd:status  - Check service status');
+      console.log('   npm run systemd:logs    - View live logs');
+      console.log('   npm run systemd:restart - Restart after changes');
+      console.log('   npm run build:dev       - Rebuild development assets');
+    } else if (deploymentStatus === 'running-prod') {
+      console.log('🏭 Your PRODUCTION application is LIVE and running with systemd!');
+      console.log('=======================================================');
+      console.log(`🔗 Website: http://${serverIP}:${serverPort}`);
+      console.log(`🔐 Admin Panel: http://${serverIP}:${serverPort}/admin/`);
+      console.log(`   Username: ${adminUsername}`);
+      console.log(`   Password: ${adminPassword}`);
+      console.log('\n📊 Production Service Management:');
+      console.log('   npm run systemd:status  - Check service status');
+      console.log('   npm run systemd:logs    - View live logs');
+      console.log('   npm run systemd:restart - Restart service');
+      console.log('   🔒 Enterprise security hardening active');
+    } else {
+      console.log('📋 Next Steps - Choose Your Deployment:');
+      console.log('=======================================');
+      console.log(`🚀 Development: npm run systemd:dev`);
+      console.log(`🏭 Production:  npm run systemd:prod`);
+      console.log(`🔗 Website: http://${serverIP}:${serverPort}`);
+      console.log(`🔐 Admin Panel: http://${serverIP}:${serverPort}/admin/`);
+      console.log(`   Username: ${adminUsername}`);
+      console.log(`   Password: ${adminPassword}`);
+    }
+
+    console.log('\n🔧 systemd Commands (Secure Process Management):');
+    console.log('==============================================');
+    console.log('   npm run systemd:dev    - Deploy development service');
+    console.log('   npm run systemd:prod   - Deploy production service');
+    console.log('   npm run systemd:status - Check service status');
+    console.log('   npm run systemd:logs   - View service logs');
+    console.log('   npm run systemd:restart - Restart service');
+    console.log('   npm run systemd:stop   - Stop service');
+    console.log('   npm run deploy         - Interactive deployment tool');
   } catch (error) {
     console.error('\n❌ Setup failed:', error.message);
     process.exit(1);

@@ -9,6 +9,7 @@
     "// === BUILD COMMANDS ===": "",
     "build:dev": "webpack --mode development && npm run update-bundles",
     "build:prod": "npm run build:clean && webpack --mode production && npm run sitemap:generate",
+    "build:docker": "mkdir -p public/dist && node node_modules/.bin/webpack --mode production",
     "build:clean": "node scripts/utilities/pre-build-quality.js",
     "build:analyze": "webpack --mode production --env analyze",
     "// === RUN COMMANDS ===": "",

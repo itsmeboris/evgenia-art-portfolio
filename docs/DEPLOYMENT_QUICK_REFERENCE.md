@@ -44,16 +44,17 @@ sudo npm run systemd:prod
 
 ## 🌐 Domain & SSL Management
 
-| Command                           | Description                  |
-| --------------------------------- | ---------------------------- |
-| `sudo certbot --nginx -d [domain]` | Get real SSL certificate     |
-| `sudo certbot renew`              | Renew SSL certificates       |
-| `sudo nginx -t`                   | Test nginx configuration     |
-| `sudo systemctl reload nginx`     | Reload nginx config          |
+| Command                            | Description              |
+| ---------------------------------- | ------------------------ |
+| `sudo certbot --nginx -d [domain]` | Get real SSL certificate |
+| `sudo certbot renew`               | Renew SSL certificates   |
+| `sudo nginx -t`                    | Test nginx configuration |
+| `sudo systemctl reload nginx`      | Reload nginx config      |
 
 ## 🔧 Manual Deployment Process
 
 ### Initial Server Setup
+
 ```bash
 # 1. Production user and directories
 sudo ./scripts/production-setup.sh
@@ -74,6 +75,7 @@ sudo systemctl restart evgenia-art nginx
 ```
 
 ### Update Deployment
+
 ```bash
 # Simple process - recommended
 cd /home/boris/evgenia-art-portfolio

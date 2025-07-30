@@ -5,10 +5,13 @@
 ## 🚀 Complete Production Setup Process
 
 This guide covers the complete process of deploying the Evgenia Art Portfolio to a production server with:
+
 - External domain access (evgenia-art.shuktech.shop)
 - HTTPS/SSL certificates
 - Nginx reverse proxy
 - Proper security configuration
+
+> **Note:** For container-based deployment, see the [Container Deployment Guide](./CONTAINER_DEPLOYMENT.md).
 
 ### Prerequisites
 
@@ -49,6 +52,7 @@ sudo nano /etc/systemd/system/evgenia-art.service
 ```
 
 **Remove these lines:**
+
 ```ini
 IPAddressDeny=any
 IPAddressAllow=localhost
@@ -65,6 +69,7 @@ sudo nano /opt/evgenia-art-portfolio/.env
 ```
 
 **Key settings for external access:**
+
 ```env
 # Server Configuration
 PORT=3000
@@ -245,9 +250,10 @@ sudo npm run systemd:prod
 ```
 
 The `sudo npm run systemd:prod` command automatically:
+
 - ✅ Copies updated files to production directory
 - ✅ Updates dependencies if needed
-- ✅ Sets proper ownership and permissions  
+- ✅ Sets proper ownership and permissions
 - ✅ Restarts the systemd service
 
 ### Manual Alternative (if needed)
@@ -306,18 +312,21 @@ sudo tail -f /opt/evgenia-art-portfolio/logs/systemd-error.log
 ### Common Issues
 
 1. **Service won't start**
+
    ```bash
    sudo journalctl -u evgenia-art --no-pager
    sudo systemctl status evgenia-art
    ```
 
 2. **Nginx configuration errors**
+
    ```bash
    sudo nginx -t
    sudo tail -f /var/log/nginx/error.log
    ```
 
 3. **SSL certificate issues**
+
    ```bash
    sudo certbot renew --dry-run
    sudo systemctl reload nginx
@@ -343,15 +352,15 @@ curl -w "%{time_total}\n" -o /dev/null -s https://your-domain.com
 
 ## 🚀 Quick Reference
 
-| Task                  | Command                                          |
-| --------------------- | ------------------------------------------------ |
-| Deploy updates        | `git pull && sudo npm run systemd:prod`         |
-| Check service status  | `sudo systemctl status evgenia-art`             |
-| View live logs        | `sudo journalctl -u evgenia-art -f`             |
-| Restart application   | `sudo systemctl restart evgenia-art`            |
-| Restart nginx         | `sudo systemctl restart nginx`                  |
-| Test nginx config     | `sudo nginx -t`                                 |
-| Renew SSL certificate | `sudo certbot renew`                            |
+| Task                  | Command                                 |
+| --------------------- | --------------------------------------- |
+| Deploy updates        | `git pull && sudo npm run systemd:prod` |
+| Check service status  | `sudo systemctl status evgenia-art`     |
+| View live logs        | `sudo journalctl -u evgenia-art -f`     |
+| Restart application   | `sudo systemctl restart evgenia-art`    |
+| Restart nginx         | `sudo systemctl restart nginx`          |
+| Test nginx config     | `sudo nginx -t`                         |
+| Renew SSL certificate | `sudo certbot renew`                    |
 
 ## 📁 File Locations
 
@@ -367,5 +376,6 @@ curl -w "%{time_total}\n" -o /dev/null -s https://your-domain.com
 ---
 
 **Success!** Your Evgenia Art Portfolio should now be accessible at:
+
 - `https://your-domain.com` (main site)
-- `https://your-domain.com/admin/` (admin panel) 
+- `https://your-domain.com/admin/` (admin panel)

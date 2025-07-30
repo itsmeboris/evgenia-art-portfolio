@@ -440,6 +440,11 @@ app.post('/admin/logout', validateCSRF, (req, res) => {
   });
 });
 
+// Simple health check endpoint for Docker
+app.get('/health', (req, res) => {
+  res.status(200).send('OK');
+});
+
 // Health check endpoint for mobile debugging
 app.get('/api/health', (req, res) => {
   const userAgent = req.get('User-Agent') || '';
